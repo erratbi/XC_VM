@@ -49,6 +49,31 @@ class ProcessManager {
     // ───────────────────────────────────────────────────────────
 
     /**
+     * Check if a process executable matches expected name (handles QEMU wrappers)
+     *
+     * @param int $pid Process ID
+     * @param string $expectedExe Expected executable name (e.g. 'ffmpeg', 'php')
+     * @return bool
+     */
+    public static function isExeMatching($pid, $expectedExe) {
+        if (!self::procExists($pid) || !is_readable('/proc/' . $pid . '/exe')) {
+            return false;
+        }
+        $actualExe = @basename(@readlink('/proc/' . $pid . '/exe'));
+        $expectedBase = basename($expectedExe);
+        if (strpos($actualExe, $expectedBase) === 0) {
+            return true;
+        }
+        if (strpos($actualExe, 'qemu-') === 0) {
+            $cmdline = @file_get_contents('/proc/' . $pid . '/cmdline');
+            if ($cmdline && strpos($cmdline, $expectedBase) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Check if a process is running via /proc filesystem
      *
      * @param int $pid Process ID
@@ -71,14 +96,7 @@ class ProcessManager {
             return true;
         }
 
-        // Check executable matches
-        if (!is_readable('/proc/' . $pid . '/exe')) {
-            return false;
-        }
-
-        $actualExe = @basename(@readlink('/proc/' . $pid . '/exe'));
-
-        return strpos($actualExe, basename($exe)) === 0;
+        return self::isExeMatching($pid, $exe);
     }
 
     /**
@@ -109,21 +127,18 @@ class ProcessManager {
             return false;
         }
 
-        if ($exe && !is_readable('/proc/' . $pid . '/exe')) {
+        if ($exe && !self::isExeMatching($pid, $exe)) {
             return false;
         }
 
-        if ($exe) {
-            $actualExe = @basename(@readlink('/proc/' . $pid . '/exe'));
-            if (strpos($actualExe, basename($exe)) !== 0) {
-                return false;
-            }
+        $raw = @file_get_contents('/proc/' . $pid . '/cmdline');
+        if (empty($raw)) {
+            return false;
         }
-
-        $cmdline = trim(@file_get_contents('/proc/' . $pid . '/cmdline'));
+        $cmdline = str_replace("\0", ' ', $raw);
         $expected = $processName . '[' . $identifier . ']';
 
-        return $cmdline === $expected;
+        return trim($raw) === $expected || strpos($cmdline, $expected) !== false || strpos($cmdline, strtolower($processName) . ' ' . $identifier) !== false;
     }
 
     /**
@@ -143,21 +158,23 @@ class ProcessManager {
             return false;
         }
 
-        if (!self::procExists($pid) || !is_readable('/proc/' . $pid . '/exe')) {
+        if (!self::procExists($pid)) {
             return false;
         }
 
-        $exe = @basename(@readlink('/proc/' . $pid . '/exe'));
+        $cmdline = trim(@file_get_contents('/proc/' . $pid . '/cmdline'));
+        if (empty($cmdline)) {
+            return false;
+        }
 
-        if (strpos($exe, 'ffmpeg') === 0) {
-            $cmdline = trim(@file_get_contents('/proc/' . $pid . '/cmdline'));
+        if (self::isExeMatching($pid, 'ffmpeg')) {
             return (
-                stristr($cmdline, '/' . $streamId . '_.m3u8') ||
-                stristr($cmdline, '/' . $streamId . '_%d.ts')
+                stristr($cmdline, '/' . $streamId . '_.m3u8') !== false ||
+                stristr($cmdline, '/' . $streamId . '_%d.ts') !== false
             );
         }
 
-        if (strpos($exe, 'php') === 0) {
+        if (self::isExeMatching($pid, 'php')) {
             return true;
         }
 
@@ -472,16 +489,25 @@ class ProcessManager {
             return false;
         }
 
-        if (!$exe || !is_readable('/proc/' . $pid . '/exe')) {
+        if ($exe && !self::isExeMatching($pid, $exe)) {
             return false;
         }
 
-        if (strpos(basename(@readlink('/proc/' . $pid . '/exe')), basename($exe)) !== 0) {
+        $raw = @file_get_contents('/proc/' . $pid . '/cmdline');
+        if (empty($raw)) {
             return false;
         }
+        $cmdline = str_replace("\0", ' ', $raw);
+        $exact = trim($raw);
 
-        $cmdline = trim(@file_get_contents('/proc/' . $pid . '/cmdline'));
-        return ($cmdline == 'XC_VM[' . $streamID . ']' || $cmdline == 'XC_VMProxy[' . $streamID . ']');
+        return (
+            $exact === 'XC_VM[' . $streamID . ']' ||
+            $exact === 'XC_VMProxy[' . $streamID . ']' ||
+            strpos($cmdline, 'console.php monitor ' . $streamID) !== false ||
+            strpos($cmdline, 'console.php proxy ' . $streamID) !== false ||
+            strpos($cmdline, 'XC_VM[' . $streamID . ']') !== false ||
+            strpos($cmdline, 'XC_VMProxy[' . $streamID . ']') !== false
+        );
     }
 
     /**
