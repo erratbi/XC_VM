@@ -44,10 +44,15 @@ This document provides complete, high-density context for AI agents working in t
 * **Cause:** If client IP differs across requests (e.g., Docker NAT `192.168.97.1` vs `192.168.97.0`, mobile networks, multi-WAN), token verification fails if subnet matching is disabled.
 * **Setting:** Database `settings.ip_subnet_match` (UI: **Settings** $\to$ **Security** $\to$ **`Match Subnet of IP`**). Keep enabled (`1`).
 
-### C. Bootstrap & Globals
-* `XC_Bootstrap::boot($context)` must be invoked on entry points.
-* `initCore()` populates `$GLOBALS['rSettings']`, `$GLOBALS['rServers']`, and `$GLOBALS['rFFPROBE']`.
-* Direct singleton services: `SettingsManager::getAll()`, `ServerRepository::getAll()`, `FfmpegPaths::probe()`.
+### C. Bootstrap & Globals in CLI, Docker, and `php -r` Tests
+* **Crucial for CLI / Docker testing:** Merely running `require "/home/xc_vm/bootstrap.php";` only registers autoloaders and does **not** connect to the database or populate `$GLOBALS`.
+* If writing a scratch script or running `php -r` in Docker/CLI, you **must** explicitly call `XC_Bootstrap::boot()`:
+  ```php
+  require_once "/home/xc_vm/bootstrap.php";
+  XC_Bootstrap::boot(XC_Bootstrap::CONTEXT_CLI, ["process" => "XC_VM[Test]"]);
+  ```
+* This triggers `LegacyInitializer::initCore()`, which executes `DatabaseFactory::connect()`, resolves `FfmpegPaths::resolve()`, and runs `LegacyInitializer::exportGlobals()`, correctly populating `$GLOBALS['rSettings']`, `$GLOBALS['rServers']`, and `$GLOBALS['rFFPROBE']`.
+* In production application code, prefer direct singleton calls where possible: `SettingsManager::getAll()`, `ServerRepository::getAll()`, and `FfmpegPaths::probe()`.
 
 ---
 

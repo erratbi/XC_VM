@@ -64,11 +64,18 @@ When a stream URL is an HTTP redirect endpoint (e.g. `http://proxy:4444/watch/ch
 
 ## 5. Bootstrap & Global State Notes
 
-* Modern XC_VM boots via `XC_Bootstrap::boot($context)`:
-  * `BootContext::Cli` (for `console.php`)
-  * `BootContext::Admin` / `BootContext::Minimal`
-* `XC_Bootstrap::boot()` invokes `LegacyInitializer::initCore()`, which runs `LegacyInitializer::exportGlobals()`. This populates `$GLOBALS['rSettings']`, `$GLOBALS['rServers']`, and `$GLOBALS['rFFPROBE']`.
-* Direct singleton access is always available via `SettingsManager::getAll()`, `ServerRepository::getAll()`, and `FfmpegPaths::probe()`.
+* **Crucial for CLI / Docker testing (`php -r` / scratch scripts):**
+  Merely running `require "/home/xc_vm/bootstrap.php";` only registers PSR-4 autoloaders. It does **not** connect to MySQL or populate `$GLOBALS`.
+* To run tests or standalone one-liners, you **must** call `XC_Bootstrap::boot()`:
+  ```php
+  require_once "/home/xc_vm/bootstrap.php";
+  XC_Bootstrap::boot(XC_Bootstrap::CONTEXT_CLI, ["process" => "XC_VM[Test]"]);
+  ```
+* **What `XC_Bootstrap::boot()` does:**
+  * Runs `DatabaseFactory::connect()`.
+  * Calls `FfmpegPaths::resolve(SettingsManager::get('ffmpeg_cpu'))`.
+  * Calls `LegacyInitializer::initCore()`, which executes `LegacyInitializer::exportGlobals()` to populate `$GLOBALS['rSettings']`, `$GLOBALS['rServers']`, and `$GLOBALS['rFFPROBE']`.
+* In production application classes, direct singleton access is preferred: `SettingsManager::getAll()`, `ServerRepository::getAll()`, and `FfmpegPaths::probe()`.
 
 ---
 
