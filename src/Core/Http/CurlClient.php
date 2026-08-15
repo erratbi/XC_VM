@@ -193,4 +193,38 @@ class CurlClient {
 			throw new \RuntimeException("Download failed (HTTP {$rCode}) for {$rURL}: {$rErr}");
 		}
 	}
+
+	/**
+	 * Follow HTTP redirects and resolve the final effective URL.
+	 *
+	 * Uses a range-bounded GET request to discover the effective destination URL
+	 * without downloading the full media payload.
+	 *
+	 * @param string $rURL      Source URL.
+	 * @param int    $rTimeout  Connection timeout in seconds.
+	 * @param string $rUserAgent Custom user-agent.
+	 * @return string Effective target URL after all redirects.
+	 */
+	public static function getEffectiveURL(string $rURL, int $rTimeout = 4, string $rUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'): string {
+		if (!preg_match('#^https?://#i', $rURL)) {
+			return $rURL;
+		}
+		$ch = curl_init($rURL);
+		curl_setopt_array($ch, [
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_MAXREDIRS      => 5,
+			CURLOPT_USERAGENT      => $rUserAgent,
+			CURLOPT_CONNECTTIMEOUT => 2,
+			CURLOPT_TIMEOUT        => $rTimeout,
+			CURLOPT_SSL_VERIFYHOST => 0,
+			CURLOPT_SSL_VERIFYPEER => 0,
+			CURLOPT_RANGE          => '0-1024',
+		]);
+		curl_exec($ch);
+		$effective = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+		curl_close($ch);
+		return (!empty($effective) && is_string($effective)) ? $effective : $rURL;
+	}
 }
+

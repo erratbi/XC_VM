@@ -1,6 +1,7 @@
 <?php
 
 namespace XcVm\Streaming\Codec;
+use XcVm\Core\Util\StreamUtils;
 
 /**
  * FFprobeRunner — f fprobe runner
@@ -21,7 +22,15 @@ class FFprobeRunner {
 		if (!is_array($rFetchArguments)) {
 			$rFetchArguments = !empty($rFetchArguments) ? [$rFetchArguments] : [];
 		}
-		$rCommand = $rPrepend . 'timeout ' . $rTimeout . ' ' . $rFFPROBE . ' -probesize ' . $rProbesize . ' -analyzeduration ' . $rAnalyseDuration . ' ' . implode(' ', $rFetchArguments) . ' -i "' . $rSourceURL . '" -v quiet -print_format json -show_streams -show_format';
+
+		$rCencKey = StreamUtils::extractCencKey($rSourceURL);
+		if (!empty($rCencKey)) {
+			$rFetchArguments[] = '-cenc_decryption_key ' . escapeshellarg($rCencKey);
+		}
+
+		$rEffectiveURL = StreamUtils::parseStreamURL($rSourceURL);
+
+		$rCommand = $rPrepend . 'timeout ' . $rTimeout . ' ' . $rFFPROBE . ' -probesize ' . $rProbesize . ' -analyzeduration ' . $rAnalyseDuration . ' ' . implode(' ', $rFetchArguments) . ' -i ' . escapeshellarg($rEffectiveURL) . ' -v quiet -print_format json -show_streams -show_format';
 		exec($rCommand, $rReturn);
 		$result = implode("\n", $rReturn);
 		if ($rParse) {

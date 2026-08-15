@@ -2,6 +2,7 @@
 
 namespace XcVm\Core\Util;
 
+use XcVm\Core\Http\CurlClient;
 use XcVm\Core\Process\ProcessManager;
 use XcVm\Streaming\TS;
 
@@ -180,6 +181,8 @@ class StreamUtils {
 				if (in_array($rHost, $rPlatforms)) {
 					$rURLs = trim(shell_exec(YOUTUBE_BIN . ' ' . escapeshellarg($rURL) . ' -q --get-url --skip-download -f best'));
 					list($rURL) = explode("\n", $rURLs);
+				} else {
+					$rURL = CurlClient::getEffectiveURL($rURL);
 				}
 			}
 		}
