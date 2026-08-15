@@ -99,7 +99,7 @@ class ProxyCommand implements CommandInterface {
 			$rOptions['http']['header'] .= 'Cookie: ' . $rStreamArguments['cookie']['value'] . "\r\n";
 		}
 		if (SettingsManager::getAll()['request_prebuffer']) {
-			$rOptions['http']['header'] .= 'X-\XC_VM-Prebuffer: 1' . "\r\n";
+			$rOptions['http']['header'] .= 'X-XC_VM-Prebuffer: 1' . "\r\n";
 		}
 		$rContext = stream_context_create($rOptions);
 		$rURLs = json_decode($rStreamInfo['stream_source'], true);
