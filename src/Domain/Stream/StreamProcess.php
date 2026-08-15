@@ -1053,6 +1053,10 @@ class StreamProcess {
 						$rProtocol = substr($rStreamSource, 0, strpos($rStreamSource, '://'));
 						$rMoviePath = str_replace(' ', '%20', $rStreamSource);
 						$rFetchOptions = implode(' ', StreamUtils::getArguments($rStream['stream_arguments'], $rProtocol, 'fetch'));
+						$rCencKey = StreamUtils::extractCencKey($rStreamSource);
+						if (!empty($rCencKey)) {
+							$rFetchOptions = trim('-cenc_decryption_key ' . escapeshellarg($rCencKey) . ' ' . $rFetchOptions);
+						}
 					}
 				}
 
@@ -1310,6 +1314,13 @@ class StreamProcess {
 					$rProtocol = strtolower(substr($rStreamSource, 0, strpos($rStreamSource, '://')));
 					$rProbeOptions = implode(' ', StreamUtils::getArguments($rProbeArguments, $rProtocol, 'fetch'));
 					$rFetchOptions = implode(' ', StreamUtils::getArguments($rStream['stream_arguments'], $rProtocol, 'fetch'));
+
+					$rCencKey = StreamUtils::extractCencKey($rSource) ?: StreamUtils::extractCencKey($rStreamSource);
+					if (!empty($rCencKey)) {
+						$rCencOpt = '-cenc_decryption_key ' . escapeshellarg($rCencKey);
+						$rProbeOptions = trim($rCencOpt . ' ' . $rProbeOptions);
+						$rFetchOptions = trim($rCencOpt . ' ' . $rFetchOptions);
+					}
 
 					$rSkipFFProbe = self::hasSkipFFProbe($rStream['stream_arguments']);
 

@@ -142,6 +142,29 @@ class StreamUtils {
 	 * @param string $rURL Source URL.
 	 * @return string Normalized/resolved URL.
 	 */
+	/**
+	 * Extract a CENC / Clearkey DRM key from a stream URL or parameter string.
+	 *
+	 * Handles formats such as:
+	 *  - ?decryption_key=KID:KEY or &decryption_key=KEY
+	 *  - ?cenc_decryption_key=KEY
+	 *  - |decryption_key=KID:KEY
+	 *
+	 * @param string $rURL Stream URL or source string.
+	 * @return string|null 32-character hex key if found, null otherwise.
+	 */
+	public static function extractCencKey($rURL) {
+		if (is_string($rURL) && preg_match('/(?:decryption_key|cenc_decryption_key|cenc_key|drm_key)=([a-fA-F0-9:]+)/i', $rURL, $rMatches)) {
+			$rKeyPart = $rMatches[1];
+			if (strpos($rKeyPart, ':') !== false) {
+				$rParts = explode(':', $rKeyPart);
+				return end($rParts);
+			}
+			return $rKeyPart;
+		}
+		return null;
+	}
+
 	public static function parseStreamURL($rURL) {
 		$rProtocol = strtolower(substr($rURL, 0, 4));
 		if ($rProtocol == 'rtmp') {
