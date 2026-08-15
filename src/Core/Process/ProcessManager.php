@@ -541,8 +541,11 @@ class ProcessManager {
     public static function isNginxRunning() {
         foreach (glob('/proc/*/cmdline') ?: [] as $rCmdFile) {
             $rRaw = @file_get_contents($rCmdFile);
-            if ($rRaw && strpos(str_replace("\0", ' ', $rRaw), 'nginx: master') !== false) {
-                return true;
+            if ($rRaw) {
+                $cmd = str_replace("\0", ' ', $rRaw);
+                if (strpos($cmd, 'nginx: master') !== false || strpos($cmd, 'bin/nginx/sbin/nginx') !== false) {
+                    return true;
+                }
             }
         }
         return false;
