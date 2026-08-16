@@ -140,6 +140,25 @@ class ResellerJsonApiController
             case 'delete_enigma':
                 self::handleDeleteEnigma($rData);
                 break;
+            case 'tickets':
+                self::handleTickets($rData);
+                break;
+            case 'get_ticket':
+            case 'ticket':
+                self::handleGetTicket($rData);
+                break;
+            case 'create_ticket':
+                self::handleCreateTicket($rData);
+                break;
+            case 'reply_ticket':
+                self::handleReplyTicket($rData);
+                break;
+            case 'close_ticket':
+                self::handleCloseTicket($rData);
+                break;
+            case 'reopen_ticket':
+                self::handleReopenTicket($rData);
+                break;
             default:
                 http_response_code(400);
                 echo json_encode([
@@ -1494,4 +1513,318 @@ class ResellerJsonApiController
         ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
         exit();
     }
+
+    // ─────────────────────────────────────────────────────────────
+    // Support Tickets Endpoints
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * GET ?action=tickets
+     * Lists support tickets for the current reseller and sub-resellers.
+     */
+    private static function handleTickets(array $params): void
+    {
+        $db = self::$db;
+        $user = self::$userInfo;
+        $reports = implode(',', $user['reports']);
+
+        $page = max(1, (int)($params['page'] ?? 1));
+        $limit = max(1, min(100, (int)($params['limit'] ?? 50)));
+        $offset = ($page - 1) * $limit;
+        $statusFilter = strtolower(trim((string)($params['status'] ?? 'all')));
+        $search = trim((string)($params['search'] ?? ''));
+
+        $where = ["`tickets`.`member_id` IN ({$reports})", "`users`.`id` = `tickets`.`member_id`"];
+
+        if ($statusFilter === 'open') {
+            $where[] = "`tickets`.`status` != 0";
+        } elseif ($statusFilter === 'closed') {
+            $where[] = "`tickets`.`status` = 0";
+        }
+
+        if ($search !== '') {
+            $escapedSearch = '%' . $search . '%';
+            $where[] = "(`tickets`.`title` LIKE '{$db->escape($escapedSearch)}' OR `users`.`username` LIKE '{$db->escape($escapedSearch)}')";
+        }
+
+        $whereSql = implode(' AND ', $where);
+
+        // Counts
+        $db->query("SELECT 
+            COUNT(*) AS `total`,
+            SUM(CASE WHEN `tickets`.`status` != 0 THEN 1 ELSE 0 END) AS `open_count`,
+            SUM(CASE WHEN `tickets`.`status` = 0 THEN 1 ELSE 0 END) AS `closed_count`,
+            SUM(CASE WHEN `tickets`.`status` != 0 AND `tickets`.`user_read` = 0 THEN 1 ELSE 0 END) AS `unread_count`
+            FROM `tickets`, `users` WHERE {$whereSql};");
+        $stats = $db->get_row() ?: [];
+        $total = (int)($stats['total'] ?? 0);
+
+        // Fetch rows
+        $db->query("SELECT `tickets`.`id`, `tickets`.`member_id`, `tickets`.`title`, `tickets`.`status`, `tickets`.`admin_read`, `tickets`.`user_read`, `users`.`username` 
+            FROM `tickets`, `users` 
+            WHERE {$whereSql} 
+            ORDER BY `tickets`.`id` DESC 
+            LIMIT {$offset}, {$limit};");
+
+        $rows = $db->get_rows() ?: [];
+        $tickets = [];
+
+        foreach ($rows as $row) {
+            $ticketId = (int)$row['id'];
+
+            // First message date (creation)
+            $db->query('SELECT MIN(`date`) AS `created_date`, COUNT(*) AS `reply_count` FROM `tickets_replies` WHERE `ticket_id` = ?;', $ticketId);
+            $meta = $db->get_row() ?: [];
+            $createdAt = !empty($meta['created_date']) ? (int)$meta['created_date'] : null;
+            $replyCount = (int)($meta['reply_count'] ?? 0);
+
+            // Last reply info
+            $db->query('SELECT `admin_reply`, `date` FROM `tickets_replies` WHERE `ticket_id` = ? ORDER BY `id` DESC LIMIT 1;', $ticketId);
+            $lastReply = $db->get_row() ?: [];
+            $lastReplyDate = !empty($lastReply['date']) ? (int)$lastReply['date'] : $createdAt;
+            $lastReplyByAdmin = !empty($lastReply['admin_reply']);
+
+            // Determine status label & code
+            $statusCode = (int)$row['status'];
+            $statusLabel = 'open';
+            if ($statusCode === 0) {
+                $statusLabel = 'closed';
+            } elseif ($lastReplyByAdmin) {
+                $statusLabel = ((int)$row['user_read'] === 0) ? 'unread_admin_reply' : 'admin_replied';
+            } else {
+                $statusLabel = ((int)$row['admin_read'] === 0) ? 'pending_admin' : 'admin_read';
+            }
+
+            $tickets[] = [
+                'id'                  => $ticketId,
+                'title'               => (string)$row['title'],
+                'status'              => $statusLabel,
+                'status_code'         => $statusCode,
+                'is_closed'           => ($statusCode === 0),
+                'user_read'           => (bool)$row['user_read'],
+                'admin_read'          => (bool)$row['admin_read'],
+                'unread'              => ($statusCode !== 0 && (int)$row['user_read'] === 0 && $lastReplyByAdmin),
+                'member_id'           => (int)$row['member_id'],
+                'username'            => (string)$row['username'],
+                'reply_count'         => $replyCount,
+                'created_at'          => $createdAt ? date('Y-m-d H:i:s', $createdAt) : null,
+                'created_timestamp'   => $createdAt,
+                'last_reply_at'       => $lastReplyDate ? date('Y-m-d H:i:s', $lastReplyDate) : null,
+                'last_reply_timestamp'=> $lastReplyDate,
+                'last_reply_by_admin' => $lastReplyByAdmin,
+            ];
+        }
+
+        echo json_encode([
+            'success'      => true,
+            'total'        => $total,
+            'page'         => $page,
+            'limit'        => $limit,
+            'open_count'   => (int)($stats['open_count'] ?? 0),
+            'closed_count' => (int)($stats['closed_count'] ?? 0),
+            'unread_count' => (int)($stats['unread_count'] ?? 0),
+            'tickets'      => $tickets,
+        ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        exit();
+    }
+
+    /**
+     * GET ?action=get_ticket
+     * Retrieves a full support ticket conversation thread and marks it as read.
+     */
+    private static function handleGetTicket(array $params): void
+    {
+        $db = self::$db;
+        $user = self::$userInfo;
+        $ticketId = (int)($params['ticket_id'] ?? $params['id'] ?? 0);
+
+        if ($ticketId <= 0) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Valid ticket_id is required.'], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+            exit();
+        }
+
+        $db->query('SELECT `tickets`.*, `users`.`username` FROM `tickets` LEFT JOIN `users` ON `users`.`id` = `tickets`.`member_id` WHERE `tickets`.`id` = ? LIMIT 1;', $ticketId);
+        $ticket = $db->get_row();
+
+        if (!$ticket || !in_array((int)$ticket['member_id'], $user['reports'], true)) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'Ticket not found or unauthorized.'], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+            exit();
+        }
+
+        // Mark as read by user
+        $db->query('UPDATE `tickets` SET `user_read` = 1 WHERE `id` = ?;', $ticketId);
+
+        // Fetch all replies
+        $db->query('SELECT * FROM `tickets_replies` WHERE `ticket_id` = ? ORDER BY `id` ASC;', $ticketId);
+        $replyRows = $db->get_rows() ?: [];
+        $replies = [];
+
+        foreach ($replyRows as $r) {
+            $isAdmin = !empty($r['admin_reply']);
+            $date = (int)$r['date'];
+            $replies[] = [
+                'id'          => (int)$r['id'],
+                'admin_reply' => $isAdmin,
+                'sender'      => $isAdmin ? 'Support Admin' : ($ticket['username'] ?? 'Reseller'),
+                'message'     => (string)$r['message'],
+                'date'        => date('Y-m-d H:i:s', $date),
+                'timestamp'   => $date,
+            ];
+        }
+
+        $statusCode = (int)$ticket['status'];
+
+        echo json_encode([
+            'success'   => true,
+            'ticket'    => [
+                'id'          => $ticketId,
+                'title'       => (string)$ticket['title'],
+                'status_code' => $statusCode,
+                'is_closed'   => ($statusCode === 0),
+                'status'      => ($statusCode === 0 ? 'closed' : 'open'),
+                'member_id'   => (int)$ticket['member_id'],
+                'username'    => (string)$ticket['username'],
+                'admin_read'  => (bool)$ticket['admin_read'],
+                'user_read'   => true,
+                'replies'     => $replies,
+            ],
+        ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        exit();
+    }
+
+    /**
+     * POST ?action=create_ticket
+     * Opens a new support ticket.
+     */
+    private static function handleCreateTicket(array $params): void
+    {
+        $db = self::$db;
+        $user = self::$userInfo;
+        $title = trim((string)($params['title'] ?? ''));
+        $message = trim((string)($params['message'] ?? ''));
+
+        if ($title === '' || $message === '') {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Title and message are required.'], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+            exit();
+        }
+
+        $db->query('INSERT INTO `tickets` (`member_id`, `title`, `status`, `admin_read`, `user_read`) VALUES (?, ?, 1, 0, 1);', $user['id'], $title);
+        $ticketId = (int)$db->last_insert_id();
+
+        $db->query('INSERT INTO `tickets_replies` (`ticket_id`, `admin_reply`, `message`, `date`) VALUES (?, 0, ?, ?);', $ticketId, $message, time());
+
+        echo json_encode([
+            'success'   => true,
+            'ticket_id' => $ticketId,
+            'title'     => $title,
+            'message'   => 'Ticket created successfully.',
+        ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        exit();
+    }
+
+    /**
+     * POST ?action=reply_ticket
+     * Appends a message to an existing support ticket thread.
+     */
+    private static function handleReplyTicket(array $params): void
+    {
+        $db = self::$db;
+        $user = self::$userInfo;
+        $ticketId = (int)($params['ticket_id'] ?? $params['id'] ?? 0);
+        $message = trim((string)($params['message'] ?? ''));
+
+        if ($ticketId <= 0 || $message === '') {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Valid ticket_id and message are required.'], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+            exit();
+        }
+
+        $db->query('SELECT `id`, `member_id`, `status` FROM `tickets` WHERE `id` = ? LIMIT 1;', $ticketId);
+        $ticket = $db->get_row();
+
+        if (!$ticket || !in_array((int)$ticket['member_id'], $user['reports'], true)) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'Ticket not found or unauthorized.'], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+            exit();
+        }
+
+        $now = time();
+        $db->query('INSERT INTO `tickets_replies` (`ticket_id`, `admin_reply`, `message`, `date`) VALUES (?, 0, ?, ?);', $ticketId, $message, $now);
+        $replyId = (int)$db->last_insert_id();
+
+        // Mark unread for admin, read for user, and ensure status is open (1)
+        $db->query('UPDATE `tickets` SET `admin_read` = 0, `user_read` = 1, `status` = 1 WHERE `id` = ?;', $ticketId);
+
+        echo json_encode([
+            'success'   => true,
+            'ticket_id' => $ticketId,
+            'reply_id'  => $replyId,
+            'message'   => 'Reply submitted successfully.',
+        ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        exit();
+    }
+
+    /**
+     * POST ?action=close_ticket
+     * Marks a ticket as closed (status = 0).
+     */
+    private static function handleCloseTicket(array $params): void
+    {
+        $db = self::$db;
+        $user = self::$userInfo;
+        $ticketId = (int)($params['ticket_id'] ?? $params['id'] ?? 0);
+
+        $db->query('SELECT `id`, `member_id` FROM `tickets` WHERE `id` = ? LIMIT 1;', $ticketId);
+        $ticket = $db->get_row();
+
+        if (!$ticket || !in_array((int)$ticket['member_id'], $user['reports'], true)) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'Ticket not found or unauthorized.'], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+            exit();
+        }
+
+        $db->query('UPDATE `tickets` SET `status` = 0 WHERE `id` = ?;', $ticketId);
+
+        echo json_encode([
+            'success'   => true,
+            'ticket_id' => $ticketId,
+            'status'    => 'closed',
+            'message'   => 'Ticket closed successfully.',
+        ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        exit();
+    }
+
+    /**
+     * POST ?action=reopen_ticket
+     * Reopens a closed ticket (status = 1).
+     */
+    private static function handleReopenTicket(array $params): void
+    {
+        $db = self::$db;
+        $user = self::$userInfo;
+        $ticketId = (int)($params['ticket_id'] ?? $params['id'] ?? 0);
+
+        $db->query('SELECT `id`, `member_id` FROM `tickets` WHERE `id` = ? LIMIT 1;', $ticketId);
+        $ticket = $db->get_row();
+
+        if (!$ticket || !in_array((int)$ticket['member_id'], $user['reports'], true)) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'Ticket not found or unauthorized.'], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+            exit();
+        }
+
+        $db->query('UPDATE `tickets` SET `status` = 1, `admin_read` = 0 WHERE `id` = ?;', $ticketId);
+
+        echo json_encode([
+            'success'   => true,
+            'ticket_id' => $ticketId,
+            'status'    => 'open',
+            'message'   => 'Ticket reopened successfully.',
+        ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        exit();
+    }
 }
+
