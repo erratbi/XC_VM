@@ -196,7 +196,7 @@ $functionsFile = MAIN_HOME . 'Infrastructure/Bootstrap/' . $rFunctionsName;
 if ($scope === 'player') {
     $noBootstrapPages = ['login'];
 } else {
-    $noBootstrapPages = ['login', 'setup', 'database', 'index', 'session'];
+    $noBootstrapPages = ['login', 'setup', 'database', 'index', 'session', 'api_reseller'];
 }
 
 // 7a. Страницы без bootstrap (имеют свой)
