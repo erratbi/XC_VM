@@ -545,9 +545,9 @@ class ResellerJsonApiController
             'allowed_trials'          => (int)($rGroup['total_allowed_gen_trials'] ?? $rPerms['allowed_trials'] ?? 100000),
             'allowed_trials_in'       => (string)($rGroup['total_allowed_gen_in'] ?? $rPerms['allowed_trials_in'] ?? 'month'),
             'allow_line_restrictions' => (bool)($rGroup['allow_restrictions'] ?? $rPerms['allow_line_restrictions'] ?? 1),
-            'create_line'             => (bool)($createLine || ($rPerms['create_line'] ?? true)),
-            'create_mag'              => (bool)($createMag || ($rPerms['create_mag'] ?? false)),
-            'create_enigma'           => (bool)($createEnigma || ($rPerms['create_enigma'] ?? false)),
+            'create_line'             => (bool)(isset($rPerms['create_line']) ? $rPerms['create_line'] : $createLine),
+            'create_mag'              => (bool)(isset($rPerms['create_mag']) ? $rPerms['create_mag'] : $createMag),
+            'create_enigma'           => (bool)(isset($rPerms['create_enigma']) ? $rPerms['create_enigma'] : $createEnigma),
             'create_sub_resellers'    => (bool)($rGroup['create_sub_resellers'] ?? $rPerms['create_sub_resellers'] ?? 0),
         ];
     }
