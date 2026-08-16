@@ -236,6 +236,7 @@ class ResellerJsonApiController
                 'member_group'    => $group['group_name'] ?? 'Reseller',
                 'member_group_id' => (int)$user['member_group_id'],
                 'email'           => $user['email'] ?? '',
+                'permissions'     => self::getFullGroupPermissions((int)$user['member_group_id'], (int)$user['id']),
             ],
         ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
         exit();
@@ -502,6 +503,55 @@ class ResellerJsonApiController
         }
     }
 
+    /**
+     * Retrieve complete dynamic group permissions from users_groups table & package entitlements.
+     */
+    private static function getFullGroupPermissions(int $groupId, int $userId): array
+    {
+        $db = self::$db;
+        $db->query('SELECT * FROM `users_groups` WHERE `group_id` = ? LIMIT 1;', $groupId);
+        $rGroup = $db->get_row() ?: [];
+
+        $rPerms = [];
+        if (!empty($rGroup['group_permissions'])) {
+            $rPerms = json_decode($rGroup['group_permissions'], true) ?: (is_string($rGroup['group_permissions']) && @unserialize($rGroup['group_permissions']) !== false ? unserialize($rGroup['group_permissions']) : []);
+            if (!is_array($rPerms)) {
+                $rPerms = [];
+            }
+        }
+
+        // Package capabilities (create_line, create_mag, create_enigma)
+        $createLine = false;
+        $createMag = false;
+        $createEnigma = false;
+        $db->query("SELECT * FROM `users_packages` WHERE JSON_CONTAINS(`groups`, ?, '$');", $groupId);
+        foreach ($db->get_rows() ?: [] as $pkg) {
+            if (!empty($pkg['is_line'])) $createLine = true;
+            if (!empty($pkg['is_mag'])) $createMag = true;
+            if (!empty($pkg['is_e2'])) $createEnigma = true;
+        }
+
+        return [
+            'live_connections'        => (bool)($rGroup['reseller_client_connection_logs'] ?? $rPerms['live_connections'] ?? 1),
+            'view_vod'                => (bool)($rGroup['can_view_vod'] ?? $rPerms['view_vod'] ?? 1),
+            'show_m3u'                => (bool)($rGroup['allow_download'] ?? $rPerms['show_m3u'] ?? 1),
+            'delete_users'            => (bool)($rGroup['delete_users'] ?? $rPerms['delete_users'] ?? 1),
+            'allow_change_bouquets'   => (bool)($rGroup['allow_change_bouquets'] ?? $rPerms['allow_change_bouquets'] ?? 0),
+            'edit_usernames'          => (bool)($rGroup['allow_change_username'] ?? $rPerms['edit_usernames'] ?? 1),
+            'edit_passwords'          => (bool)($rGroup['allow_change_password'] ?? $rPerms['edit_passwords'] ?? 1),
+            'min_username_len'        => (int)($rGroup['minimum_username_length'] ?? $rPerms['min_username_len'] ?? 8),
+            'min_password_len'        => (int)($rGroup['minimum_password_length'] ?? $rPerms['min_password_len'] ?? 8),
+            'min_trial_credits'       => (float)($rGroup['minimum_trial_credits'] ?? $rPerms['min_trial_credits'] ?? 0),
+            'allowed_trials'          => (int)($rGroup['total_allowed_gen_trials'] ?? $rPerms['allowed_trials'] ?? 100000),
+            'allowed_trials_in'       => (string)($rGroup['total_allowed_gen_in'] ?? $rPerms['allowed_trials_in'] ?? 'month'),
+            'allow_line_restrictions' => (bool)($rGroup['allow_restrictions'] ?? $rPerms['allow_line_restrictions'] ?? 1),
+            'create_line'             => (bool)($createLine || ($rPerms['create_line'] ?? true)),
+            'create_mag'              => (bool)($createMag || ($rPerms['create_mag'] ?? false)),
+            'create_enigma'           => (bool)($createEnigma || ($rPerms['create_enigma'] ?? false)),
+            'create_sub_resellers'    => (bool)($rGroup['create_sub_resellers'] ?? $rPerms['create_sub_resellers'] ?? 0),
+        ];
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Endpoints
     // ─────────────────────────────────────────────────────────────
@@ -544,14 +594,7 @@ class ResellerJsonApiController
             'total_lines'      => $totalLines,
             'active_accounts'  => $activeAccounts,
             'open_connections' => $openConnections,
-            'permissions'      => [
-                'create_line'           => (bool)(self::$permissions['create_line'] ?? true),
-                'create_mag'            => (bool)(self::$permissions['create_mag'] ?? true),
-                'create_enigma'         => (bool)(self::$permissions['create_enigma'] ?? true),
-                'create_sub_resellers'  => (bool)(self::$permissions['create_sub_resellers'] ?? false),
-                'allow_change_bouquets' => (bool)(self::$permissions['allow_change_bouquets'] ?? false),
-                'delete_users'          => (bool)(self::$permissions['delete_users'] ?? true),
-            ],
+            'permissions'      => self::getFullGroupPermissions((int)$user['member_group_id'], (int)$user['id']),
         ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
         exit();
     }
