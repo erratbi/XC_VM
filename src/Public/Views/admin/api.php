@@ -2313,7 +2313,12 @@ if (isset($_SESSION['hash'])) {
 				$rStreamInfo = null;
 
 				if (!empty(RequestManager::getAll()['url'])) {
-					$rURL = StreamUtils::parseStreamURL(RequestManager::getAll()['url']);
+					$rRawURL = RequestManager::getAll()['url'];
+					$rProxy = RequestManager::getAll()['proxy'] ?? RequestManager::getAll()['http_proxy'] ?? null;
+					$rUserAgent = RequestManager::getAll()['user_agent'] ?? null;
+					$rCookies = RequestManager::getAll()['cookies'] ?? null;
+					$rHeaders = RequestManager::getAll()['headers'] ?? null;
+					$rURL = StreamUtils::parseStreamURL($rRawURL, $rProxy);
 
 					if (StreamUtils::detectXC_VM($rURL) && SettingsManager::getAll()['api_probe']) {
 						$rURLInfo = parse_url($rURL);
@@ -2331,7 +2336,7 @@ if (isset($_SESSION['hash'])) {
 					}
 
 					if (!$rStreamInfo) {
-						$rProbeResult = ServerRepository::probeSource($rServerID, RequestManager::getAll()['url'], (RequestManager::getAll()['user_agent'] ?? null), (RequestManager::getAll()['http_proxy'] ?? null), (RequestManager::getAll()['cookies'] ?? null), (RequestManager::getAll()['headers'] ?? null));
+						$rProbeResult = ServerRepository::probeSource($rServerID, $rRawURL, $rUserAgent, $rProxy, $rCookies, $rHeaders);
 						$rStreamInfo = $rProbeResult['data'] ?? [];
 						$rStreamInfo['container'] = $rStreamInfo['format']['format_name'] ?? '';
 					}

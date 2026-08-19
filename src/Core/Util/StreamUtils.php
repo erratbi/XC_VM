@@ -144,29 +144,92 @@ class StreamUtils {
 	 * @return string Normalized/resolved URL.
 	 */
 	/**
-	 * Extract a CENC / Clearkey DRM key from a stream URL or parameter string.
+	 * Extract CENC / Clearkey DRM keys from a stream URL or parameter string.
 	 *
-	 * Handles formats such as:
+	 * Supports single or multi-key KID:KEY pairs or raw hex keys:
+	 *  - ?decryption_key=KID1:KEY1,KID2:KEY2
 	 *  - ?decryption_key=KID:KEY or &decryption_key=KEY
 	 *  - ?cenc_decryption_key=KEY
-	 *  - |decryption_key=KID:KEY
+	 *  - |decryption_key=KID1:KEY1,KID2:KEY2
 	 *
 	 * @param string $rURL Stream URL or source string.
-	 * @return string|null 32-character hex key if found, null otherwise.
+	 * @return string|null Formatted comma-separated keys string for -decryption_key (e.g. "KID1:KEY1,KID2:KEY2" or "KEY"), or null if none found.
 	 */
-	public static function extractCencKey($rURL) {
-		if (is_string($rURL) && preg_match('/(?:decryption_key|cenc_decryption_key|cenc_key|drm_key)=([a-fA-F0-9:]+)/i', $rURL, $rMatches)) {
-			$rKeyPart = $rMatches[1];
-			if (strpos($rKeyPart, ':') !== false) {
-				$rParts = explode(':', $rKeyPart);
-				return end($rParts);
-			}
-			return $rKeyPart;
+	public static function extractDecryptionKey($rURL): ?string {
+		$rKeys = self::extractCencKeys($rURL);
+		return !empty($rKeys) ? implode(',', $rKeys) : null;
+	}
+
+	/**
+	 * Extract all CENC / Clearkey DRM keys as an array from a stream URL or parameter string.
+	 *
+	 * @param string $rURL Stream URL or source string.
+	 * @return array List of normalized KID:KEY or KEY strings.
+	 */
+	public static function extractCencKeys($rURL): array {
+		$rKeys = [];
+		if (!is_string($rURL)) {
+			return $rKeys;
 		}
+
+		if (preg_match_all('/(?:decryption_keys?|cenc_decryption_keys?|cenc_key|drm_key)=([a-fA-F0-9:,\-_=]+)/i', $rURL, $rMatches)) {
+			foreach ($rMatches[1] as $rMatch) {
+				$rItems = preg_split('/[,;]/', $rMatch);
+				foreach ($rItems as $rItem) {
+					$rItem = trim($rItem);
+					if (empty($rItem)) {
+						continue;
+					}
+					if (strpos($rItem, ':') !== false || strpos($rItem, '=') !== false) {
+						$rDelim = strpos($rItem, ':') !== false ? ':' : '=';
+						$rParts = explode($rDelim, $rItem, 2);
+						$rKid = trim($rParts[0]);
+						$rKey = trim($rParts[1]);
+						if (preg_match('/^[a-fA-F0-9]{32}$/', $rKid) && preg_match('/^[a-fA-F0-9]{32}$/', $rKey)) {
+							$rKeys[] = strtolower($rKid) . ':' . strtolower($rKey);
+						} elseif (preg_match('/^[a-fA-F0-9]{32}$/', $rKey)) {
+							$rKeys[] = strtolower($rKey);
+						}
+					} elseif (preg_match('/^[a-fA-F0-9]{32}$/', $rItem)) {
+						$rKeys[] = strtolower($rItem);
+					}
+				}
+			}
+		}
+
+		return array_values(array_unique($rKeys));
+	}
+
+	/**
+	 * Extract HTTP/HTTPS proxy from URL parameters or fetch arguments.
+	 *
+	 * Handles:
+	 *  - URL parameters: |proxy=http://..., ?proxy=http://..., ?http_proxy=http://...
+	 *  - Fetch arguments array: "-http_proxy 'http://...'"
+	 *
+	 * @param string $rURL            Stream URL.
+	 * @param array  $rFetchArguments Optional FFmpeg fetch arguments.
+	 * @return string|null Proxy URL if found.
+	 */
+	public static function extractProxy(string $rURL, array $rFetchArguments = []): ?string {
+		foreach ($rFetchArguments as $rArg) {
+			if (is_string($rArg) && preg_match("/-http_proxy\s+['\"]?([^'\"]+)['\"]?/i", $rArg, $m)) {
+				return trim($m[1]);
+			}
+		}
+
+		if (preg_match('/[?&|](?:http_)?proxy=([^&|]+)/i', $rURL, $m)) {
+			return trim(urldecode($m[1]));
+		}
+
 		return null;
 	}
 
-	public static function parseStreamURL($rURL) {
+	public static function parseStreamURL($rURL, ?string $rProxy = null, array $rHeaders = []) {
+		if ($rProxy === null) {
+			$rProxy = self::extractProxy($rURL);
+		}
+
 		$rProtocol = strtolower(substr($rURL, 0, 4));
 		if ($rProtocol == 'rtmp') {
 			if (stristr($rURL, '$OPT')) {
@@ -182,7 +245,7 @@ class StreamUtils {
 					$rURLs = trim(shell_exec(YOUTUBE_BIN . ' ' . escapeshellarg($rURL) . ' -q --get-url --skip-download -f best'));
 					list($rURL) = explode("\n", $rURLs);
 				} else {
-					$rURL = CurlClient::getEffectiveURL($rURL);
+					$rURL = CurlClient::getEffectiveURL($rURL, 4, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', $rProxy, $rHeaders);
 				}
 			}
 		}

@@ -22,14 +22,15 @@ Modern IPTV sources increasingly use MPEG-DASH (`.mpd`) manifests protected with
 DASH CENC decryption is handled natively in Core across all streaming lifecycles:
 
 1. **Key Extraction ([`src/Core/Util/StreamUtils.php`](file:///Users/amir/Desktop/project_manhattan/XC_VM/xtream_ui/src/Core/Util/StreamUtils.php)):**
-   * `StreamUtils::extractCencKey($url)` parses Clearkey hexadecimal keys from query parameters and URL pipe strings:
-     * `?decryption_key=KID:KEY` $\implies$ extracts 32-hex `KEY`
-     * `?decryption_key=KEY` $\implies$ extracts 32-hex `KEY`
-     * `?cenc_decryption_key=KEY` $\implies$ extracts 32-hex `KEY`
-     * `|decryption_key=KID:KEY` $\implies$ extracts 32-hex `KEY`
+   * `StreamUtils::extractDecryptionKey($url)` parses Clearkey hexadecimal keys (supporting multi-key comma-separated KID:KEY pairs or raw hex keys) from query parameters and URL pipe strings:
+     * `?decryption_key=KID1:KEY1,KID2:KEY2` $\implies$ extracts `"KID1:KEY1,KID2:KEY2"`
+     * `?decryption_key=KID:KEY` $\implies$ extracts `"KID:KEY"`
+     * `?decryption_key=KEY` $\implies$ extracts 32-hex `"KEY"`
+     * `?cenc_decryption_key=KEY` $\implies$ extracts 32-hex `"KEY"`
+     * `|decryption_key=KID1:KEY1,KID2:KEY2` $\implies$ extracts `"KID1:KEY1,KID2:KEY2"`
 
 2. **Command Injection ([`src/Domain/Stream/StreamProcess.php`](file:///Users/amir/Desktop/project_manhattan/XC_VM/xtream_ui/src/Domain/Stream/StreamProcess.php)):**
-   * In `startStream()` (Live) and `startMovie()` (VOD), `-cenc_decryption_key '<KEY>'` is automatically injected into `$rFetchOptions` and `$rProbeOptions` as an input option before `-i <URL>`.
+   * In `startStream()` (Live) and `startMovie()` (VOD), `-decryption_key '<KEYS>'` is automatically injected into `$rFetchOptions` and `$rProbeOptions` as an input option before `-i <URL>`.
    * Also integrated into [`src/Cli/Commands/ScannerCommand.php`](file:///Users/amir/Desktop/project_manhattan/XC_VM/xtream_ui/src/Cli/Commands/ScannerCommand.php) and [`src/Streaming/Codec/FFprobeRunner.php`](file:///Users/amir/Desktop/project_manhattan/XC_VM/xtream_ui/src/Streaming/Codec/FFprobeRunner.php).
 
 ---
@@ -43,13 +44,13 @@ When a stream URL is an HTTP redirect endpoint (e.g. `http://proxy:4444/watch/ch
 
 ### The Solution
 * **[`src/Core/Http/CurlClient.php`](file:///Users/amir/Desktop/project_manhattan/XC_VM/xtream_ui/src/Core/Http/CurlClient.php):**
-  * `CurlClient::getEffectiveURL($url)` uses a lightweight range-bounded request (`Range: 0-1024`, `CURLOPT_FOLLOWLOCATION => true`) to resolve the destination URL.
+  * `CurlClient::getEffectiveURL($url, 4, $userAgent, $proxy, $headers)` uses a lightweight range-bounded request (`Range: 0-1024`, `CURLOPT_FOLLOWLOCATION => true`, proxy-aware) to resolve the destination URL.
 * **[`src/Core/Util/StreamUtils.php`](file:///Users/amir/Desktop/project_manhattan/XC_VM/xtream_ui/src/Core/Util/StreamUtils.php):**
-  * `StreamUtils::parseStreamURL($url)` calls `CurlClient::getEffectiveURL($url)`.
+  * `StreamUtils::parseStreamURL($url, $proxy)` calls `CurlClient::getEffectiveURL($url, 4, '...', $proxy)`.
 * **Flow:**
-  1. `$rCencKey` is extracted from the original configured source `$rSource`.
+  1. `$rDecryptionKey` is extracted from the original configured source `$rSource`.
   2. `$rEffectiveURL` is resolved via `StreamUtils::parseStreamURL()`.
-  3. FFmpeg is executed with `-cenc_decryption_key '<KEY>' -i '<EFFECTIVE_CDN_URL>'`.
+  3. FFmpeg is executed with `-decryption_key '<KEYS>' -i '<EFFECTIVE_CDN_URL>'`.
 
 ---
 

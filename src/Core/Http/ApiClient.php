@@ -3,6 +3,7 @@
 namespace XcVm\Core\Http;
 
 use XcVm\Core\Config\SettingsManager;
+use XcVm\Domain\Server\ServerRepository;
 
 /**
  * ApiClient — internal API communication
@@ -24,7 +25,7 @@ class ApiClient {
 	 */
 	public static function request($rData, $rTimeout = 5) {
 		ini_set('default_socket_timeout', $rTimeout);
-		$rAPI = 'http://127.0.0.1:' . intval(\XcVm\Domain\Server\ServerRepository::getAll()[SERVER_ID]['http_broadcast_port']) . '/admin/api';
+		$rAPI = 'http://127.0.0.1:' . intval(ServerRepository::getAll()[SERVER_ID]['http_broadcast_port']) . '/admin/api';
 
 		if (!empty(SettingsManager::getAll()['api_pass'])) {
 			$rData['api_pass'] = SettingsManager::getAll()['api_pass'];
@@ -53,12 +54,14 @@ class ApiClient {
 	public static function systemRequest($rServerID, $rData, $rTimeout = 5) {
 		ini_set('default_socket_timeout', $rTimeout);
 		global $rServers, $rSettings;
-		if (!is_array($rServers) || !isset($rServers[$rServerID])) {
+		$servers = !empty($rServers) && is_array($rServers) ? $rServers : ServerRepository::getAll();
+		$settings = !empty($rSettings) && is_array($rSettings) ? $rSettings : SettingsManager::getAll();
+		if (!is_array($servers) || !isset($servers[$rServerID])) {
 			return null;
 		}
-		if ($rServers[$rServerID]['server_online']) {
-			$rAPI = 'http://' . $rServers[intval($rServerID)]['server_ip'] . ':' . $rServers[intval($rServerID)]['http_broadcast_port'] . '/api';
-			$rData['password'] = $rSettings['live_streaming_pass'];
+		if ($servers[$rServerID]['server_online']) {
+			$rAPI = 'http://' . $servers[intval($rServerID)]['server_ip'] . ':' . $servers[intval($rServerID)]['http_broadcast_port'] . '/api';
+			$rData['password'] = $settings['live_streaming_pass'] ?? '';
 			$rPost = http_build_query($rData);
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $rAPI);

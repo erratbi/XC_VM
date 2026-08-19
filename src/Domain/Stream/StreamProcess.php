@@ -1053,9 +1053,9 @@ class StreamProcess {
 						$rProtocol = substr($rStreamSource, 0, strpos($rStreamSource, '://'));
 						$rMoviePath = str_replace(' ', '%20', $rStreamSource);
 						$rFetchOptions = implode(' ', StreamUtils::getArguments($rStream['stream_arguments'], $rProtocol, 'fetch'));
-						$rCencKey = StreamUtils::extractCencKey($rStreamSource);
-						if (!empty($rCencKey)) {
-							$rFetchOptions = trim('-cenc_decryption_key ' . escapeshellarg($rCencKey) . ' ' . $rFetchOptions);
+						$rDecryptionKey = StreamUtils::extractDecryptionKey($rStreamSource);
+						if (!empty($rDecryptionKey)) {
+							$rFetchOptions = trim('-decryption_key ' . escapeshellarg($rDecryptionKey) . ' ' . $rFetchOptions);
 						}
 					}
 				}
@@ -1294,7 +1294,8 @@ class StreamProcess {
 				$rFFProbeOutput = array();
 				foreach ($rSources as $rSource) {
 					$rRealSource = $rSource;
-					$rStreamSource = StreamUtils::parseStreamURL($rSource);
+					$rProxy = StreamUtils::extractProxy($rSource, is_array($rStream['stream_arguments']) ? $rStream['stream_arguments'] : []);
+					$rStreamSource = StreamUtils::parseStreamURL($rSource, $rProxy);
 					echo 'Checking source: ' . $rSource . "\n";
 					$rURLInfo = parse_url($rStreamSource);
 					$rIsXC_VM = ($rLoopback ? true : StreamUtils::detectXC_VM($rStreamSource));
@@ -1315,11 +1316,11 @@ class StreamProcess {
 					$rProbeOptions = implode(' ', StreamUtils::getArguments($rProbeArguments, $rProtocol, 'fetch'));
 					$rFetchOptions = implode(' ', StreamUtils::getArguments($rStream['stream_arguments'], $rProtocol, 'fetch'));
 
-					$rCencKey = StreamUtils::extractCencKey($rSource) ?: StreamUtils::extractCencKey($rStreamSource);
-					if (!empty($rCencKey)) {
-						$rCencOpt = '-cenc_decryption_key ' . escapeshellarg($rCencKey);
-						$rProbeOptions = trim($rCencOpt . ' ' . $rProbeOptions);
-						$rFetchOptions = trim($rCencOpt . ' ' . $rFetchOptions);
+					$rDecryptionKey = StreamUtils::extractDecryptionKey($rSource) ?: StreamUtils::extractDecryptionKey($rStreamSource);
+					if (!empty($rDecryptionKey)) {
+						$rDecryptionOpt = '-decryption_key ' . escapeshellarg($rDecryptionKey);
+						$rProbeOptions = trim($rDecryptionOpt . ' ' . $rProbeOptions);
+						$rFetchOptions = trim($rDecryptionOpt . ' ' . $rFetchOptions);
 					}
 
 					$rSkipFFProbe = self::hasSkipFFProbe($rStream['stream_arguments']);

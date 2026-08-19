@@ -19,16 +19,17 @@ This document provides complete, high-density context for AI agents working in t
 ### Ingestion Protocol Flow
 1. **Source Configuration:** Sources are stored in `streams` and `streams_options` tables.
 2. **URL Normalization & Key Extraction ([`src/Core/Util/StreamUtils.php`](file:///Users/amir/Desktop/project_manhattan/XC_VM/xtream_ui/src/Core/Util/StreamUtils.php)):**
-   * **CENC DRM Keys:** `StreamUtils::extractCencKey($rURL)` extracts Clearkey hex keys from query strings or pipe parameters:
-     * `?decryption_key=KID:KEY` $\implies$ returns 32-hex `KEY`
-     * `?decryption_key=KEY` $\implies$ returns 32-hex `KEY`
-     * `?cenc_decryption_key=KEY` $\implies$ returns 32-hex `KEY`
-     * `|decryption_key=KID:KEY` $\implies$ returns 32-hex `KEY`
-   * **HTTP Redirects:** `StreamUtils::parseStreamURL($rURL)` resolves 301/302 redirects via `CurlClient::getEffectiveURL($rURL)` to find the final `.mpd` manifest URL on the CDN.
+   * **CENC DRM Keys:** `StreamUtils::extractDecryptionKey($rURL)` extracts and normalizes Clearkey hex keys from query strings or pipe parameters:
+     * `?decryption_key=KID1:KEY1,KID2:KEY2,...` $\implies$ returns formatted `"KID1:KEY1,KID2:KEY2,..."`
+     * `?decryption_key=KID:KEY` $\implies$ returns formatted `"KID:KEY"`
+     * `?decryption_key=KEY` or `?cenc_decryption_key=KEY` $\implies$ returns 32-hex `"KEY"`
+     * `|decryption_key=KID1:KEY1,KID2:KEY2` $\implies$ returns formatted `"KID1:KEY1,KID2:KEY2"`
+   * **Proxy Extraction:** `StreamUtils::extractProxy($rURL, $rFetchArguments)` extracts HTTP proxies from query params (`?proxy=...`, `?http_proxy=...`), pipe syntax (`|proxy=...`), or FFmpeg args (`-http_proxy '...'`).
+   * **HTTP Redirects:** `StreamUtils::parseStreamURL($rURL, $rProxy)` resolves 301/302 redirects via `CurlClient::getEffectiveURL($rURL, 4, $userAgent, $rProxy)` to find the final `.mpd` manifest URL on the CDN.
 3. **FFmpeg Command Generation ([`src/Domain/Stream/StreamProcess.php`](file:///Users/amir/Desktop/project_manhattan/XC_VM/xtream_ui/src/Domain/Stream/StreamProcess.php)):**
-   * If a CENC key is present, `-cenc_decryption_key '<KEY>'` is automatically appended to `$rFetchOptions` and `$rProbeOptions` before `-i '<EFFECTIVE_URL>'`.
+   * If decryption keys are present, `-decryption_key '<KEYS>'` is automatically appended to `$rFetchOptions` and `$rProbeOptions` before `-i '<EFFECTIVE_URL>'`.
 4. **Stream Prober ([`src/Streaming/Codec/FFprobeRunner.php`](file:///Users/amir/Desktop/project_manhattan/XC_VM/xtream_ui/src/Streaming/Codec/FFprobeRunner.php)):**
-   * `FFprobeRunner::probeStream($url)` resolves the effective URL, attaches `-cenc_decryption_key '<KEY>'`, and invokes FFprobe with JSON output.
+   * `FFprobeRunner::probeStream($url)` resolves the effective URL via proxy, attaches `-decryption_key '<KEYS>'`, and invokes FFprobe with JSON output.
 
 ---
 

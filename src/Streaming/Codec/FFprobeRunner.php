@@ -16,19 +16,41 @@ use XcVm\Core\Util\StreamUtils;
 class FFprobeRunner {
 	public static function probeStream($rSourceURL, $rFetchArguments = array(), $rPrepend = '', $rParse = true) {
 		global $rSettings, $rFFPROBE;
-		$rAnalyseDuration = abs(intval($rSettings['stream_max_analyze']));
-		$rProbesize = abs(intval($rSettings['probesize']));
-		$rTimeout = intval($rAnalyseDuration / 1000000) + $rSettings['probe_extra_wait'];
+		$settings = !empty($rSettings) && is_array($rSettings) ? $rSettings : \XcVm\Core\Config\SettingsManager::getAll();
+		$rFFPROBE = !empty($rFFPROBE) ? $rFFPROBE : \XcVm\Streaming\Codec\FfmpegPaths::probe();
+		$rAnalyseDuration = !empty($settings['stream_max_analyze']) ? abs(intval($settings['stream_max_analyze'])) : 5000000;
+		$rProbesize = !empty($settings['probesize']) ? abs(intval($settings['probesize'])) : 5000000;
+		$rTimeout = intval($rAnalyseDuration / 1000000) + intval($settings['probe_extra_wait'] ?? 5);
+		if ($rTimeout < 5) {
+			$rTimeout = 15;
+		}
 		if (!is_array($rFetchArguments)) {
 			$rFetchArguments = !empty($rFetchArguments) ? [$rFetchArguments] : [];
 		}
 
-		$rCencKey = StreamUtils::extractCencKey($rSourceURL);
-		if (!empty($rCencKey)) {
-			$rFetchArguments[] = '-cenc_decryption_key ' . escapeshellarg($rCencKey);
+		$rProxy = StreamUtils::extractProxy($rSourceURL, $rFetchArguments);
+		if (!empty($rProxy)) {
+			$hasProxyArg = false;
+			foreach ($rFetchArguments as $arg) {
+				if (stripos($arg, '-http_proxy') !== false) {
+					$hasProxyArg = true;
+					break;
+				}
+			}
+			if (!$hasProxyArg) {
+				$rFetchArguments[] = '-http_proxy ' . escapeshellarg($rProxy);
+			}
 		}
 
-		$rEffectiveURL = StreamUtils::parseStreamURL($rSourceURL);
+		$rEffectiveURL = StreamUtils::parseStreamURL($rSourceURL, $rProxy);
+
+		$rDecryptionKey = StreamUtils::extractDecryptionKey($rSourceURL);
+		if (empty($rDecryptionKey) && $rEffectiveURL !== $rSourceURL) {
+			$rDecryptionKey = StreamUtils::extractDecryptionKey($rEffectiveURL);
+		}
+		if (!empty($rDecryptionKey)) {
+			$rFetchArguments[] = '-decryption_key ' . escapeshellarg($rDecryptionKey);
+		}
 
 		$rCommand = $rPrepend . 'timeout ' . $rTimeout . ' ' . $rFFPROBE . ' -probesize ' . $rProbesize . ' -analyzeduration ' . $rAnalyseDuration . ' ' . implode(' ', $rFetchArguments) . ' -i ' . escapeshellarg($rEffectiveURL) . ' -v quiet -print_format json -show_streams -show_format';
 		exec($rCommand, $rReturn);

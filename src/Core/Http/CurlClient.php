@@ -200,17 +200,19 @@ class CurlClient {
 	 * Uses a range-bounded GET request to discover the effective destination URL
 	 * without downloading the full media payload.
 	 *
-	 * @param string $rURL      Source URL.
-	 * @param int    $rTimeout  Connection timeout in seconds.
-	 * @param string $rUserAgent Custom user-agent.
+	 * @param string      $rURL       Source URL.
+	 * @param int         $rTimeout   Connection timeout in seconds.
+	 * @param string      $rUserAgent Custom user-agent.
+	 * @param string|null $rProxy     Optional HTTP/HTTPS proxy.
+	 * @param array       $rHeaders   Optional HTTP headers.
 	 * @return string Effective target URL after all redirects.
 	 */
-	public static function getEffectiveURL(string $rURL, int $rTimeout = 4, string $rUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'): string {
+	public static function getEffectiveURL(string $rURL, int $rTimeout = 4, string $rUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', ?string $rProxy = null, array $rHeaders = []): string {
 		if (!preg_match('#^https?://#i', $rURL)) {
 			return $rURL;
 		}
 		$ch = curl_init($rURL);
-		curl_setopt_array($ch, [
+		$rOptions = [
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_FOLLOWLOCATION => true,
 			CURLOPT_MAXREDIRS      => 5,
@@ -220,7 +222,14 @@ class CurlClient {
 			CURLOPT_SSL_VERIFYHOST => 0,
 			CURLOPT_SSL_VERIFYPEER => 0,
 			CURLOPT_RANGE          => '0-1024',
-		]);
+		];
+		if (!empty($rProxy)) {
+			$rOptions[CURLOPT_PROXY] = $rProxy;
+		}
+		if (!empty($rHeaders)) {
+			$rOptions[CURLOPT_HTTPHEADER] = $rHeaders;
+		}
+		curl_setopt_array($ch, $rOptions);
 		curl_exec($ch);
 		$effective = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
 		curl_close($ch);

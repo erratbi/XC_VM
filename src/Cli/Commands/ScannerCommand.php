@@ -146,9 +146,9 @@ class ScannerCommand implements CommandInterface {
 
 				$rProtocol = strtolower(substr($rStreamSource, 0, strpos($rStreamSource, '://')));
 				$rFetchOptions = implode(' ', StreamUtils::getArguments($rStreamArguments, $rProtocol, 'fetch'));
-				$rCencKey = StreamUtils::extractCencKey($rSource) ?: StreamUtils::extractCencKey($rStreamSource);
-				if (!empty($rCencKey)) {
-					$rFetchOptions = trim('-cenc_decryption_key ' . escapeshellarg($rCencKey) . ' ' . $rFetchOptions);
+				$rDecryptionKey = StreamUtils::extractDecryptionKey($rSource) ?: StreamUtils::extractDecryptionKey($rStreamSource);
+				if (!empty($rDecryptionKey)) {
+					$rFetchOptions = trim('-decryption_key ' . escapeshellarg($rDecryptionKey) . ' ' . $rFetchOptions);
 				}
 
 				if ($rIsXC_VM && SettingsManager::getAll()['api_probe']) {

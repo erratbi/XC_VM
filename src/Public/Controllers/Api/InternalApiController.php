@@ -508,12 +508,12 @@ class InternalApiController {
 		$rURL = $rRequest['url'];
 		$rFetchArguments = array();
 
-		if (!empty($rRequest['user_agent'])) {
-			$rFetchArguments[] = sprintf("-user_agent '%s'", escapeshellcmd($rRequest['user_agent']));
-		}
+		$rUserAgent = !empty($rRequest['user_agent']) ? $rRequest['user_agent'] : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+		$rFetchArguments[] = sprintf("-user_agent '%s'", escapeshellcmd($rUserAgent));
 
-		if (!empty($rRequest['http_proxy'])) {
-			$rFetchArguments[] = sprintf("-http_proxy '%s'", escapeshellcmd($rRequest['http_proxy']));
+		$rProxy = !empty($rRequest['http_proxy']) ? $rRequest['http_proxy'] : (!empty($rRequest['proxy']) ? $rRequest['proxy'] : null);
+		if (!empty($rProxy)) {
+			$rFetchArguments[] = sprintf("-http_proxy '%s'", escapeshellcmd($rProxy));
 		}
 
 		if (!empty($rRequest['cookies'])) {
