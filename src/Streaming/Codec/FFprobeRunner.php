@@ -39,8 +39,8 @@ class FFprobeRunner {
 		}
 
 		$rTimeout = intval($rAnalyseDuration / 1000000) + intval($settings['probe_extra_wait'] ?? 10);
-		if (!empty($rProxy) && $rTimeout < 75) {
-			$rTimeout = 75;
+		if (!empty($rProxy) && $rTimeout < 120) {
+			$rTimeout = 120;
 		} elseif ($rTimeout < 30) {
 			$rTimeout = 30;
 		}
