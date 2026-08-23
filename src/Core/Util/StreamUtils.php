@@ -210,7 +210,13 @@ class StreamUtils {
 	public static function extractProxy($rFetchArgumentsOrURL = [], array $rFetchArguments = []): ?string {
 		$args = is_array($rFetchArgumentsOrURL) ? $rFetchArgumentsOrURL : $rFetchArguments;
 		foreach ($args as $rArg) {
-			if (is_string($rArg) && preg_match("/-http_proxy\s+['\"]?([^'\"]+)['\"]?/i", $rArg, $m)) {
+			if (is_array($rArg)) {
+				if (isset($rArg['argument_key']) && ($rArg['argument_key'] === 'proxy' || $rArg['argument_key'] === 'http_proxy')) {
+					if (!empty($rArg['value'])) {
+						return trim($rArg['value']);
+					}
+				}
+			} elseif (is_string($rArg) && preg_match("/-http_proxy\s+['\"]?([^'\"]+)['\"]?/i", $rArg, $m)) {
 				return trim($m[1]);
 			}
 		}

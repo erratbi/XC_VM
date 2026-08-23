@@ -397,7 +397,7 @@ class StreamProcess {
 	 * @param array $rSettings          Global settings (analyze/probesize/slack).
 	 * @return array{0:int,1:int|string,2:int} [probesize, analyzeDuration, timeout]
 	 */
-	private static function resolveProbeSettings($rOnDemand, $rProbesizeOndemand, $rLLOD, $rSettings) {
+	private static function resolveProbeSettings($rOnDemand, $rProbesizeOndemand, $rLLOD, $rSettings, $rHasProxy = false) {
 		if ($rOnDemand == 1) {
 			$rProbesize = intval($rProbesizeOndemand) ?: 1000000;
 			$rAnalyseDuration = ($rLLOD ? '500000' : '10000000');
@@ -405,7 +405,12 @@ class StreamProcess {
 			$rAnalyseDuration = abs(intval($rSettings['stream_max_analyze']));
 			$rProbesize = abs(intval($rSettings['probesize']));
 		}
-		$rTimeout = intval($rAnalyseDuration / 1000000) + $rSettings['probe_extra_wait'];
+		$rTimeout = intval($rAnalyseDuration / 1000000) + intval($rSettings['probe_extra_wait'] ?? 10);
+		if ($rHasProxy && $rTimeout < 75) {
+			$rTimeout = 75;
+		} elseif ($rTimeout < 30) {
+			$rTimeout = 30;
+		}
 		return array($rProbesize, $rAnalyseDuration, $rTimeout);
 	}
 
@@ -1196,7 +1201,8 @@ class StreamProcess {
 				$db->query('SELECT t1.*, t2.* FROM `streams_options` t1, `streams_arguments` t2 WHERE t1.stream_id = ? AND t1.argument_id = t2.id', $rStreamID);
 				$rStream['stream_arguments'] = $db->get_rows();
 
-				list($rProbesize, $rAnalyseDuration, $rTimeout) = self::resolveProbeSettings($rStream['server_info']['on_demand'], $rStream['stream_info']['probesize_ondemand'], $rLLOD, $rSettings);
+				$rProxy = StreamUtils::extractProxy(is_array($rStream['stream_arguments']) ? $rStream['stream_arguments'] : []);
+				list($rProbesize, $rAnalyseDuration, $rTimeout) = self::resolveProbeSettings($rStream['server_info']['on_demand'], $rStream['stream_info']['probesize_ondemand'], $rLLOD, $rSettings, !empty($rProxy));
 				$rFFProbee = 'timeout ' . $rTimeout . ' ' . $rFFPROBE . ' {FETCH_OPTIONS} -probesize ' . $rProbesize . ' -analyzeduration ' . $rAnalyseDuration . ' {CONCAT} -i {STREAM_SOURCE} -v quiet -print_format json -show_streams -show_format';
 				$rFetchOptions = '';
 				$rLoopback = false;
