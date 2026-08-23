@@ -230,9 +230,10 @@ class MonitorCommand implements CommandInterface {
 							break;
 						}
 					}
-					if (($rSegmentTime * 6) <= time() - $rCheckedTime) {
-						$rNewMd5 = md5_file($rPlaylist);
-						if ($rMD5 != $rNewMd5) {
+					$rMaxStaleTime = max(60, $rSegmentTime * 6);
+					if ($rMaxStaleTime <= (time() - $rCheckedTime)) {
+						$rNewMd5 = file_exists($rPlaylist) ? md5_file($rPlaylist) : false;
+						if ($rMD5 !== $rNewMd5) {
 							$rMD5 = $rNewMd5;
 							$rCheckedTime = time();
 							if (SettingsManager::getAll()['encrypt_hls']) {
@@ -246,7 +247,8 @@ class MonitorCommand implements CommandInterface {
 								$rStreamProbe = true;
 							}
 							$rCheckedTime = time();
-						} else {
+						} elseif (!file_exists($rPlaylist) || (time() - filemtime($rPlaylist) >= $rMaxStaleTime)) {
+							echo "Playlist is stale (not updated for {$rMaxStaleTime}s)! Break\n";
 							break;
 						}
 					}
@@ -397,7 +399,7 @@ class MonitorCommand implements CommandInterface {
 					$rFirstSegment = $rFolder . $rStreamID . '_0.ts';
 					$rSegmentSeen = false;
 					$rChecks = 0;
-					$rMaxChecks = max(20, min($rSegmentTime * 3, 30));
+					$rMaxChecks = max(90, min($rSegmentTime * 6, 150));
 					while (true) {
 						echo 'Checking for playlist ' . ($rChecks + 1) . '/' . $rMaxChecks . "...\n";
 						if (!ProcessManager::isStreamRunning($rPID, $rStreamID)) {
@@ -581,20 +583,24 @@ class MonitorCommand implements CommandInterface {
 	 */
 	private function checkRunning(int $rStreamID): void {
 		clearstatcache(true);
-		$rPID = 0;
+		$myPid = getmypid();
 		$monitorFile = STREAMS_PATH . $rStreamID . '_.monitor';
 
 		if (file_exists($monitorFile)) {
 			$rPID = intval(file_get_contents($monitorFile));
+			if ($rPID > 0 && $rPID !== $myPid && ProcessManager::isMonitorAlive($rPID, $rStreamID)) {
+				posix_kill($rPID, 9);
+				usleep(50000);
+			}
 		}
 
-		if (empty($rPID)) {
-			shell_exec("ps -ef | grep 'XC_VM\\[" . intval($rStreamID) . "\\]' | grep -v grep | awk '{print \$2}' | xargs -r kill -9 2>/dev/null");
-		} else {
-			if (file_exists('/proc/' . $rPID)) {
-				$rCommand = trim(file_get_contents('/proc/' . $rPID . '/cmdline'));
-				if ($rCommand == 'XC_VM[' . $rStreamID . ']' && is_numeric($rPID) && $rPID > 0) {
-					posix_kill($rPID, 9);
+		// Also kill any duplicate monitor processes for this stream
+		exec("ps -ef | grep -E 'console\\.php monitor " . intval($rStreamID) . "($| )|XC_VM\\[" . intval($rStreamID) . "\\]' | grep -v grep | awk '{print $2}'", $pids);
+		if (is_array($pids)) {
+			foreach ($pids as $p) {
+				$p = intval($p);
+				if ($p > 0 && $p !== $myPid) {
+					posix_kill($p, 9);
 				}
 			}
 		}

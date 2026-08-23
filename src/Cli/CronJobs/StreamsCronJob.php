@@ -211,12 +211,24 @@ class StreamsCronJob implements CommandInterface {
                         } else {
                             $db->query('UPDATE `streams_servers` SET `progress_info` = ?, `stream_info` = ?, `compatible` = ?, `bitrate` = ?, `audio_codec` = ?, `video_codec` = ?, `resolution` = ? WHERE `server_stream_id` = ?', $rProgress, $rStreamInfo, $rCompatible, $rBitrate, $rAudioCodec, $rVideoCodec, $rResolution, $rStream['server_stream_id']);
                         }
+                        echo "\n";
+                    } else {
+                        $monitorRunning = false;
+                        if (!empty($rStream['monitor_pid']) && ProcessManager::isMonitorAlive($rStream['monitor_pid'], $rStream['stream_id'])) {
+                            $monitorRunning = true;
+                        } elseif (file_exists(STREAMS_PATH . $rStream['stream_id'] . '_.monitor')) {
+                            $mPid = intval(file_get_contents(STREAMS_PATH . $rStream['stream_id'] . '_.monitor'));
+                            if ($mPid > 0 && ProcessManager::isMonitorAlive($mPid, $rStream['stream_id'])) {
+                                $monitorRunning = true;
+                            }
+                        }
+
+                        if (!$monitorRunning) {
+                            echo 'Start monitor...' . "\n\n";
+                            StreamProcess::startMonitor($rStream['stream_id']);
+                            usleep(50000);
+                        }
                     }
-                    echo "\n";
-                } else {
-                    echo 'Start monitor...' . "\n\n";
-                    StreamProcess::startMonitor($rStream['stream_id']);
-                    usleep(50000);
                 }
             }
         }

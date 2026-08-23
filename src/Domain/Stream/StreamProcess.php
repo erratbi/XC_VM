@@ -402,12 +402,12 @@ class StreamProcess {
 			$rProbesize = intval($rProbesizeOndemand) ?: 1000000;
 			$rAnalyseDuration = ($rLLOD ? '500000' : '10000000');
 		} else {
-			$rAnalyseDuration = abs(intval($rSettings['stream_max_analyze']));
-			$rProbesize = abs(intval($rSettings['probesize']));
+			$rAnalyseDuration = abs(intval($rSettings['stream_max_analyze'] ?? 0)) ?: 5000000;
+			$rProbesize = abs(intval($rSettings['probesize'] ?? 0)) ?: 5000000;
 		}
 		$rTimeout = intval($rAnalyseDuration / 1000000) + intval($rSettings['probe_extra_wait'] ?? 10);
-		if ($rHasProxy && $rTimeout < 75) {
-			$rTimeout = 75;
+		if ($rHasProxy && $rTimeout < 120) {
+			$rTimeout = 120;
 		} elseif ($rTimeout < 30) {
 			$rTimeout = 30;
 		}
@@ -733,7 +733,7 @@ class StreamProcess {
 			}
 
 			$container = (isset($rFFProbeOutput) && is_array($rFFProbeOutput)) ? ($rFFProbeOutput['container'] ?? null) : null;
-			if (empty($rStream['server_info']['parent_id']) && (($rStream['stream_info']['read_native'] == 1) || ($container && stristr($container, 'hls') && $rSettings['read_native_hls']) || empty($rProtocol) || ($container && stristr($container, 'mp4')) || ($container && stristr($container, 'matroska')))) {
+			if (empty($rStream['server_info']['parent_id']) && (($rStream['stream_info']['read_native'] == 1) || empty($rProtocol) || ($container && (stristr($container, 'mp4') || stristr($container, 'matroska'))))) {
 				$rReadNative = '-re';
 			} else {
 				$rReadNative = '';
