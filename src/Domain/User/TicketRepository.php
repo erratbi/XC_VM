@@ -60,30 +60,31 @@ class TicketRepository {
 		global $rPermissions;
 		$rReturn = array();
 
-		if ($rID) {
-			if ($rAdmin) {
-				$db->query('SELECT `tickets`.`id`, `tickets`.`member_id`, `tickets`.`title`, `tickets`.`status`, `tickets`.`admin_read`, `tickets`.`user_read`, `users`.`username` FROM `tickets`, `users` WHERE `member_id` IN (SELECT `id` FROM `users` WHERE `owner_id` = ?) AND `users`.`id` = `tickets`.`member_id` ORDER BY `id` DESC;', $rID);
-			} else {
-				$db->query('SELECT `tickets`.`id`, `tickets`.`member_id`, `tickets`.`title`, `tickets`.`status`, `tickets`.`admin_read`, `tickets`.`user_read`, `users`.`username` FROM `tickets`, `users` WHERE `member_id` IN (' . implode(',', array_map('intval', array_merge(array($rUserInfo['id']), $rPermissions['all_reports']))) . ') AND `users`.`id` = `tickets`.`member_id` ORDER BY `id` DESC;');
-			}
+		if ($rID && !$rAdmin) {
+			$reports = array_unique(array_map('intval', array_merge(array($rUserInfo['id'] ?? $rID), $rPermissions['all_reports'] ?? [])));
+			$reportsStr = implode(',', $reports);
+			$db->query("SELECT `tickets`.`id`, `tickets`.`member_id`, `tickets`.`title`, `tickets`.`status`, `tickets`.`admin_read`, `tickets`.`user_read`, `users`.`username` FROM `tickets` INNER JOIN `users` ON `users`.`id` = `tickets`.`member_id` WHERE `tickets`.`member_id` IN ({$reportsStr}) ORDER BY `tickets`.`id` DESC;");
 		} else {
-			$db->query('SELECT `tickets`.`id`, `tickets`.`member_id`, `tickets`.`title`, `tickets`.`status`, `tickets`.`admin_read`, `tickets`.`user_read`, `users`.`username` FROM `tickets`, `users` WHERE `users`.`id` = `tickets`.`member_id` ORDER BY `id` DESC;');
+			$db->query("SELECT `tickets`.`id`, `tickets`.`member_id`, `tickets`.`title`, `tickets`.`status`, `tickets`.`admin_read`, `tickets`.`user_read`, `users`.`username` FROM `tickets` INNER JOIN `users` ON `users`.`id` = `tickets`.`member_id` ORDER BY `tickets`.`id` DESC;");
 		}
 
 		if (0 >= $db->num_rows()) {
 		} else {
 			foreach ($db->get_rows() as $rRow) {
 				$db->query('SELECT MIN(`date`) AS `date` FROM `tickets_replies` WHERE `ticket_id` = ?;', $rRow['id']);
-
-				if ($rDate = $db->get_row()['date']) {
-					$rRow['created'] = date('Y-m-d H:i', $rDate);
+				$firstReply = $db->get_row();
+				if (!empty($firstReply['date'])) {
+					$rRow['created'] = date('Y-m-d H:i', (int)$firstReply['date']);
+				} elseif (!empty($rRow['created']) && is_numeric($rRow['created'])) {
+					$rRow['created'] = date('Y-m-d H:i', (int)$rRow['created']);
 				} else {
 					$rRow['created'] = '';
 				}
 
 				$db->query('SELECT * FROM `tickets_replies` WHERE `ticket_id` = ? ORDER BY `id` DESC LIMIT 1;', $rRow['id']);
 				$rLastResponse = $db->get_row();
-				$rRow['last_reply'] = date('Y-m-d H:i', $rLastResponse['date']);
+				$lastDate = !empty($rLastResponse['date']) ? (int)$rLastResponse['date'] : (!empty($firstReply['date']) ? (int)$firstReply['date'] : 0);
+				$rRow['last_reply'] = $lastDate > 0 ? date('Y-m-d H:i', $lastDate) : $rRow['created'];
 
 				if ($rRow['member_id'] == $rID) {
 					if ($rRow['status'] == 0) {

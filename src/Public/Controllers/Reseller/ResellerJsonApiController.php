@@ -151,6 +151,7 @@ class ResellerJsonApiController
                 self::handleCreateTicket($rData);
                 break;
             case 'reply_ticket':
+            case 'ticket_reply':
                 self::handleReplyTicket($rData);
                 break;
             case 'close_ticket':
@@ -1601,8 +1602,8 @@ class ResellerJsonApiController
                 'status'              => $statusLabel,
                 'status_code'         => $statusCode,
                 'is_closed'           => ($statusCode === 0),
-                'user_read'           => (bool)$row['user_read'],
-                'admin_read'          => (bool)$row['admin_read'],
+                'user_read'           => (int)$row['user_read'],
+                'admin_read'          => (int)$row['admin_read'],
                 'unread'              => ($statusCode !== 0 && (int)$row['user_read'] === 0 && $lastReplyByAdmin),
                 'member_id'           => (int)$row['member_id'],
                 'username'            => (string)$row['username'],
@@ -1611,7 +1612,7 @@ class ResellerJsonApiController
                 'created_timestamp'   => $createdAt,
                 'last_reply_at'       => $lastReplyDate ? date('Y-m-d H:i:s', $lastReplyDate) : null,
                 'last_reply_timestamp'=> $lastReplyDate,
-                'last_reply_by_admin' => $lastReplyByAdmin,
+                'last_reply_by_admin' => $lastReplyByAdmin ? 1 : 0,
             ];
         }
 
@@ -1666,8 +1667,9 @@ class ResellerJsonApiController
             $date = (int)$r['date'];
             $replies[] = [
                 'id'          => (int)$r['id'],
-                'admin_reply' => $isAdmin,
-                'sender'      => $isAdmin ? 'Support Admin' : ($ticket['username'] ?? 'Reseller'),
+                'admin_reply' => $isAdmin ? 1 : 0,
+                'is_admin'    => $isAdmin,
+                'sender'      => $isAdmin ? 'Administrator' : ($ticket['username'] ?? 'Reseller'),
                 'message'     => (string)$r['message'],
                 'date'        => date('Y-m-d H:i:s', $date),
                 'timestamp'   => $date,
@@ -1686,8 +1688,8 @@ class ResellerJsonApiController
                 'status'      => ($statusCode === 0 ? 'closed' : 'open'),
                 'member_id'   => (int)$ticket['member_id'],
                 'username'    => (string)$ticket['username'],
-                'admin_read'  => (bool)$ticket['admin_read'],
-                'user_read'   => true,
+                'admin_read'  => (int)$ticket['admin_read'],
+                'user_read'   => 1,
                 'replies'     => $replies,
             ],
         ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
@@ -1711,10 +1713,23 @@ class ResellerJsonApiController
             exit();
         }
 
-        $db->query('INSERT INTO `tickets` (`member_id`, `title`, `status`, `admin_read`, `user_read`) VALUES (?, ?, 1, 0, 1);', $user['id'], $title);
+        $now = time();
+
+        // Check if `created` column exists in tickets table for extended schemas
+        static $hasCreated = null;
+        if ($hasCreated === null) {
+            $db->query("SHOW COLUMNS FROM `tickets` LIKE 'created';");
+            $hasCreated = $db->num_rows() > 0;
+        }
+
+        if ($hasCreated) {
+            $db->query('INSERT INTO `tickets` (`member_id`, `title`, `status`, `admin_read`, `user_read`, `created`) VALUES (?, ?, 1, 0, 1, ?);', (int)$user['id'], $title, $now);
+        } else {
+            $db->query('INSERT INTO `tickets` (`member_id`, `title`, `status`, `admin_read`, `user_read`) VALUES (?, ?, 1, 0, 1);', (int)$user['id'], $title);
+        }
         $ticketId = (int)$db->last_insert_id();
 
-        $db->query('INSERT INTO `tickets_replies` (`ticket_id`, `admin_reply`, `message`, `date`) VALUES (?, 0, ?, ?);', $ticketId, $message, time());
+        $db->query('INSERT INTO `tickets_replies` (`ticket_id`, `admin_reply`, `message`, `date`) VALUES (?, 0, ?, ?);', $ticketId, $message, $now);
 
         echo json_encode([
             'success'   => true,
@@ -1726,7 +1741,7 @@ class ResellerJsonApiController
     }
 
     /**
-     * POST ?action=reply_ticket
+     * POST ?action=reply_ticket / ?action=ticket_reply
      * Appends a message to an existing support ticket thread.
      */
     private static function handleReplyTicket(array $params): void
@@ -1756,7 +1771,7 @@ class ResellerJsonApiController
         $replyId = (int)$db->last_insert_id();
 
         // Mark unread for admin, read for user, and ensure status is open (1)
-        $db->query('UPDATE `tickets` SET `admin_read` = 0, `user_read` = 1, `status` = 1 WHERE `id` = ?;', $ticketId);
+        $db->query('UPDATE `tickets` SET `admin_read` = 0, `user_read` = 1, `status` = 1 WHERE `id` = ? AND `member_id` = ?;', $ticketId, (int)$ticket['member_id']);
 
         echo json_encode([
             'success'   => true,
