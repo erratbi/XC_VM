@@ -162,10 +162,11 @@ class ProcessManager {
             return false;
         }
 
-        $cmdline = trim(@file_get_contents('/proc/' . $pid . '/cmdline'));
-        if (empty($cmdline)) {
+        $raw = @file_get_contents('/proc/' . $pid . '/cmdline');
+        if (empty($raw)) {
             return false;
         }
+        $cmdline = str_replace("\0", ' ', $raw);
 
         if (self::isExeMatching($pid, 'ffmpeg')) {
             return (
