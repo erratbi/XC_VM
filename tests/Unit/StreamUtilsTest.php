@@ -58,4 +58,15 @@ final class StreamUtilsTest extends TestCase {
 		$args = ["-user_agent 'Mozilla/5.0'", "-http_proxy 'http://proxy.example.com:8080'"];
 		$this->assertSame('http://proxy.example.com:8080', StreamUtils::extractProxy('http://example.com/live.mpd', $args));
 	}
+
+	public function testCleanStreamURLStripsInternalParamsAndPreservesOthers() {
+		$url1 = 'http://example.com/live.mpd?decryption_key=8c8ace025d911c6f45b7678ff44b1a73:d59729c1b1b8ec64be8534405d22b319';
+		$this->assertSame('http://example.com/live.mpd', StreamUtils::cleanStreamURL($url1));
+
+		$url2 = 'http://example.com/live.mpd|decryption_key=8c8ace025d911c6f45b7678ff44b1a73:d59729c1b1b8ec64be8534405d22b319';
+		$this->assertSame('http://example.com/live.mpd', StreamUtils::cleanStreamURL($url2));
+
+		$url3 = 'http://example.com/live.mpd?token=abc123xyz&decryption_key=8c8ace025d911c6f45b7678ff44b1a73:d59729c1b1b8ec64be8534405d22b319&proxy=http://proxy:8080';
+		$this->assertSame('http://example.com/live.mpd?token=abc123xyz', StreamUtils::cleanStreamURL($url3));
+	}
 }

@@ -225,31 +225,93 @@ class StreamUtils {
 		return null;
 	}
 
+	/**
+	 * Strip internal control parameters (DRM keys, proxy, pipe parameters) from a stream URL.
+	 *
+	 * @param string $rURL Raw stream URL.
+	 * @return string Sanitized URL suitable for passing to FFmpeg / FFprobe `-i`.
+	 */
+	public static function cleanStreamURL(string $rURL): string {
+		$rURL = trim($rURL);
+		if (empty($rURL)) {
+			return $rURL;
+		}
+
+		// 1. Strip pipe parameters (e.g. "http://example.com/live.mpd|decryption_key=..." -> "http://example.com/live.mpd")
+		if (strpos($rURL, '|') !== false) {
+			$rParts = explode('|', $rURL, 2);
+			$rURL = trim($rParts[0]);
+		}
+
+		// 2. Parse query string and remove known internal keys
+		$rQueryPos = strpos($rURL, '?');
+		if ($rQueryPos !== false) {
+			$rBase = substr($rURL, 0, $rQueryPos);
+			$rQueryStr = substr($rURL, $rQueryPos + 1);
+
+			$rParams = [];
+			parse_str($rQueryStr, $rParams);
+
+			$rInternalKeys = [
+				'decryption_key',
+				'decryption_keys',
+				'cenc_decryption_key',
+				'cenc_decryption_keys',
+				'cenc_key',
+				'cenc_keys',
+				'drm_key',
+				'drm_keys',
+				'proxy',
+				'http_proxy',
+			];
+
+			foreach (array_keys($rParams) as $existingKey) {
+				foreach ($rInternalKeys as $k) {
+					if (strcasecmp($existingKey, $k) === 0) {
+						unset($rParams[$existingKey]);
+						break;
+					}
+				}
+			}
+
+			if (!empty($rParams)) {
+				$rURL = $rBase . '?' . http_build_query($rParams);
+			} else {
+				$rURL = $rBase;
+			}
+		}
+
+		return $rURL;
+	}
+
 	public static function parseStreamURL($rURL, ?string $rProxy = null, array $rHeaders = []) {
 		if ($rProxy === null) {
 			$rProxy = self::extractProxy($rURL);
 		}
 
-		$rProtocol = strtolower(substr($rURL, 0, 4));
+		$rCleanURL = self::cleanStreamURL($rURL);
+
+		$rProtocol = strtolower(substr($rCleanURL, 0, 4));
 		if ($rProtocol == 'rtmp') {
-			if (stristr($rURL, '$OPT')) {
+			if (stristr($rCleanURL, '$OPT')) {
 				$rPattern = 'rtmp://$OPT:rtmp-raw=';
-				$rURL = trim(substr($rURL, stripos($rURL, $rPattern) + strlen($rPattern)));
+				$rCleanURL = trim(substr($rCleanURL, stripos($rCleanURL, $rPattern) + strlen($rPattern)));
 			}
-			$rURL .= ' live=1 timeout=10';
+			$rCleanURL .= ' live=1 timeout=10';
+			return $rCleanURL;
 		} else {
 			if ($rProtocol == 'http') {
 				$rPlatforms = array('livestream.com', 'ustream.tv', 'twitch.tv', 'vimeo.com', 'facebook.com', 'dailymotion.com', 'cnn.com', 'edition.cnn.com', 'youtube.com', 'youtu.be');
-				$rHost = str_ireplace('www.', '', parse_url($rURL, PHP_URL_HOST));
+				$rHost = str_ireplace('www.', '', parse_url($rCleanURL, PHP_URL_HOST));
 				if (in_array($rHost, $rPlatforms)) {
-					$rURLs = trim(shell_exec(YOUTUBE_BIN . ' ' . escapeshellarg($rURL) . ' -q --get-url --skip-download -f best'));
-					list($rURL) = explode("\n", $rURLs);
+					$rURLs = trim(shell_exec(YOUTUBE_BIN . ' ' . escapeshellarg($rCleanURL) . ' -q --get-url --skip-download -f best'));
+					list($rCleanURL) = explode("\n", $rURLs);
 				} else {
-					$rURL = CurlClient::getEffectiveURL($rURL, 4, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', $rProxy, $rHeaders);
+					$rCleanURL = CurlClient::getEffectiveURL($rCleanURL, 4, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', $rProxy, $rHeaders);
 				}
 			}
 		}
-		return $rURL;
+		return self::cleanStreamURL($rCleanURL);
 	}
 
 	/**
