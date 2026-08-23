@@ -20,10 +20,6 @@ class FFprobeRunner {
 		$rFFPROBE = !empty($rFFPROBE) ? $rFFPROBE : \XcVm\Streaming\Codec\FfmpegPaths::probe();
 		$rAnalyseDuration = !empty($settings['stream_max_analyze']) ? abs(intval($settings['stream_max_analyze'])) : 5000000;
 		$rProbesize = !empty($settings['probesize']) ? abs(intval($settings['probesize'])) : 5000000;
-		$rTimeout = intval($rAnalyseDuration / 1000000) + intval($settings['probe_extra_wait'] ?? 5);
-		if ($rTimeout < 5) {
-			$rTimeout = 15;
-		}
 		if (!is_array($rFetchArguments)) {
 			$rFetchArguments = !empty($rFetchArguments) ? [$rFetchArguments] : [];
 		}
@@ -40,6 +36,13 @@ class FFprobeRunner {
 			if (!$hasProxyArg) {
 				$rFetchArguments[] = '-http_proxy ' . escapeshellarg($rProxy);
 			}
+		}
+
+		$rTimeout = intval($rAnalyseDuration / 1000000) + intval($settings['probe_extra_wait'] ?? 10);
+		if (!empty($rProxy) && $rTimeout < 45) {
+			$rTimeout = 45;
+		} elseif ($rTimeout < 25) {
+			$rTimeout = 25;
 		}
 
 		$rEffectiveURL = StreamUtils::parseStreamURL($rSourceURL, $rProxy);
