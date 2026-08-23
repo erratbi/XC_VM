@@ -24,7 +24,7 @@ class FFprobeRunner {
 			$rFetchArguments = !empty($rFetchArguments) ? [$rFetchArguments] : [];
 		}
 
-		$rProxy = StreamUtils::extractProxy($rSourceURL, $rFetchArguments);
+		$rProxy = StreamUtils::extractProxy($rFetchArguments);
 		if (!empty($rProxy)) {
 			$hasProxyArg = false;
 			foreach ($rFetchArguments as $arg) {
@@ -39,10 +39,10 @@ class FFprobeRunner {
 		}
 
 		$rTimeout = intval($rAnalyseDuration / 1000000) + intval($settings['probe_extra_wait'] ?? 10);
-		if (!empty($rProxy) && $rTimeout < 45) {
-			$rTimeout = 45;
-		} elseif ($rTimeout < 25) {
-			$rTimeout = 25;
+		if (!empty($rProxy) && $rTimeout < 75) {
+			$rTimeout = 75;
+		} elseif ($rTimeout < 30) {
+			$rTimeout = 30;
 		}
 
 		$rEffectiveURL = StreamUtils::parseStreamURL($rSourceURL, $rProxy);

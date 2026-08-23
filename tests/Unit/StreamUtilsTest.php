@@ -48,15 +48,10 @@ final class StreamUtilsTest extends TestCase {
 		$this->assertSame('8c8ace025d911c6f45b7678ff44b1a73:d59729c1b1b8ec64be8534405d22b319', StreamUtils::extractDecryptionKey($url));
 	}
 
-	public function testExtractProxyFromUrlAndArguments() {
-		$url = 'http://example.com/live.mpd?proxy=http://user:pass@proxy.example.com:8080';
-		$this->assertSame('http://user:pass@proxy.example.com:8080', StreamUtils::extractProxy($url));
-
-		$urlPipe = 'http://example.com/live.mpd|http_proxy=http://proxy.example.com:3128';
-		$this->assertSame('http://proxy.example.com:3128', StreamUtils::extractProxy($urlPipe));
-
+	public function testExtractProxyFromArguments() {
 		$args = ["-user_agent 'Mozilla/5.0'", "-http_proxy 'http://proxy.example.com:8080'"];
-		$this->assertSame('http://proxy.example.com:8080', StreamUtils::extractProxy('http://example.com/live.mpd', $args));
+		$this->assertSame('http://proxy.example.com:8080', StreamUtils::extractProxy($args));
+		$this->assertNull(StreamUtils::extractProxy([]));
 	}
 
 	public function testCleanStreamURLStripsInternalParamsAndPreservesOthers() {

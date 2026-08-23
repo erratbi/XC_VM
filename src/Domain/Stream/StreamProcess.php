@@ -1294,7 +1294,7 @@ class StreamProcess {
 				$rFFProbeOutput = array();
 				foreach ($rSources as $rSource) {
 					$rRealSource = $rSource;
-					$rProxy = StreamUtils::extractProxy($rSource, is_array($rStream['stream_arguments']) ? $rStream['stream_arguments'] : []);
+					$rProxy = StreamUtils::extractProxy(is_array($rStream['stream_arguments']) ? $rStream['stream_arguments'] : []);
 					$rStreamSource = StreamUtils::parseStreamURL($rSource, $rProxy);
 					echo 'Checking source: ' . $rSource . "\n";
 					$rURLInfo = parse_url($rStreamSource);

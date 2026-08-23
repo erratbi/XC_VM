@@ -326,7 +326,7 @@ class ServerRepository {
 	 * @return mixed Probe result.
 	 */
 	public static function probeSource($rServerID, $rURL, $rUserAgent = null, $rProxy = null, $rCookies = null, $rHeaders = null) {
-		return json_decode(ApiClient::systemRequest($rServerID, array('action' => 'probe', 'url' => $rURL, 'user_agent' => $rUserAgent, 'http_proxy' => $rProxy, 'cookies' => $rCookies, 'headers' => $rHeaders), 30), true);
+		return json_decode(ApiClient::systemRequest($rServerID, array('action' => 'probe', 'url' => $rURL, 'user_agent' => $rUserAgent, 'http_proxy' => $rProxy, 'cookies' => $rCookies, 'headers' => $rHeaders), 120), true);
 	}
 
 	/**

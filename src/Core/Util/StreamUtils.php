@@ -201,25 +201,18 @@ class StreamUtils {
 	}
 
 	/**
-	 * Extract HTTP/HTTPS proxy from URL parameters or fetch arguments.
+	 * Extract HTTP/HTTPS proxy from fetch arguments array.
 	 *
-	 * Handles:
-	 *  - URL parameters: |proxy=http://..., ?proxy=http://..., ?http_proxy=http://...
-	 *  - Fetch arguments array: "-http_proxy 'http://...'"
-	 *
-	 * @param string $rURL            Stream URL.
-	 * @param array  $rFetchArguments Optional FFmpeg fetch arguments.
+	 * @param array|string $rFetchArgumentsOrURL Fetch arguments array or URL.
+	 * @param array        $rFetchArguments      Optional fetch arguments if URL was passed first.
 	 * @return string|null Proxy URL if found.
 	 */
-	public static function extractProxy(string $rURL, array $rFetchArguments = []): ?string {
-		foreach ($rFetchArguments as $rArg) {
+	public static function extractProxy($rFetchArgumentsOrURL = [], array $rFetchArguments = []): ?string {
+		$args = is_array($rFetchArgumentsOrURL) ? $rFetchArgumentsOrURL : $rFetchArguments;
+		foreach ($args as $rArg) {
 			if (is_string($rArg) && preg_match("/-http_proxy\s+['\"]?([^'\"]+)['\"]?/i", $rArg, $m)) {
 				return trim($m[1]);
 			}
-		}
-
-		if (preg_match('/[?&|](?:http_)?proxy=([^&|]+)/i', $rURL, $m)) {
-			return trim(urldecode($m[1]));
 		}
 
 		return null;
@@ -285,10 +278,6 @@ class StreamUtils {
 	}
 
 	public static function parseStreamURL($rURL, ?string $rProxy = null, array $rHeaders = []) {
-		if ($rProxy === null) {
-			$rProxy = self::extractProxy($rURL);
-		}
-
 		$rCleanURL = self::cleanStreamURL($rURL);
 
 		$rProtocol = strtolower(substr($rCleanURL, 0, 4));

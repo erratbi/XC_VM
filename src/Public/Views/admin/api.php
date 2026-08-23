@@ -2298,7 +2298,7 @@ if (isset($_SESSION['hash'])) {
 		if (RequestManager::getAll()['action'] == 'probe_stream') {
 			if (Authorization::check('adv', 'add_stream') || Authorization::check('adv', 'edit_stream')) {
 				$rAnalyseDuration = abs(intval(SettingsManager::getAll()['stream_max_analyze']));
-				$rTimeout = intval($rAnalyseDuration / 1000000) + SettingsManager::getAll()['probe_extra_wait'];
+				$rTimeout = max(90, intval($rAnalyseDuration / 1000000) + intval(SettingsManager::getAll()['probe_extra_wait'] ?? 10) + 60);
 				set_time_limit(intval($rTimeout));
 				ini_set('max_execution_time', intval($rTimeout));
 				ini_set('default_socket_timeout', intval($rTimeout));
