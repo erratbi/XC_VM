@@ -464,7 +464,7 @@ class MonitorCommand implements CommandInterface {
 						StreamProcess::updateStream($rStreamID);
 					}
 					echo "End start process\n";
-					break;
+					continue;
 				} else {
 					echo "Stream start failed...\n";
 					if (($rParentID == 0)) {
