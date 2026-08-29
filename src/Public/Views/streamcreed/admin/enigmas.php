@@ -1,0 +1,15 @@
+<?php
+
+use XcVm\Core\Auth\Authorization;
+
+$streamcreedPageScripts = ['assets/streamcreed/enigmas.js'];
+$streamcreedCanAddEnigma = Authorization::check('adv', 'add_e2');
+$streamcreedCanEditEnigma = Authorization::check('adv', 'edit_e2');
+$streamcreedDefaultEntries = intval($rSettings['default_entries'] ?? 25);
+if (!in_array($streamcreedDefaultEntries, [10, 25, 50, 100], true)) $streamcreedDefaultEntries = 25;
+?>
+<section class="sc-devices" data-sc-enigmas data-endpoint="table" data-default-entries="<?php echo $streamcreedDefaultEntries; ?>" data-can-edit="<?php echo $streamcreedCanEditEnigma ? '1' : '0'; ?>">
+	<div class="sc-page-heading"><div><p class="sc-eyebrow">Devices</p><h1>Enigma2 Devices</h1></div><div class="sc-page-actions"><?php if ($streamcreedCanAddEnigma): ?><a class="sc-button sc-button-primary" href="enigma"><i class="fe-plus" aria-hidden="true"></i> Add device</a><?php endif; ?></div></div>
+	<div class="sc-toolbar"><label class="sc-search-field"><i class="fe-search" aria-hidden="true"></i><span class="sc-visually-hidden">Search Enigma2 devices</span><input type="search" placeholder="Search user, MAC, IP, or expiration" data-sc-enigma-search></label><label class="sc-filter-field"><span>Status</span><select data-sc-enigma-filter><option value="">All devices</option><option value="1">Active</option><option value="2">Disabled</option><option value="3">Banned</option><option value="4">Expired</option><option value="5">Trial</option></select></label><label class="sc-filter-field sc-entry-field"><span>Per page</span><select data-sc-enigma-entries><?php foreach ([10,25,50,100] as $entries): ?><option value="<?php echo $entries; ?>"<?php echo $entries === $streamcreedDefaultEntries ? ' selected' : ''; ?>><?php echo $entries; ?></option><?php endforeach; ?></select></label></div>
+	<div class="sc-data-panel"><div class="sc-table-scroll"><table class="sc-data-table"><thead><tr><th>Device</th><th>MAC address</th><th>Public IP</th><th>Owner</th><th>Status</th><th>Connection</th><th>Expiration</th><th>Last activity</th><th></th></tr></thead><tbody data-sc-enigma-rows><tr><td class="sc-table-state" colspan="9">Loading devices…</td></tr></tbody></table></div><footer class="sc-table-footer"><span data-sc-enigma-range>Loading…</span><div class="sc-pagination"><button type="button" data-sc-enigma-previous>Previous</button><span data-sc-enigma-page>Page 1</span><button type="button" data-sc-enigma-next>Next</button></div></footer></div>
+</section>
