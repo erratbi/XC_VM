@@ -342,6 +342,10 @@ a.sc-connection-link:hover { background: #e8f4fb; color: #1177b9; }
 .sc-password-meter span[data-score="3"] { background: #8ecb3f; }
 .sc-password-meter span[data-score="4"] { background: #16c933; }
 .sc-password-meter strong { color: #16c933; font-size: 11px; font-weight: 500; }
+.sc-password-meter[data-score="0"] strong { color: #df3030; }
+.sc-password-meter[data-score="1"] strong { color: #ed7d25; }
+.sc-password-meter[data-score="2"] strong { color: #e4bd28; }
+.sc-password-meter[data-score="3"] strong { color: #8ecb3f; }
 @media (max-width: 700px) { .sc-form-grid { grid-template-columns: 1fr; } .sc-form { padding: 18px; } }
 .sc-text-danger { color: #bd3045 !important; }
 .sc-table-state { height: 150px !important; color: var(--sc-muted) !important; text-align: center; }

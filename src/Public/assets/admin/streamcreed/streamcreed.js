@@ -4,7 +4,7 @@
 	if (passwordInput) {
 		var meter = document.createElement('div'); meter.className = 'sc-password-meter'; meter.innerHTML = '<span></span><strong></strong>'; passwordInput.parentNode.appendChild(meter);
 		var meterBar = meter.querySelector('span'), meterLabel = meter.querySelector('strong');
-		passwordInput.addEventListener('input', function () { var value = passwordInput.value, score = (value.length >= 10 ? 1 : 0) + (/[A-Z]/.test(value) ? 1 : 0) + (/[0-9]/.test(value) ? 1 : 0) + (/[^A-Za-z0-9]/.test(value) ? 1 : 0), labels = ['Too weak', 'Weak', 'Medium', 'Strong', 'Very strong']; meter.hidden = !value; meterBar.style.width = Math.max(8, score * 25) + '%'; meterLabel.textContent = value ? labels[score] : ''; meterBar.dataset.score = score; }); passwordInput.dispatchEvent(new Event('input'));
+		passwordInput.addEventListener('input', function () { var value = passwordInput.value, score = (value.length >= 10 ? 1 : 0) + (/[A-Z]/.test(value) ? 1 : 0) + (/[0-9]/.test(value) ? 1 : 0) + (/[^A-Za-z0-9]/.test(value) ? 1 : 0), labels = ['Too weak', 'Weak', 'Medium', 'Strong', 'Very strong']; meter.hidden = !value; meterBar.style.width = Math.max(8, score * 25) + '%'; meterLabel.textContent = value ? labels[score] : ''; meter.dataset.score = score; }); passwordInput.dispatchEvent(new Event('input'));
 	}
 
 	var sidebar = document.getElementById('streamcreed-sidebar');
