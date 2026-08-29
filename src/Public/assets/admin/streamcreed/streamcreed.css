@@ -298,6 +298,11 @@ a.sc-connection-link:hover { background: #e8f4fb; color: #1177b9; }
 .sc-settings-row:last-child { border-bottom: 0; }
 .sc-settings-row strong { color: var(--sc-ink); font-size: 12px; font-weight: 700; }
 .sc-settings-note { display: flex; align-items: center; gap: 8px; margin: 14px 2px 0; color: var(--sc-muted); font-size: 11px; }
+.sc-process-toolbar { display: flex; align-items: flex-end; gap: 18px; padding: 16px; border-bottom: 1px solid var(--sc-line); }
+.sc-process-toolbar .sc-search-field { flex: 1; }
+.sc-process-toolbar .sc-filter-field { width: 260px; }
+.sc-process-toolbar .sc-search-field input, .sc-process-toolbar .sc-filter-field select { width: 100%; }
+@media (max-width: 700px) { .sc-process-toolbar { flex-direction: column; align-items: stretch; } .sc-process-toolbar .sc-filter-field { width: auto; } }
 .sc-text-danger { color: #bd3045 !important; }
 .sc-table-state { height: 150px !important; color: var(--sc-muted) !important; text-align: center; }
 .sc-table-state.is-error { color: #bd3045 !important; }
