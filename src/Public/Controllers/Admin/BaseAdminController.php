@@ -6,6 +6,7 @@ use XcVm\Core\Auth\Authorization;
 use XcVm\Core\Auth\PageAuthorization;
 use XcVm\Core\Http\RequestManager;
 use XcVm\Core\Http\Router;
+use XcVm\Core\Ui\AdminUiTheme;
 use XcVm\Core\Util\AdminHelpers;
 
 /**
@@ -79,6 +80,12 @@ class BaseAdminController {
      * @param array  $data Данные для view (extract'd в scope)
      */
     protected function render($view, array $data = []) {
+        $adminUi = AdminUiTheme::resolve($_GET, $_COOKIE);
+        $requestedAdminUi = AdminUiTheme::requested($_GET);
+        if ($requestedAdminUi !== null) {
+            $this->persistAdminUiTheme($requestedAdminUi);
+        }
+
         // Layout functions
         require_once MAIN_HOME . 'Public/Views/layouts/admin.php';
         require_once MAIN_HOME . 'Public/Views/layouts/footer.php';
@@ -146,6 +153,16 @@ class BaseAdminController {
         extract($data, EXTR_SKIP);
 
         $__viewsDir = MAIN_HOME . 'Public/Views/' . $this->scope . '/';
+        $__streamcreedView = MAIN_HOME . 'Public/Views/streamcreed/' . $this->scope . '/' . $view . '.php';
+
+        // StreamCreed is opt-in and page-by-page. If a matching migrated view is
+        // absent, the request falls through to the untouched legacy renderer.
+        if ($this->scope === 'admin' && $adminUi === AdminUiTheme::STREAMCREED && is_file($__streamcreedView)) {
+            require MAIN_HOME . 'Public/Views/streamcreed/layouts/header.php';
+            require $__streamcreedView;
+            require MAIN_HOME . 'Public/Views/streamcreed/layouts/footer.php';
+            return;
+        }
 
         // 1. Header
         renderUnifiedLayoutHeader($this->scope);
@@ -164,6 +181,24 @@ class BaseAdminController {
         if (file_exists($__viewFile)) {
             require $__viewFile;
         }
+    }
+
+    /**
+     * Remember an explicit UI selection for this browser only.
+     */
+    private function persistAdminUiTheme(string $theme): void {
+        if (headers_sent()) {
+            return;
+        }
+
+        setcookie(AdminUiTheme::COOKIE_NAME, $theme, [
+            'expires' => time() + 31536000,
+            'path' => '/',
+            'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+        $_COOKIE[AdminUiTheme::COOKIE_NAME] = $theme;
     }
 
     /**

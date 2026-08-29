@@ -126,8 +126,10 @@ final class NavbarProfileMenuTest extends TestCase {
         }
         // edit_profile and logout are always visible (no permission gate).
         $this->assertSame([], $byKey['profile.edit']->permissions);
+        $this->assertSame([], $byKey['profile.streamcreed']->permissions);
         $this->assertSame([], $byKey['profile.logout']->permissions);
         $this->assertSame('edit_profile', $byKey['profile.edit']->url);
+        $this->assertSame('dashboard?admin_ui=streamcreed', $byKey['profile.streamcreed']->url);
         $this->assertSame('logout', $byKey['profile.logout']->url);
         // Settings/modules gate on 'settings'; backups/cache on 'database'.
         $this->assertSame(['settings'], $byKey['profile.settings']->permissions);
@@ -149,6 +151,7 @@ final class NavbarProfileMenuTest extends TestCase {
             'profile.backups',
             'profile.cache',
             'profile.modules',
+            'profile.streamcreed',
             'profile.logout_divider',
             'profile.logout',
         ], $rendered);
@@ -161,7 +164,7 @@ final class NavbarProfileMenuTest extends TestCase {
         $visible = $this->filterVisible(NavbarRegistry::getChildren('profile'), []);
         $rendered = $this->keys(NavbarRegistry::collapseDividers($visible));
 
-        $this->assertSame(['profile.edit', 'profile.logout_divider', 'profile.logout'], $rendered);
+        $this->assertSame(['profile.edit', 'profile.streamcreed', 'profile.logout_divider', 'profile.logout'], $rendered);
     }
 
     // ── Module integration contract (Plex 1.0.2 + Watch 1.0.5) ────
@@ -200,6 +203,7 @@ final class NavbarProfileMenuTest extends TestCase {
             'profile.backups',
             'profile.cache',
             'profile.modules',
+            'profile.streamcreed',
             'profile.folder_divider',
             'profile.watch_settings',
             'profile.plex_settings',
@@ -223,6 +227,7 @@ final class NavbarProfileMenuTest extends TestCase {
             'profile.backups',
             'profile.cache',
             'profile.modules',
+            'profile.streamcreed',
             'profile.folder_divider',
             'profile.logout',
         ], $rendered);

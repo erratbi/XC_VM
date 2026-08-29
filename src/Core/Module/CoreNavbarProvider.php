@@ -527,6 +527,10 @@ class CoreNavbarProvider implements NavbarProviderInterface {
             ->parent('profile')->url('modules')
             ->label('', 'Modules')->permissions(['settings'])->order(50));
 
+        NavbarRegistry::add((new NavbarItem('profile.streamcreed'))
+            ->parent('profile')->url('dashboard?admin_ui=streamcreed')
+            ->label('', 'StreamCreed UI')->order(60));
+
         // Reserved slot 100–980 for module-provided profile links.
 
         NavbarRegistry::add((new NavbarItem('profile.logout_divider'))

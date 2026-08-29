@@ -242,6 +242,7 @@ class TableController extends BaseAdminController {
 		if (!Authorization::check("adv", "users") && !Authorization::check("adv", "mass_edit_users")) {
 			exit;
 		}
+		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
 		$rOrderDirection = strtolower(RequestManager::getAll()["order"][0]["dir"]) === "desc" ? "desc" : "asc";
 		$rOrder = ["`lines`.`id`", "`lines`.`username`", "`lines`.`password`", "`lines`.`member_id`", "`lines`.`enabled` - `lines`.`admin_enabled`", "`active_connections` > 0", "`lines`.`is_trial`", "`lines`.`is_restreamer`", "`active_connections`", "`lines`.`max_connections`", "`lines`.`exp_date`", "`active_connections` " . $rOrderDirection . ", `last_activity`", false];
 		if (isset(RequestManager::getAll()["order"]) && 0 < strlen(RequestManager::getAll()["order"][0]["column"] ?? '')) {
@@ -376,7 +377,39 @@ class TableController extends BaseAdminController {
 					if (SettingsManager::getAll()["redis_handler"]) {
 						$rRow["active_connections"] = isset($rConnectionCount[$rRow["id"]]) ? $rConnectionCount[$rRow["id"]] : 0;
 					}
-					if ($rIsAPI) {
+					if ($rStreamcreed) {
+						if (!$rRow["admin_enabled"]) {
+							$rStatusKey = "banned";
+							$rStatusLabel = "Banned";
+						} elseif (!$rRow["enabled"]) {
+							$rStatusKey = "disabled";
+							$rStatusLabel = "Disabled";
+						} elseif ($rRow["exp_date"] && $rRow["exp_date"] < time()) {
+							$rStatusKey = "expired";
+							$rStatusLabel = "Expired";
+						} else {
+							$rStatusKey = "active";
+							$rStatusLabel = "Active";
+						}
+
+						$rReturn["data"][] = [
+							"id" => (int) $rRow["id"],
+							"username" => (string) $rRow["username"],
+							"owner" => (string) ($rRow["owner_name"] ?? ""),
+							"status" => $rStatusKey,
+							"statusLabel" => $rStatusLabel,
+							"online" => 0 < (int) $rRow["active_connections"],
+							"trial" => (bool) $rRow["is_trial"],
+							"restreamer" => (bool) $rRow["is_restreamer"],
+							"connections" => (int) $rRow["active_connections"],
+							"maxConnections" => (int) $rRow["max_connections"] ?: null,
+							"expiresAt" => $rRow["exp_date"] ? (int) $rRow["exp_date"] : null,
+							"expiresAtLabel" => $rRow["exp_date"] ? date($rSettings["date_format"] . " H:i", $rRow["exp_date"]) : "Never",
+							"lastActivityAt" => !empty($rRow["last_active"]) ? (int) $rRow["last_active"] : null,
+							"lastActivityLabel" => !empty($rRow["last_active"]) ? date($rSettings["date_format"] . " H:i", $rRow["last_active"]) : "Never",
+							"currentStream" => 0 < (int) $rRow["active_connections"] ? (string) ($rRow["stream_display_name"] ?? "") : "",
+						];
+					} elseif ($rIsAPI) {
 						$rReturn["data"][] = self::filterRow($rRow, RequestManager::getAll()["show_columns"] ?? '', RequestManager::getAll()["hide_columns"] ?? '');
 					} else {
 						if (!$rRow["admin_enabled"]) {
@@ -2666,6 +2699,7 @@ class TableController extends BaseAdminController {
 		if (!Authorization::check("adv", "live_connections")) {
 			exit;
 		}
+		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
 		$rRows = [];
 		if (SettingsManager::getAll()["redis_handler"]) {
 			$rRedis = RedisManager::instance();
@@ -2878,7 +2912,36 @@ class TableController extends BaseAdminController {
 		}
 		if (0 < count($rRows)) {
 			foreach ($rRows as $rRow) {
-				if ($rIsAPI) {
+				if ($rStreamcreed) {
+					$rUserKind = !empty($rRow["hmac_id"]) ? "HMAC" : (!empty($rRow["is_mag"]) ? "MAG" : (!empty($rRow["is_e2"]) ? "Enigma2" : "Line"));
+					$rProxyID = (int) ($rRow["proxy_id"] ?? 0);
+					$rProxyName = $rProxyID > 0 && isset($rProxyServers[$rProxyID]) ? (string) $rProxyServers[$rProxyID]["server_name"] : "";
+					$rStartedAt = (int) ($rRow["date_start"] ?? 0);
+					$rReturn["data"][] = [
+						"activityId" => (string) ($rRow["activity_id"] ?? ""),
+						"userId" => (int) ($rRow["user_id"] ?? 0),
+						"hmacId" => (int) ($rRow["hmac_id"] ?? 0),
+						"magId" => (int) ($rRow["mag_id"] ?? 0),
+						"enigmaId" => (int) ($rRow["device_id"] ?? 0),
+						"subscriber" => (string) ($rRow["username"] ?? ($rRow["hmac_identifier"] ?? "Unknown")),
+						"subscriberType" => $rUserKind,
+						"streamId" => (int) ($rRow["stream_id"] ?? 0),
+						"streamName" => (string) ($rRow["stream_display_name"] ?? ""),
+						"streamType" => (int) ($rRow["type"] ?? 1),
+						"seriesNo" => (int) ($rRow["series_no"] ?? 0),
+						"serverId" => (int) ($rRow["server_id"] ?? 0),
+						"serverName" => (string) ($rRow["server_name"] ?? ""),
+						"proxyName" => $rProxyName,
+						"player" => trim(explode("(", (string) ($rRow["user_agent"] ?? ""))[0]),
+						"isp" => (string) ($rRow["isp"] ?? ""),
+						"ip" => (string) ($rRow["user_ip"] ?? ""),
+						"country" => strtoupper((string) ($rRow["geoip_country_code"] ?? "")),
+						"quality" => max(0, min(100, 100 - (int) ($rRow["divergence"] ?? 0))),
+						"startedAt" => $rStartedAt,
+						"output" => strtoupper((string) ($rRow["container"] ?? "")),
+						"restreamer" => !empty($rRow["is_restreamer"]),
+					];
+				} elseif ($rIsAPI) {
 					$rReturn["data"][] = self::filterRow($rRow, RequestManager::getAll()["show_columns"] ?? '', RequestManager::getAll()["hide_columns"] ?? '');
 				} else {
 					if ($rRow["divergence"] <= 50) {
@@ -4116,6 +4179,7 @@ class TableController extends BaseAdminController {
 		if (!Authorization::check("adv", "mng_regusers")) {
 			exit;
 		}
+		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
 		$rOrder = ["`users`.`id`", "`users`.`username`", "`users`.`owner_id`", "`users`.`ip`", "`users`.`status`", "`users`.`member_group_id`", "`users`.`credits`", false, false, false, false, "`users`.`last_login`", false];
 		$rOrderColumn = RequestManager::getAll()["order"][0]["column"] ?? '';
 		$rOrderRow = (0 < strlen((string) $rOrderColumn)) ? (int) $rOrderColumn : 0;
@@ -4203,7 +4267,25 @@ class TableController extends BaseAdminController {
 						$rRow["owner_username"] = "";
 					}
 					$rRow = array_merge($rRow, $rUserInfo[$rRow["id"]]);
-					if ($rIsAPI) {
+					if ($rStreamcreed) {
+						$rReturn["data"][] = [
+							"id" => (int) $rRow["id"],
+							"username" => (string) $rRow["username"],
+							"ownerId" => (int) $rRow["owner_id"],
+							"owner" => (string) $rRow["owner_username"],
+							"status" => (int) $rRow["status"] === 1 ? "active" : "disabled",
+							"statusLabel" => (int) $rRow["status"] === 1 ? "Active" : "Disabled",
+							"groupId" => (int) $rRow["member_group_id"],
+							"groupName" => (string) ($rRow["group_name"] ?? ""),
+							"isReseller" => !empty($rRow["is_reseller"]),
+							"credits" => (int) $rRow["credits"],
+							"ip" => (string) $rRow["ip"],
+							"userLines" => (int) $rRow["user_lines"],
+							"magLines" => (int) $rRow["mag_lines"],
+							"e2Lines" => (int) $rRow["e2_lines"],
+							"lastLogin" => $rRow["last_login"] ?: null,
+						];
+					} elseif ($rIsAPI) {
 						$rReturn["data"][] = self::filterRow($rRow, RequestManager::getAll()["show_columns"] ?? '', RequestManager::getAll()["hide_columns"] ?? '');
 					} else {
 						if ($rRow["status"] == 1) {
