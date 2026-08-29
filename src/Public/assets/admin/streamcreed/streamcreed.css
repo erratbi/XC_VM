@@ -326,6 +326,13 @@ a.sc-connection-link:hover { background: #e8f4fb; color: #1177b9; }
 .sc-ticket-message time { color: var(--sc-muted); font-size: 10px; }
 .sc-ticket-message p { margin: 0; color: #3d4246; font-size: 12px; line-height: 1.65; }
 .sc-ticket-actions { margin-top: 18px; }
+.sc-form { padding: 24px; border: 1px solid var(--sc-line); background: #fff; }
+.sc-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.sc-form label { display: grid; gap: 7px; color: var(--sc-muted); font-size: 11px; font-weight: 700; }
+.sc-form input, .sc-form textarea { width: 100%; padding: 10px 11px; border: 1px solid var(--sc-line); border-radius: 4px; background: #fff; color: var(--sc-ink); font: inherit; font-weight: 400; }
+.sc-form-wide { margin-top: 18px; }
+.sc-form-actions { display: flex; gap: 10px; margin-top: 22px; }
+@media (max-width: 700px) { .sc-form-grid { grid-template-columns: 1fr; } .sc-form { padding: 18px; } }
 .sc-text-danger { color: #bd3045 !important; }
 .sc-table-state { height: 150px !important; color: var(--sc-muted) !important; text-align: center; }
 .sc-table-state.is-error { color: #bd3045 !important; }
