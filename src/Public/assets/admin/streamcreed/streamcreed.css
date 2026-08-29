@@ -332,6 +332,13 @@ a.sc-connection-link:hover { background: #e8f4fb; color: #1177b9; }
 .sc-form input, .sc-form textarea { width: 100%; padding: 10px 11px; border: 1px solid var(--sc-line); border-radius: 4px; background: #fff; color: var(--sc-ink); font: inherit; font-weight: 400; }
 .sc-form-wide { margin-top: 18px; }
 .sc-form-actions { display: flex; gap: 10px; margin-top: 22px; }
+.sc-password-meter { display: grid; gap: 5px; margin-top: 6px; }
+.sc-password-meter span { display: block; width: 8%; height: 3px; background: #16c933; transition: width .2s ease, background .2s ease; }
+.sc-password-meter span[data-score="1"] { background: #e7ad28; }
+.sc-password-meter span[data-score="2"] { background: #e7ad28; }
+.sc-password-meter span[data-score="3"] { background: #6ebf3d; }
+.sc-password-meter span[data-score="4"] { background: #16c933; }
+.sc-password-meter strong { color: #16c933; font-size: 11px; font-weight: 500; }
 @media (max-width: 700px) { .sc-form-grid { grid-template-columns: 1fr; } .sc-form { padding: 18px; } }
 .sc-text-danger { color: #bd3045 !important; }
 .sc-table-state { height: 150px !important; color: var(--sc-muted) !important; text-align: center; }
