@@ -45,7 +45,7 @@ $streamcreedDrillNav = [
 	'logs' => ['Logs', [['', [['Panel Logs', 'panel_logs', ['panel_logs']], ['Client Logs', 'client_logs', ['client_request_log']], ['Login Logs', 'login_logs', ['login_logs']], ['User Logs', 'user_logs', ['reg_userlog']]]]]],
 	'system' => ['System', [
 		['Infrastructure', [['Streaming Servers', 'servers', ['servers']], ['Process Monitor', 'process_monitor', ['process_monitor']], ['RTMP Management', 'rtmp_monitor', ['rtmp_monitor']], ['Statistics', 'stream_rank', ['streams']]]],
-		['Administration', [['Settings', 'settings', ['settings']], ['Modules', 'modules', ['modules']], ['Backups', 'backups', ['backups']], ['Security plug-ins', 'theft_detection', ['theft_detection']]]],
+		['Administration', [['Settings', 'settings', ['settings']], ['Cache / Redis', 'cache', ['cache']], ['Modules', 'modules', ['modules']], ['Backups', 'backups', ['backups']], ['Security plug-ins', 'theft_detection', ['theft_detection']]]],
 	]],
 ];
 ?>
