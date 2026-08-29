@@ -293,6 +293,11 @@ a.sc-connection-link:hover { background: #e8f4fb; color: #1177b9; }
 .sc-table-actions { text-align: right; }
 .sc-row-action { display: inline-flex; min-height: 28px; align-items: center; justify-content: center; padding: 5px 10px; border: 1px solid var(--sc-line); border-radius: 4px; background: #fff; color: var(--sc-primary-fallback); color: var(--sc-primary); font-size: 9px; font-weight: 750; }
 .sc-row-action:hover { border-color: var(--sc-primary-fallback); border-color: var(--sc-primary); background: #fff7f8; background: color-mix(in oklch, var(--sc-primary) 5%, white); }
+.sc-settings-list { display: grid; }
+.sc-settings-row { display: flex; min-height: 50px; align-items: center; justify-content: space-between; gap: 24px; padding: 0 18px; border-bottom: 1px solid var(--sc-line); color: var(--sc-muted); font-size: 12px; }
+.sc-settings-row:last-child { border-bottom: 0; }
+.sc-settings-row strong { color: var(--sc-ink); font-size: 12px; font-weight: 700; }
+.sc-settings-note { display: flex; align-items: center; gap: 8px; margin: 14px 2px 0; color: var(--sc-muted); font-size: 11px; }
 .sc-text-danger { color: #bd3045 !important; }
 .sc-table-state { height: 150px !important; color: var(--sc-muted) !important; text-align: center; }
 .sc-table-state.is-error { color: #bd3045 !important; }
