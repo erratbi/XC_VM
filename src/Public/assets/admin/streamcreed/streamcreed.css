@@ -335,6 +335,12 @@ a.sc-connection-link:hover { background: #e8f4fb; color: #1177b9; }
 .sc-form textarea { min-height: 120px; resize: vertical; }
 .sc-form-wide { margin-top: 24px; }
 .sc-form-actions { display: flex; gap: 10px; margin-top: 22px; }
+.sc-owner-combobox { position: relative; }
+.sc-owner-combobox > input { width: 100%; }
+.sc-owner-options { position: absolute; z-index: 20; top: calc(100% + 4px); right: 0; left: 0; max-height: 230px; overflow-y: auto; padding: 5px; border: 1px solid var(--sc-line); border-radius: 4px; background: #fff; box-shadow: 0 8px 24px rgb(30 35 40 / 14%); }
+.sc-owner-options[hidden] { display: none; }
+.sc-owner-options button { display: block; width: 100%; padding: 10px 12px; border: 0; background: #fff; color: var(--sc-ink); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.sc-owner-options button:hover, .sc-owner-options button:focus { background: color-mix(in oklch, var(--sc-primary) 10%, white); color: var(--sc-primary); outline: 0; }
 .sc-password-meter { display: grid; gap: 5px; margin-top: 6px; }
 .sc-password-meter[hidden] { display: none !important; }
 .sc-password-meter span { display: block; width: 8%; height: 3px; background: #16c933; transition: width .2s ease, background .2s ease; }
