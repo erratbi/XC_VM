@@ -568,6 +568,7 @@ class TableController extends BaseAdminController {
 		if (!Authorization::check("adv", "manage_mag")) {
 			exit;
 		}
+		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
 		$rOrderDirection = strtolower(RequestManager::getAll()["order"][0]["dir"]) === "desc" ? "desc" : "asc";
 		$rOrder = ["`lines`.`id`", "`lines`.`username`", "`mag_devices`.`mac`", "`mag_devices`.`stb_type`", "`lines`.`member_id`", "`lines`.`enabled`", "`active_connections` > 0", "`lines`.`is_trial`", "`lines`.`exp_date`", "`active_connections` " . $rOrderDirection . ", `last_activity`", false];
 		$rOrderColumn = RequestManager::getAll()["order"][0]["column"] ?? '';
@@ -692,7 +693,14 @@ class TableController extends BaseAdminController {
 					if (SettingsManager::getAll()["redis_handler"]) {
 						$rRow["active_connections"] = isset($rConnectionCount[$rRow["id"]]) ? $rConnectionCount[$rRow["id"]] : 0;
 					}
-					if ($rIsAPI) {
+					if ($rStreamcreed) {
+						if (!$rRow["id"]) { $rStatus = ["damaged", "Line missing"]; }
+						elseif (!$rRow["admin_enabled"]) { $rStatus = ["banned", "Banned"]; }
+						elseif (!$rRow["enabled"]) { $rStatus = ["disabled", "Disabled"]; }
+						elseif ($rRow["exp_date"] && $rRow["exp_date"] < time()) { $rStatus = ["expired", "Expired"]; }
+						else { $rStatus = ["active", "Active"]; }
+						$rReturn["data"][] = ["id" => (int) $rRow["id"], "magId" => (int) $rRow["mag_id"], "username" => (string) ($rRow["username"] ?? ""), "mac" => (string) ($rRow["mac"] ?? ""), "device" => (string) ($rRow["stb_type"] ?? ""), "owner" => (string) ($rRow["owner_name"] ?? ""), "status" => $rStatus[0], "statusLabel" => $rStatus[1], "online" => (int) $rRow["active_connections"] > 0, "trial" => !empty($rRow["is_trial"]), "expires" => $rRow["exp_date"] ? date($rSettings["date_format"] . " H:i", $rRow["exp_date"]) : "Never", "lastActive" => !empty($rRow["last_active"]) ? date($rSettings["date_format"] . " H:i", $rRow["last_active"]) : "Never"];
+					} elseif ($rIsAPI) {
 						$rReturn["data"][] = self::filterRow($rRow, RequestManager::getAll()["show_columns"] ?? '', RequestManager::getAll()["hide_columns"] ?? '');
 					} else {
 						if (!$rRow["id"]) {

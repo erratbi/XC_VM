@@ -25,12 +25,28 @@ $streamcreedNav = [
 	['Streaming Servers', 'servers', 'fe-server', ['servers'], ['servers', 'server', 'server_view', 'server_install']],
 	['Bouquets', 'bouquets', 'fe-gift', ['bouquets'], ['bouquets', 'bouquet', 'bouquet_order', 'bouquet_sort']],
 	['Registered Users', 'users', 'fe-users', ['mng_regusers'], ['users', 'user', 'user_mass']],
-	['Reseller Packages', 'packages', 'fe-package', ['packages'], ['packages', 'package']],
+	['Reseller Packages', 'packages', 'fe-package', ['mng_packages'], ['packages', 'package']],
 	['Statistics', 'stream_rank', 'fe-bar-chart-2', ['streams'], ['stream_rank']],
 	['Security plug-ins', 'theft_detection', 'fe-shield', ['theft_detection', 'settings'], ['theft_detection', 'ips', 'isps', 'hmacs', 'asns']],
 	['Logs', 'panel_logs', 'fe-clock', ['panel_logs'], ['panel_logs', 'client_logs', 'login_logs', 'user_logs', 'stream_errors']],
 	['System', 'settings', 'fe-settings', ['settings'], ['settings', 'modules', 'backups', 'cache', 'process_monitor']],
 	['Tickets Support', 'tickets', 'fe-help-circle', ['tickets'], ['tickets', 'ticket', 'ticket_view']],
+];
+$streamcreedNavGroups = [
+	['User management', 'fe-users', [
+		['Registered Users', 'users', ['mng_regusers'], ['users', 'user', 'user_mass']],
+		['Packages', 'packages', ['mng_packages'], ['packages', 'package']],
+		['Groups', 'groups', ['mng_groups'], ['groups', 'group']],
+	]],
+	['Device management', 'fe-monitor', [
+		['MAG Devices', 'mags', ['manage_mag'], ['mags', 'mag']],
+		['Enigma2 Devices', 'enigmas', ['manage_e2'], ['enigmas', 'enigma']],
+		['HMAC Devices', 'hmacs', ['add_hmac'], ['hmacs', 'hmac']],
+	]],
+	['Service setup', 'fe-sliders', [
+		['Streaming Categories', 'stream_categories', ['categories'], ['stream_categories', 'stream_category']],
+		['Bouquets', 'bouquets', ['bouquets'], ['bouquets', 'bouquet', 'bouquet_order', 'bouquet_sort']],
+	]],
 ];
 ?>
 <!doctype html>
@@ -60,6 +76,21 @@ $streamcreedNav = [
 						<i class="<?php echo htmlspecialchars($icon, ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="true"></i>
 						<span><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></span>
 					</a>
+				<?php endforeach; ?>
+				<?php foreach ($streamcreedNavGroups as [$groupLabel, $groupIcon, $groupItems]): ?>
+					<?php
+					$streamcreedVisibleItems = array_filter($groupItems, static fn(array $item): bool => $streamcreedCanAny($item[2]));
+					$streamcreedGroupActive = (bool) array_filter($streamcreedVisibleItems, static fn(array $item): bool => in_array($streamcreedPage, $item[3], true));
+					if (!$streamcreedVisibleItems) continue;
+					?>
+					<details class="sc-nav-group"<?php echo $streamcreedGroupActive ? ' open' : ''; ?>>
+						<summary><i class="<?php echo htmlspecialchars($groupIcon, ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="true"></i><span><?php echo htmlspecialchars($groupLabel, ENT_QUOTES, 'UTF-8'); ?></span><i class="fe-chevron-down sc-nav-group-chevron" aria-hidden="true"></i></summary>
+						<div class="sc-nav-submenu">
+							<?php foreach ($streamcreedVisibleItems as [$itemLabel, $itemUrl, $itemPermissions, $itemPages]): ?>
+								<a class="sc-nav-sublink<?php echo in_array($streamcreedPage, $itemPages, true) ? ' is-active' : ''; ?>" href="<?php echo htmlspecialchars($itemUrl, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($itemLabel, ENT_QUOTES, 'UTF-8'); ?></a>
+							<?php endforeach; ?>
+						</div>
+					</details>
 				<?php endforeach; ?>
 			</nav>
 		</aside>
