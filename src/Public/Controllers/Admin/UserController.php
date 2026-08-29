@@ -31,8 +31,9 @@ class UserController extends BaseAdminController {
         }
 
         $rPackages = $rUser ? PackageService::getAll($rUser['member_group_id']) : [];
+        $rOwners = UserRepository::getRegisteredUsers();
 
         $this->setTitle('User');
-        $this->render('user', compact('rUser', 'rPackages'));
+        $this->render('user', compact('rUser', 'rPackages', 'rOwners'));
     }
 }

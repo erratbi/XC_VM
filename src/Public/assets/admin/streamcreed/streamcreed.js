@@ -6,6 +6,13 @@
 		var meterBar = meter.querySelector('span'), meterLabel = meter.querySelector('strong');
 		passwordInput.addEventListener('input', function () { var value = passwordInput.value, score = (value.length >= 10 ? 1 : 0) + (/[A-Z]/.test(value) ? 1 : 0) + (/[0-9]/.test(value) ? 1 : 0) + (/[^A-Za-z0-9]/.test(value) ? 1 : 0), labels = ['Too weak', 'Weak', 'Medium', 'Strong', 'Very strong']; meter.hidden = !value; meterBar.style.width = Math.max(8, score * 25) + '%'; meterLabel.textContent = value ? labels[score] : ''; meter.dataset.score = score; }); passwordInput.dispatchEvent(new Event('input'));
 	}
+	var ownerInput = document.querySelector('.sc-user-editor input[name="owner_id"]');
+	if (ownerInput) {
+		var ownerSelect = document.createElement('select'); ownerSelect.name = 'owner_id'; ownerSelect.className = ownerInput.className; ownerSelect.innerHTML = '<option value="0">No owner</option>'; ownerSelect.value = ownerInput.value || '0'; ownerInput.replaceWith(ownerSelect);
+		var ownerTimer;
+		function loadOwners() { var query = ownerSelect.dataset.query || ''; fetch('./api?action=reguserlist&search=' + encodeURIComponent(query), { credentials: 'same-origin', headers: { Accept: 'application/json' } }).then(function (response) { return response.json(); }).then(function (data) { var current = ownerSelect.value; ownerSelect.innerHTML = '<option value="0">No owner</option>'; (data.items || []).forEach(function (item) { var option = document.createElement('option'); option.value = item.id; option.textContent = item.text || item.username || item.id; ownerSelect.appendChild(option); }); ownerSelect.value = current; }).catch(function () {}); }
+		ownerSelect.addEventListener('focus', loadOwners); ownerSelect.addEventListener('change', function () { ownerSelect.dataset.query = ownerSelect.options[ownerSelect.selectedIndex].textContent; clearTimeout(ownerTimer); ownerTimer = setTimeout(loadOwners, 250); });
+	}
 
 	var sidebar = document.getElementById('streamcreed-sidebar');
 	var sidebarToggle = document.querySelector('[data-sc-sidebar-toggle]');
