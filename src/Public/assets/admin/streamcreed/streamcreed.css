@@ -327,8 +327,8 @@ a.sc-connection-link:hover { background: #e8f4fb; color: #1177b9; }
 .sc-ticket-message p { margin: 0; color: #3d4246; font-size: 12px; line-height: 1.65; }
 .sc-ticket-actions { margin-top: 18px; }
 .sc-form { max-width: 1180px; margin: 0 auto; padding: 32px 38px; border: 1px solid var(--sc-line); background: #fff; }
-.sc-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 34px; }
-.sc-form label { display: grid; gap: 9px; color: #596168; font-size: 14px; font-weight: 650; }
+.sc-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 24px 34px; }
+.sc-form label { display: grid; align-content: start; align-self: start; gap: 9px; color: #596168; font-size: 14px; font-weight: 650; }
 .sc-form input, .sc-form select, .sc-form textarea { width: 100%; min-height: 46px; padding: 11px 13px; border: 1px solid #cfd6dc; border-radius: 3px; background: #fff; color: var(--sc-ink); font: inherit; font-size: 14px; font-weight: 400; }
 .sc-form textarea { min-height: 120px; resize: vertical; }
 .sc-form-wide { margin-top: 24px; }
