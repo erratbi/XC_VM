@@ -16,36 +16,36 @@ $streamcreedCanAny = static function (array $permissions): bool {
 	}
 	return false;
 };
-$streamcreedNav = [
-	['Dashboard', 'dashboard', 'fe-activity', [], ['dashboard', 'index']],
-	['Live Connections', 'live_connections', 'fe-wifi', ['live_connections'], ['live_connections']],
-	['Subscriptions', 'lines', 'fe-shopping-cart', ['users'], ['lines', 'line', 'line_mass']],
-	['Live / VOD / Radio', 'streams', 'fe-play', ['streams', 'movies', 'radio'], ['streams', 'stream', 'movies', 'movie', 'series', 'serie', 'radios', 'radio']],
-	['RTMP Management', 'rtmp_monitor', 'fe-radio', ['rtmp_monitor'], ['rtmp_monitor', 'rtmp_ips', 'rtmp_ip']],
-	['Streaming Servers', 'servers', 'fe-server', ['servers'], ['servers', 'server', 'server_view', 'server_install']],
-	['Bouquets', 'bouquets', 'fe-gift', ['bouquets'], ['bouquets', 'bouquet', 'bouquet_order', 'bouquet_sort']],
-	['Registered Users', 'users', 'fe-users', ['mng_regusers'], ['users', 'user', 'user_mass']],
-	['Reseller Packages', 'packages', 'fe-package', ['mng_packages'], ['packages', 'package']],
-	['Statistics', 'stream_rank', 'fe-bar-chart-2', ['streams'], ['stream_rank']],
-	['Security plug-ins', 'theft_detection', 'fe-shield', ['theft_detection', 'settings'], ['theft_detection', 'ips', 'isps', 'hmacs', 'asns']],
-	['Logs', 'panel_logs', 'fe-clock', ['panel_logs'], ['panel_logs', 'client_logs', 'login_logs', 'user_logs', 'stream_errors']],
-	['System', 'settings', 'fe-settings', ['settings'], ['settings', 'modules', 'backups', 'cache', 'process_monitor']],
-	['Tickets Support', 'tickets', 'fe-help-circle', ['tickets'], ['tickets', 'ticket', 'ticket_view']],
+$streamcreedPrimaryNav = [
+	['Dashboard', 'dashboard', 'fe-activity', [], ['dashboard', 'index'], null],
+	['Live Connections', 'live_connections', 'fe-wifi', ['live_connections'], ['live_connections'], null],
+	['Streaming Lines', '#', 'fe-menu', ['users'], ['lines', 'line', 'line_mass'], 'lines'],
+	['Users', '#', 'fe-users', ['mng_regusers', 'mng_packages', 'mng_groups'], ['users', 'user', 'user_mass', 'packages', 'package', 'groups', 'group'], 'users'],
+	['Devices', '#', 'fe-monitor', ['manage_mag', 'manage_e2', 'add_hmac'], ['mags', 'mag', 'enigmas', 'enigma', 'hmacs', 'hmac'], 'devices'],
+	['Content', '#', 'fe-play', ['streams', 'movies', 'radio', 'categories', 'bouquets'], ['streams', 'stream', 'movies', 'movie', 'series', 'serie', 'radios', 'radio', 'stream_categories', 'stream_category', 'bouquets', 'bouquet', 'bouquet_order', 'bouquet_sort'], 'content'],
+	['Logs', '#', 'fe-clock', ['panel_logs', 'client_request_log', 'login_logs'], ['panel_logs', 'client_logs', 'login_logs', 'user_logs', 'stream_errors'], 'logs'],
+	['System', '#', 'fe-settings', ['settings', 'servers'], ['settings', 'modules', 'backups', 'cache', 'process_monitor', 'servers', 'server', 'server_view', 'server_install'], 'system'],
+	['Tickets Support', 'tickets', 'fe-help-circle', ['tickets'], ['tickets', 'ticket', 'ticket_view'], null],
 ];
-$streamcreedNavGroups = [
-	['User management', 'fe-users', [
-		['Registered Users', 'users', ['mng_regusers'], ['users', 'user', 'user_mass']],
-		['Packages', 'packages', ['mng_packages'], ['packages', 'package']],
-		['Groups', 'groups', ['mng_groups'], ['groups', 'group']],
+$streamcreedDrillNav = [
+	'lines' => ['Streaming Lines', [
+		['', [['Create New Line', 'line', ['add_user']], ['Manage Lines', 'lines', ['users']]]],
 	]],
-	['Device management', 'fe-monitor', [
-		['MAG Devices', 'mags', ['manage_mag'], ['mags', 'mag']],
-		['Enigma2 Devices', 'enigmas', ['manage_e2'], ['enigmas', 'enigma']],
-		['HMAC Devices', 'hmacs', ['add_hmac'], ['hmacs', 'hmac']],
+	'users' => ['Users', [
+		['', [['Registered Users', 'users', ['mng_regusers']], ['Packages', 'packages', ['mng_packages']], ['Groups', 'groups', ['mng_groups']]]],
 	]],
-	['Service setup', 'fe-sliders', [
-		['Streaming Categories', 'stream_categories', ['categories'], ['stream_categories', 'stream_category']],
-		['Bouquets', 'bouquets', ['bouquets'], ['bouquets', 'bouquet', 'bouquet_order', 'bouquet_sort']],
+	'devices' => ['Devices', [
+		['MAG Devices', [['Add MAG Device', 'mag', ['add_mag']], ['Manage MAG Devices', 'mags', ['manage_mag']]]],
+		['Enigma2 Devices', [['Add Enigma2 Device', 'enigma', ['add_e2']], ['Manage Enigma2 Devices', 'enigmas', ['manage_e2']]]],
+		['HMAC Devices', [['Manage HMAC Devices', 'hmacs', ['add_hmac']]]],
+	]],
+	'content' => ['Content', [
+		['', [['Live / VOD / Radio', 'streams', ['streams', 'movies', 'radio']], ['Streaming Categories', 'stream_categories', ['categories']], ['Bouquets', 'bouquets', ['bouquets']]]],
+	]],
+	'logs' => ['Logs', [['', [['Panel Logs', 'panel_logs', ['panel_logs']], ['Client Logs', 'client_logs', ['client_request_log']], ['Login Logs', 'login_logs', ['login_logs']], ['User Logs', 'user_logs', ['reg_userlog']]]]]],
+	'system' => ['System', [
+		['Infrastructure', [['Streaming Servers', 'servers', ['servers']], ['RTMP Management', 'rtmp_monitor', ['rtmp_monitor']], ['Statistics', 'stream_rank', ['streams']]]],
+		['Administration', [['Settings', 'settings', ['settings']], ['Backups', 'backups', ['backups']], ['Security plug-ins', 'theft_detection', ['theft_detection']]]],
 	]],
 ];
 ?>
@@ -69,30 +69,21 @@ $streamcreedNavGroups = [
 				<span class="sc-brand-copy"><strong>XC_VM</strong><small>STREAM</small></span>
 			</a>
 
-			<nav class="sc-nav">
-				<?php foreach ($streamcreedNav as [$label, $url, $icon, $permissions, $activePages]): ?>
+			<nav class="sc-nav" data-sc-primary-nav>
+				<?php foreach ($streamcreedPrimaryNav as [$label, $url, $icon, $permissions, $activePages, $drill]): ?>
 					<?php if (!$streamcreedCanAny($permissions)) continue; ?>
-					<a class="sc-nav-link<?php echo in_array($streamcreedPage, $activePages, true) ? ' is-active' : ''; ?>" href="<?php echo htmlspecialchars($url, ENT_QUOTES, 'UTF-8'); ?>">
+					<?php $streamcreedActive = in_array($streamcreedPage, $activePages, true); ?>
+					<?php if ($drill): ?>
+						<button class="sc-nav-link" type="button" data-sc-nav-open="<?php echo $drill; ?>">
+					<?php else: ?><a class="sc-nav-link<?php echo $streamcreedActive ? ' is-active' : ''; ?>" href="<?php echo htmlspecialchars($url, ENT_QUOTES, 'UTF-8'); ?>"><?php endif; ?>
 						<i class="<?php echo htmlspecialchars($icon, ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="true"></i>
 						<span><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></span>
-					</a>
-				<?php endforeach; ?>
-				<?php foreach ($streamcreedNavGroups as [$groupLabel, $groupIcon, $groupItems]): ?>
-					<?php
-					$streamcreedVisibleItems = array_filter($groupItems, static fn(array $item): bool => $streamcreedCanAny($item[2]));
-					$streamcreedGroupActive = (bool) array_filter($streamcreedVisibleItems, static fn(array $item): bool => in_array($streamcreedPage, $item[3], true));
-					if (!$streamcreedVisibleItems) continue;
-					?>
-					<details class="sc-nav-group"<?php echo $streamcreedGroupActive ? ' open' : ''; ?>>
-						<summary><i class="<?php echo htmlspecialchars($groupIcon, ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="true"></i><span><?php echo htmlspecialchars($groupLabel, ENT_QUOTES, 'UTF-8'); ?></span><i class="fe-chevron-down sc-nav-group-chevron" aria-hidden="true"></i></summary>
-						<div class="sc-nav-submenu">
-							<?php foreach ($streamcreedVisibleItems as [$itemLabel, $itemUrl, $itemPermissions, $itemPages]): ?>
-								<a class="sc-nav-sublink<?php echo in_array($streamcreedPage, $itemPages, true) ? ' is-active' : ''; ?>" href="<?php echo htmlspecialchars($itemUrl, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($itemLabel, ENT_QUOTES, 'UTF-8'); ?></a>
-							<?php endforeach; ?>
-						</div>
-					</details>
+					<?php echo $drill ? '</button>' : '</a>'; ?>
 				<?php endforeach; ?>
 			</nav>
+			<?php foreach ($streamcreedDrillNav as $streamcreedKey => [$streamcreedTitle, $streamcreedSections]): ?>
+				<aside class="sc-nav-drill" data-sc-nav-panel="<?php echo $streamcreedKey; ?>" aria-label="<?php echo htmlspecialchars($streamcreedTitle, ENT_QUOTES, 'UTF-8'); ?> navigation" hidden><header><span>Navigation</span><button type="button" data-sc-nav-close><i class="fe-chevron-left"></i> Back</button></header><?php foreach ($streamcreedSections as [$sectionLabel, $sectionItems]): $streamcreedSectionItems=array_filter($sectionItems, static fn(array $item): bool => $streamcreedCanAny($item[2])); if(!$streamcreedSectionItems) continue; ?><section><?php if ($sectionLabel !== ''): ?><h3><?php echo htmlspecialchars($sectionLabel, ENT_QUOTES, 'UTF-8'); ?></h3><?php endif; ?><?php foreach($streamcreedSectionItems as [$itemLabel,$itemUrl]): ?><a href="<?php echo htmlspecialchars($itemUrl, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($itemLabel, ENT_QUOTES, 'UTF-8'); ?></a><?php endforeach; ?></section><?php endforeach; ?></aside>
+			<?php endforeach; ?>
 		</aside>
 
 		<div class="sc-workspace">

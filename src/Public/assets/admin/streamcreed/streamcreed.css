@@ -61,7 +61,7 @@ a { color: inherit; text-decoration: none; }
 .sc-brand-copy strong { font-size: 14px; letter-spacing: .06em; }
 .sc-brand-copy small { margin-top: 3px; color: var(--sc-muted); font-size: 8px; font-weight: 700; letter-spacing: .22em; }
 
-.sc-nav { display: flex; flex: 1; flex-direction: column; gap: 2px; padding: 14px 12px 20px; }
+.sc-nav { display: flex; flex: 1; flex-direction: column; gap: 2px; padding: 14px 12px 20px; transition: width .2s ease; }
 .sc-nav-link {
 	position: relative;
 	display: flex;
@@ -74,6 +74,21 @@ a { color: inherit; text-decoration: none; }
 	font-size: 13.5px;
 	transition: background-color .16s ease, color .16s ease;
 }
+.sc-nav button.sc-nav-link { width: 100%; border: 0; appearance: none; background: transparent; cursor: pointer; text-align: left; }
+.sc-nav-drill { position: absolute; z-index: 3; top: 0; right: 0; bottom: 0; left: 58px; overflow-y: auto; padding: 28px 6px 14px; background: #fff; box-shadow: -1px 0 0 #e1e3e4; transform: translateX(100%); transition: transform .22s ease; }
+.sc-sidebar.is-drilling .sc-nav-drill.is-open { transform: translateX(0); }
+.sc-sidebar.is-drilling .sc-nav { width: 58px; padding-right: 8px; padding-left: 8px; }
+.sc-sidebar.is-drilling .sc-nav-link { justify-content: center; padding-right: 0; padding-left: 0; }
+.sc-sidebar.is-drilling .sc-nav-link span { display: none; }
+.sc-sidebar.is-drilling .sc-nav-link.is-active::before { left: -8px; }
+.sc-nav-drill header { display: flex; min-height: 36px; align-items: center; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid var(--sc-line); color: var(--sc-muted); font-size: 9px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.sc-nav-drill header button { display: inline-flex; align-items: center; gap: 5px; border: 0; background: none; color: #555b60; cursor: pointer; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.sc-nav-drill h2 { margin: 18px 9px 11px; color: #30353a; font-size: 16px; }
+.sc-nav-drill section { margin: 0 4px 18px; padding-bottom: 12px; border-bottom: 1px solid #eceeef; }
+.sc-nav-drill section:last-child { border-bottom: 0; }
+.sc-nav-drill h3 { margin: 0 0 6px; color: #888e92; font-size: 9px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.sc-nav-drill a { display: block; padding: 8px 6px; border-radius: 4px; color: #383d41; font-size: 12px; font-weight: 650; }
+.sc-nav-drill a:hover { background: #fff4f5; color: var(--sc-primary); }
 .sc-nav-link i { width: 20px; color: #3c4145; font-size: 18px; text-align: center; }
 .sc-nav-link:hover { background: #f6f6f6; color: var(--sc-primary-fallback); color: var(--sc-primary); }
 .sc-nav-link:hover i { color: currentColor; }
