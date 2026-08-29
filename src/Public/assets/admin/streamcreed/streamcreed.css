@@ -318,6 +318,14 @@ a.sc-connection-link:hover { background: #e8f4fb; color: #1177b9; }
 .sc-cache-grid strong { color: var(--sc-ink); }
 .sc-cache-actions { margin-top: 24px; }
 @media (max-width: 700px) { .sc-cache-grid { grid-template-columns: 1fr; } .sc-cache-performance, .sc-cache-content { padding: 22px 18px; } }
+.sc-ticket-thread { display: grid; gap: 14px; }
+.sc-ticket-message { max-width: 760px; padding: 18px 20px; border: 1px solid var(--sc-line); background: #fff; }
+.sc-ticket-message.is-admin { margin-left: auto; border-color: color-mix(in oklch, var(--sc-primary) 22%, var(--sc-line)); background: color-mix(in oklch, var(--sc-primary) 4%, white); }
+.sc-ticket-message header { display: flex; justify-content: space-between; gap: 18px; margin-bottom: 10px; }
+.sc-ticket-message header strong { color: var(--sc-ink); font-size: 12px; }
+.sc-ticket-message time { color: var(--sc-muted); font-size: 10px; }
+.sc-ticket-message p { margin: 0; color: #3d4246; font-size: 12px; line-height: 1.65; }
+.sc-ticket-actions { margin-top: 18px; }
 .sc-text-danger { color: #bd3045 !important; }
 .sc-table-state { height: 150px !important; color: var(--sc-muted) !important; text-align: center; }
 .sc-table-state.is-error { color: #bd3045 !important; }
