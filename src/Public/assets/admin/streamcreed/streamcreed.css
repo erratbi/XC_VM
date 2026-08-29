@@ -334,6 +334,7 @@ a.sc-connection-link:hover { background: #e8f4fb; color: #1177b9; }
 .sc-form-wide { margin-top: 24px; }
 .sc-form-actions { display: flex; gap: 10px; margin-top: 22px; }
 .sc-password-meter { display: grid; gap: 5px; margin-top: 6px; }
+.sc-password-meter[hidden] { display: none !important; }
 .sc-password-meter span { display: block; width: 8%; height: 3px; background: #16c933; transition: width .2s ease, background .2s ease; }
 .sc-password-meter span[data-score="0"] { background: #df3030; }
 .sc-password-meter span[data-score="1"] { background: #ed7d25; }
