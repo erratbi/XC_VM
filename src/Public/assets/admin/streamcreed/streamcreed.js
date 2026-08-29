@@ -8,10 +8,45 @@
 	}
 	var ownerInput = document.querySelector('.sc-user-editor input[name="owner_id"]');
 	if (ownerInput) {
-		var wrapper = document.createElement('div'); wrapper.className = 'sc-owner-combobox'; var trigger = document.createElement('input'); trigger.type = 'text'; trigger.className = ownerInput.className; trigger.placeholder = 'Search for an owner…'; trigger.autocomplete = 'off'; var hidden = document.createElement('input'); hidden.type = 'hidden'; hidden.name = 'owner_id'; hidden.value = ownerInput.value || '0'; var menu = document.createElement('div'); menu.className = 'sc-owner-options'; wrapper.append(trigger, hidden, menu); ownerInput.replaceWith(wrapper);
+		var wrapper = document.createElement('div'); wrapper.className = 'sc-owner-combobox'; var trigger = document.createElement('input'); trigger.type = 'text'; trigger.className = ownerInput.className; trigger.placeholder = 'Search for an owner…'; trigger.autocomplete = 'off'; var hidden = document.createElement('input'); hidden.type = 'hidden'; hidden.name = 'owner_id'; hidden.value = ownerInput.value || '0'; var menu = document.createElement('div'); menu.className = 'sc-owner-options'; menu.hidden = true; wrapper.append(trigger, hidden, menu); ownerInput.replaceWith(wrapper);
 		var ownerTimer;
 		function loadOwners() { var query = trigger.value.trim(); fetch('./api?search=' + encodeURIComponent(query) + '&action=reguserlist&page=1', { credentials: 'same-origin', headers: { Accept: 'application/json, text/javascript, */*; q=0.01', 'X-Requested-With': 'XMLHttpRequest' } }).then(function (response) { return response.json(); }).then(function (data) { menu.replaceChildren(); var clear = document.createElement('button'); clear.type = 'button'; clear.textContent = 'No owner'; clear.addEventListener('click', function () { hidden.value = '0'; trigger.value = ''; menu.hidden = true; }); menu.appendChild(clear); (data.items || []).forEach(function (item) { var option = document.createElement('button'); option.type = 'button'; option.textContent = item.text || item.username || item.id; option.dataset.id = item.id; option.addEventListener('click', function () { hidden.value = item.id; trigger.value = option.textContent; menu.hidden = true; }); menu.appendChild(option); }); menu.hidden = false; }).catch(function () {}); }
 		trigger.addEventListener('focus', loadOwners); trigger.addEventListener('input', function () { clearTimeout(ownerTimer); ownerTimer = setTimeout(loadOwners, 250); }); document.addEventListener('click', function (event) { if (!wrapper.contains(event.target)) menu.hidden = true; });
+	}
+
+	// User saves use the same request contract as the legacy editor. Keep the form
+	// markup usable without JavaScript, but intercept the normal navigation when
+	// the StreamCreed bundle is available and send the browser-generated
+	// multipart FormData to post.php?action=user instead.
+	var userForm = document.querySelector('.sc-user-editor form');
+	if (userForm) {
+		userForm.addEventListener('submit', function (event) {
+			event.preventDefault();
+			var submitButton = userForm.querySelector('button[type="submit"]');
+			if (submitButton) submitButton.disabled = true;
+			fetch(userForm.action, {
+				method: 'POST',
+				body: new FormData(userForm),
+				credentials: 'same-origin',
+				headers: {
+					'Accept': 'application/json, text/javascript, */*; q=0.01',
+					'X-Requested-With': 'XMLHttpRequest'
+				}
+			}).then(function (response) { return response.text(); }).then(function (text) {
+				var response;
+				try { response = JSON.parse(text); } catch (error) { response = null; }
+				if (response && response.location) {
+					window.location.href = response.location;
+					return;
+				}
+				if (submitButton) submitButton.disabled = false;
+				if (response && response.message) window.alert(response.message);
+				else window.alert('The user could not be saved. Please check the form and try again.');
+			}).catch(function () {
+				if (submitButton) submitButton.disabled = false;
+				window.alert('The user could not be saved. Please try again.');
+			});
+		});
 	}
 
 	var sidebar = document.getElementById('streamcreed-sidebar');
