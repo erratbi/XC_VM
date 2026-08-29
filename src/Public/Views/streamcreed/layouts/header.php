@@ -40,7 +40,7 @@ $streamcreedDrillNav = [
 		['HMAC Devices', [['Manage HMAC Devices', 'hmacs', ['add_hmac']]]],
 	]],
 	'content' => ['Content', [
-		['', [['Live / VOD / Radio', 'streams', ['streams', 'movies', 'radio']], ['Streaming Categories', 'stream_categories', ['categories']], ['Bouquets', 'bouquets', ['bouquets']]]],
+		['', [['Live Streams', 'streams', ['streams']], ['VOD Movies', 'movies', ['movies']], ['Radio', 'radios', ['radio']], ['Streaming Categories', 'stream_categories', ['categories']], ['Bouquets', 'bouquets', ['bouquets']]]],
 	]],
 	'logs' => ['Logs', [['', [['Panel Logs', 'panel_logs', ['panel_logs']], ['Client Logs', 'client_logs', ['client_request_log']], ['Login Logs', 'login_logs', ['login_logs']], ['User Logs', 'user_logs', ['reg_userlog']]]]]],
 	'system' => ['System', [
