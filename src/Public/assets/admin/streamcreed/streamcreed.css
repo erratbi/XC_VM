@@ -429,6 +429,8 @@ a.sc-connection-link:hover { background: #e8f4fb; color: #1177b9; }
 	.sc-page-inner .sc-sidebar:hover .sc-nav-link span { display: inline; }
 	.sc-page-inner .sc-sidebar:hover .sc-nav-link.is-active::before { left: -12px; }
 	.sc-page-inner .sc-nav-drill { display: none; }
+	.sc-page-inner .sc-sidebar.is-menu-drilling { width: 260px; box-shadow: 10px 0 28px rgba(28, 32, 36, .12); }
+	.sc-page-inner .sc-sidebar.is-menu-drilling .sc-nav-drill { display: block; }
 	.sc-content-layout.has-context-nav { display: grid; grid-template-columns: 190px minmax(0, 1fr); align-items: start; }
 	.sc-context-nav { position: sticky; top: var(--sc-topbar-height); display: block; padding: 39px 12px 30px 28px; }
 	.sc-context-nav section { margin: 0 0 28px; }
