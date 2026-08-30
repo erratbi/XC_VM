@@ -1,0 +1,27 @@
+<?php
+use XcVm\Domain\Line\PackageService;
+use XcVm\Domain\User\GroupService;
+use XcVm\Domain\User\UserRepository;
+$streamcreedPageScripts = ['assets/streamcreed/user_mass.js'];
+$streamcreedGroups = GroupService::getAll();
+$streamcreedOwners = UserRepository::getRegisteredUsers();
+$streamcreedPackages = array_filter(PackageService::getAll(), static fn(array $package): bool => !empty($package['is_official']));
+$streamcreedDefaultEntries = intval($rSettings['default_entries'] ?? 25); if (!in_array($streamcreedDefaultEntries, [10,25,50,100], true)) $streamcreedDefaultEntries = 25;
+?>
+<section class="sc-user-mass" data-sc-user-mass data-default-entries="<?php echo $streamcreedDefaultEntries; ?>">
+ <div class="sc-page-heading"><div><p class="sc-eyebrow">Account Management</p><h1>Mass Edit Users <small data-sc-selected-count></small></h1></div><div class="sc-page-actions"><a class="sc-button sc-button-secondary" href="users"><i class="fe-chevron-left"></i> Back to users</a></div></div>
+ <form class="sc-form sc-mass-form" action="post.php?action=user_mass&amp;referer=users" method="post" enctype="multipart/form-data" data-status-invalid-input="<?php echo intval(STATUS_INVALID_INPUT); ?>">
+  <input type="hidden" name="users_selected" value="[]">
+  <section class="sc-form-section"><h2>Select Users</h2><div class="sc-toolbar"><label class="sc-search-field"><i class="fe-search"></i><input type="search" placeholder="Search users" data-sc-mass-search></label><label class="sc-filter-field"><span>Status</span><select data-sc-mass-filter><option value="">All users</option><option value="1">Active</option><option value="2">Disabled</option></select></label><label class="sc-filter-field"><span>Per page</span><select data-sc-mass-entries><?php foreach ([10,25,50,100] as $size): ?><option<?php echo $size === $streamcreedDefaultEntries ? ' selected' : ''; ?>><?php echo $size; ?></option><?php endforeach; ?></select></label></div>
+   <div class="sc-data-panel"><div class="sc-table-scroll"><table class="sc-data-table"><thead><tr><th class="sc-select-column"><input type="checkbox" data-sc-mass-select-page aria-label="Select page"></th><th>User</th><th>Owner</th><th>Group</th><th>Status</th><th>Credits</th></tr></thead><tbody data-sc-mass-rows><tr><td colspan="6" class="sc-table-state">Loading users…</td></tr></tbody></table></div><footer class="sc-table-footer"><span data-sc-mass-range></span><div class="sc-pagination"><button type="button" data-sc-mass-previous>Previous</button><span data-sc-mass-page>Page 1</span><button type="button" data-sc-mass-next>Next</button></div></footer></div>
+  </section>
+  <section class="sc-form-section"><h2>Changes to Apply</h2><p class="sc-section-copy">Enable only the fields you want to change. Disabled fields are not submitted to the legacy mutation handler.</p><div class="sc-mass-change-grid">
+   <div class="sc-mass-change"><label class="sc-check"><input type="checkbox" name="c_owner_id" data-sc-activate="owner_id"><span>Change owner</span></label><label>Owner<select name="owner_id" disabled><option value="0">No owner</option><?php foreach ($streamcreedOwners as $owner): ?><option value="<?php echo intval($owner['id']); ?>"><?php echo htmlspecialchars((string) $owner['username'], ENT_QUOTES, 'UTF-8'); ?></option><?php endforeach; ?></select></label></div>
+   <div class="sc-mass-change"><label class="sc-check"><input type="checkbox" name="c_member_group_id" data-sc-activate="member_group_id"><span>Change member group</span></label><label>Member Group<select name="member_group_id" disabled><?php foreach ($streamcreedGroups as $group): ?><option value="<?php echo intval($group['group_id']); ?>"><?php echo htmlspecialchars((string) $group['group_name'], ENT_QUOTES, 'UTF-8'); ?></option><?php endforeach; ?></select></label></div>
+   <div class="sc-mass-change"><label class="sc-check"><input type="checkbox" name="c_reseller_dns" data-sc-activate="reseller_dns"><span>Change reseller DNS</span></label><label>Reseller DNS<input type="text" name="reseller_dns" disabled></label></div>
+   <div class="sc-mass-change"><label class="sc-check"><input type="checkbox" name="c_status" data-sc-activate="status"><span>Change account status</span></label><label class="sc-check sc-mass-value"><input type="checkbox" name="status" disabled><span>Accounts enabled</span></label></div>
+  </div></section>
+  <section class="sc-form-section"><div class="sc-section-heading"><div><h2>Package Credit Overrides</h2><p class="sc-section-copy">Leave an override blank to remove it from the selected users.</p></div><label class="sc-check"><input type="checkbox" name="c_override"><span>Apply package overrides</span></label></div><div class="sc-override-grid"><?php foreach ($streamcreedPackages as $package): ?><label><span><?php echo htmlspecialchars((string) $package['package_name'], ENT_QUOTES, 'UTF-8'); ?> <small>Default: <?php echo intval($package['official_credits']); ?></small></span><input type="number" min="0" name="override_<?php echo intval($package['id']); ?>" placeholder="No override" data-sc-override></label><?php endforeach; ?></div></section>
+  <div class="sc-form-error" data-sc-mass-error role="alert" hidden></div><div class="sc-form-actions"><button class="sc-button sc-button-primary" type="submit" name="submit_user" value="Mass Edit">Apply Changes</button><a class="sc-button sc-button-secondary" href="users">Cancel</a></div>
+ </form>
+</section>
