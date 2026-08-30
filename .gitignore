@@ -1,6 +1,7 @@
 .vscode/
 dist/
 .DS_Store
+.env
 __pycache__/
 *.pyc
 *.phpunit.result.cache
