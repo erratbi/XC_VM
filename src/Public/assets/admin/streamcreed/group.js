@@ -7,6 +7,25 @@
     form.querySelectorAll('[data-sc-group-role]').forEach(function (input) { input.addEventListener('change', setVisibility); }); setVisibility();
     form.querySelectorAll('[data-sc-toggle-selection]').forEach(function (button) { button.addEventListener('click', function () { var fields = inputs(button.dataset.scToggleSelection), checked = fields.some(function (field) { return !field.checked; }); fields.forEach(function (field) { field.checked = checked; }); }); });
     form.querySelectorAll('[data-sc-permissions]').forEach(function (button) { button.addEventListener('click', function () { inputs('permissions').forEach(function (field) { field.checked = button.dataset.scPermissions === 'all'; }); }); });
+    var permissionFilter = form.querySelector('[data-sc-permission-filter]');
+    if (permissionFilter) {
+        var permissionCards = Array.from(form.querySelectorAll('[data-sc-permission-card]'));
+        var permissionCount = form.querySelector('[data-sc-permission-count]');
+        var permissionEmpty = form.querySelector('[data-sc-permission-empty]');
+        function filterPermissions() {
+            var query = permissionFilter.value.trim().toLowerCase();
+            var visible = 0;
+            permissionCards.forEach(function (card) {
+                var matches = !query || card.textContent.toLowerCase().indexOf(query) !== -1;
+                card.hidden = !matches;
+                if (matches) visible += 1;
+            });
+            if (permissionCount) permissionCount.textContent = visible + ' of ' + permissionCards.length + ' permissions';
+            if (permissionEmpty) permissionEmpty.hidden = visible !== 0;
+        }
+        permissionFilter.addEventListener('input', filterPermissions);
+        filterPermissions();
+    }
     var subresellers = form.querySelector('[data-sc-subresellers-enabled]'); if (subresellers) subresellers.addEventListener('change', function () { if (!subresellers.checked) inputs('groups').forEach(function (field) { field.checked = false; }); });
     form.addEventListener('submit', function (event) {
         event.preventDefault(); form.elements.permissions_selected.value = JSON.stringify(selected('permissions')); form.elements.packages_selected.value = JSON.stringify(selected('packages')); form.elements.groups_selected.value = JSON.stringify(selected('groups')); form.elements.notice_html.value = form.querySelector('[data-sc-notice]').value;

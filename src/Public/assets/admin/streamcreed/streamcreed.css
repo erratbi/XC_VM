@@ -379,7 +379,13 @@ a.sc-connection-link:hover { background: #e8f4fb; color: #1177b9; }
 .sc-selection-card small { color: var(--sc-muted); font-size: 10px; font-weight: 500; }
 .sc-group-form { display: grid; gap: 28px; }
 .sc-group-switches { margin-top: 24px; }
-.sc-permission-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.sc-permission-tools { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 16px; }
+.sc-permission-tools .sc-search-field { max-width: 560px; flex: 1; }
+.sc-permission-tools > span { color: var(--sc-muted); font-size: 11px; white-space: nowrap; }
+.sc-permission-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.sc-permission-grid .sc-selection-card[hidden] { display: none !important; }
+.sc-permission-empty { grid-column: 1 / -1; margin: 20px 0; color: var(--sc-muted); text-align: center; }
+.sc-permission-empty[hidden] { display: none; }
 .sc-form-section[hidden] { display: none; }
 .sc-user-mass { max-width: 1280px; margin: 0 auto; }
 .sc-mass-form { display: grid; gap: 28px; }
@@ -412,7 +418,8 @@ a.sc-connection-link:hover { background: #e8f4fb; color: #1177b9; }
 .sc-password-meter[data-score="2"] strong { color: #e4bd28; }
 .sc-password-meter[data-score="3"] strong { color: #8ecb3f; }
 @media (max-width: 700px) { .sc-form-grid { grid-template-columns: 1fr; } .sc-form { padding: 18px; } }
-@media (max-width: 900px) { .sc-selection-grid, .sc-package-options, .sc-permission-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 1050px) { .sc-permission-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .sc-selection-grid, .sc-package-options { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 620px) { .sc-selection-grid, .sc-package-options, .sc-inline-fields, .sc-package-output, .sc-permission-grid, .sc-mass-change-grid, .sc-override-grid { grid-template-columns: 1fr; } .sc-form-span { grid-column: auto; } }
 .sc-text-danger { color: #bd3045 !important; }
 .sc-table-state { height: 150px !important; color: var(--sc-muted) !important; text-align: center; }
