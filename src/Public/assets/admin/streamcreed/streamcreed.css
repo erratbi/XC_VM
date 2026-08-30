@@ -398,8 +398,6 @@ a.sc-connection-link:hover { background: #e8f4fb; color: #1177b9; }
 .sc-section-copy { margin: -12px 0 20px; color: var(--sc-muted); font-size: 12px; }
 .sc-section-heading .sc-section-copy { margin: 5px 0 0; }
 .sc-mass-change-grid, .sc-override-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
-.sc-mass-section { position: relative; padding-left: 46px; }
-.sc-mass-section::before { position: absolute; top: -4px; left: 0; display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; background: #f0f1f2; color: #697075; content: attr(data-step); font-size: 12px; font-weight: 750; }
 .sc-selection-summary { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin: 0 0 14px; padding: 10px 13px; border: 1px solid color-mix(in oklch, var(--sc-primary) 25%, var(--sc-line)); background: color-mix(in oklch, var(--sc-primary) 5%, white); color: #555b60; font-size: 12px; }
 .sc-selection-summary[hidden] { display: none; }
 .sc-selection-summary button { border: 0; background: transparent; color: var(--sc-primary); font: inherit; font-weight: 700; cursor: pointer; }
@@ -439,7 +437,7 @@ a.sc-connection-link:hover { background: #e8f4fb; color: #1177b9; }
 @media (max-width: 1050px) { .sc-permission-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 900px) { .sc-selection-grid, .sc-package-options { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 620px) { .sc-selection-grid, .sc-package-options, .sc-inline-fields, .sc-package-output, .sc-permission-grid, .sc-mass-change-grid, .sc-override-grid { grid-template-columns: 1fr; } .sc-form-span { grid-column: auto; } }
-@media (max-width: 700px) { .sc-mass-section { padding-left: 40px; } .sc-mass-actions { align-items: flex-start; flex-direction: column; margin: 0 -18px -18px; padding: 14px 18px; } .sc-mass-actions .sc-form-actions { width: 100%; } .sc-mass-actions .sc-button { flex: 1; } }
+@media (max-width: 700px) { .sc-mass-actions { align-items: flex-start; flex-direction: column; margin: 0 -18px -18px; padding: 14px 18px; } .sc-mass-actions .sc-form-actions { width: 100%; } .sc-mass-actions .sc-button { flex: 1; } }
 .sc-text-danger { color: #bd3045 !important; }
 .sc-table-state { height: 150px !important; color: var(--sc-muted) !important; text-align: center; }
 .sc-table-state.is-error { color: #bd3045 !important; }
