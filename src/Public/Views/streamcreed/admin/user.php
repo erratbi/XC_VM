@@ -10,7 +10,7 @@ $streamcreedGroups = $streamcreedGroupService::getAll();
 ?>
 <section class="sc-user-editor">
     <div class="sc-page-heading"><div><p class="sc-eyebrow">Account Management</p><h1><?php echo $streamcreedEditing ? 'Edit User' : 'Add User'; ?></h1></div><div class="sc-page-actions"><a class="sc-button sc-button-secondary" href="users"><i class="fe-chevron-left" aria-hidden="true"></i> Back to users</a></div></div>
-    <form class="sc-form" method="post" enctype="multipart/form-data" action="post.php?action=user&amp;referer=users%3Forder%3D0%26dir%3Ddesc">
+    <form class="sc-form" method="post" enctype="multipart/form-data" action="post.php?action=user&amp;referer=users%3Forder%3D0%26dir%3Ddesc" data-status-invalid-input="<?php echo intval(STATUS_INVALID_INPUT); ?>" data-status-invalid-group="<?php echo intval(STATUS_INVALID_GROUP); ?>" data-status-existing-username="<?php echo intval(STATUS_EXISTS_USERNAME); ?>">
         <input type="hidden" name="submit_user" value="<?php echo $streamcreedEditing ? 'Edit User' : 'Add User'; ?>">
         <?php if ($streamcreedEditing): ?><input type="hidden" name="edit" value="<?php echo $streamcreedUserId; ?>"><?php endif; ?>
         <div class="sc-form-grid">
@@ -24,6 +24,7 @@ $streamcreedGroups = $streamcreedGroupService::getAll();
             <label>Reseller DNS<input type="text" name="reseller_dns" value="<?php echo htmlspecialchars((string) ($streamcreedUserRecord['reseller_dns'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></label>
         </div>
         <label class="sc-form-wide">Notes<textarea name="notes" rows="4"><?php echo htmlspecialchars((string) ($streamcreedUserRecord['notes'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></textarea></label>
+        <div class="sc-form-error" data-sc-user-form-error role="alert" hidden></div>
         <p class="sc-settings-note"><i class="fe-info" aria-hidden="true"></i> Saving uses the existing legacy validation and account mutation handler.</p>
         <div class="sc-form-actions"><button class="sc-button sc-button-primary" type="submit"><?php echo $streamcreedEditing ? 'Save User' : 'Add User'; ?></button><a class="sc-button sc-button-secondary" href="users">Cancel</a></div>
     </form>

@@ -20,8 +20,11 @@
 	// multipart FormData to post.php?action=user instead.
 	var userForm = document.querySelector('.sc-user-editor form');
 	if (userForm) {
+		var userFormError = userForm.querySelector('[data-sc-user-form-error]');
+		function showUserFormError(message) { if (userFormError) { userFormError.textContent = message; userFormError.hidden = false; userFormError.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } else window.alert(message); }
 		userForm.addEventListener('submit', function (event) {
 			event.preventDefault();
+			if (userFormError) userFormError.hidden = true;
 			var submitButton = userForm.querySelector('button[type="submit"]');
 			if (submitButton) submitButton.disabled = true;
 			fetch(userForm.action, {
@@ -40,11 +43,13 @@
 					return;
 				}
 				if (submitButton) submitButton.disabled = false;
-				if (response && response.message) window.alert(response.message);
-				else window.alert('The user could not be saved. Please check the form and try again.');
+				if (response && String(response.status) === userForm.getAttribute('data-status-invalid-input')) showUserFormError('Required entry fields have not been populated. Please check the form.');
+				else if (response && String(response.status) === userForm.getAttribute('data-status-invalid-group')) showUserFormError('Please select a member group.');
+				else if (response && String(response.status) === userForm.getAttribute('data-status-existing-username')) showUserFormError('The username you selected already exists. Please use another.');
+				else showUserFormError(response && response.message ? response.message : 'An error occurred while processing your request.');
 			}).catch(function () {
 				if (submitButton) submitButton.disabled = false;
-				window.alert('The user could not be saved. Please try again.');
+				showUserFormError('The user could not be saved. Please try again.');
 			});
 		});
 	}

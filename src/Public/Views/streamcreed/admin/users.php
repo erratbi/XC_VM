@@ -51,12 +51,23 @@ if (!in_array($streamcreedDefaultEntries, [10, 25, 50, 100], true)) $streamcreed
 			</select>
 		</label>
 	</div>
+	<?php if ($streamcreedCanEditUsers): ?>
+		<div class="sc-user-bulk" data-sc-user-bulk hidden>
+			<strong><span data-sc-user-selected-count>0</span> selected</strong>
+			<div>
+				<button type="button" data-sc-user-bulk-action="enable">Enable</button>
+				<button type="button" data-sc-user-bulk-action="disable">Disable</button>
+				<button type="button" class="is-danger" data-sc-user-bulk-action="delete">Delete</button>
+				<button type="button" data-sc-user-selection-clear>Clear</button>
+			</div>
+		</div>
+	<?php endif; ?>
 
 	<div class="sc-data-panel">
 		<div class="sc-table-scroll">
 			<table class="sc-data-table">
-				<thead><tr><th>User</th><th>Owner</th><th>Group</th><th>Status</th><th>Credits</th><th>Lines</th><th>MAGs</th><th>Enigma2</th><th>Last login</th><th><span class="sc-visually-hidden">Actions</span></th></tr></thead>
-				<tbody data-sc-user-rows><tr><td class="sc-table-state" colspan="10"><span class="sc-spinner" aria-hidden="true"></span> Loading registered users…</td></tr></tbody>
+				<thead><tr><?php if ($streamcreedCanEditUsers): ?><th class="sc-select-column"><input type="checkbox" data-sc-user-select-all aria-label="Select all users on this page"></th><?php endif; ?><th>User</th><th>Owner</th><th>Group</th><th>Status</th><th>Credits</th><th>Lines</th><th>MAGs</th><th>Enigma2</th><th>Last login</th><th><span class="sc-visually-hidden">Actions</span></th></tr></thead>
+				<tbody data-sc-user-rows><tr><td class="sc-table-state" colspan="<?php echo $streamcreedCanEditUsers ? 11 : 10; ?>"><span class="sc-spinner" aria-hidden="true"></span> Loading registered users…</td></tr></tbody>
 			</table>
 		</div>
 		<footer class="sc-table-footer">
