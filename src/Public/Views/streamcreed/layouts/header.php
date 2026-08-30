@@ -48,6 +48,14 @@ $streamcreedDrillNav = [
 		['Administration', [['Settings', 'settings', ['settings']], ['Cache / Redis', 'cache', ['cache']], ['Modules', 'modules', ['modules']], ['Backups', 'backups', ['backups']], ['Security plug-ins', 'theft_detection', ['theft_detection']]]],
 	]],
 ];
+$streamcreedActiveDrill = null;
+foreach ($streamcreedPrimaryNav as $streamcreedNavItem) {
+	if ($streamcreedNavItem[5] && in_array($streamcreedPage, $streamcreedNavItem[4], true)) {
+		$streamcreedActiveDrill = $streamcreedNavItem[5];
+		break;
+	}
+}
+$streamcreedIsDashboard = in_array($streamcreedPage, ['dashboard', 'index'], true);
 ?>
 <!doctype html>
 <html lang="en">
@@ -60,10 +68,10 @@ $streamcreedDrillNav = [
 	<link rel="stylesheet" href="assets/css/icons.css">
 	<link rel="stylesheet" href="assets/streamcreed/streamcreed.css">
 </head>
-<body class="streamcreed-ui">
+<body class="streamcreed-ui <?php echo $streamcreedIsDashboard ? 'sc-page-dashboard' : 'sc-page-inner'; ?><?php echo $streamcreedActiveDrill ? ' sc-has-context-nav' : ''; ?>">
 	<div class="sc-mobile-scrim" data-sc-sidebar-close></div>
 	<div class="sc-app-shell">
-		<aside class="sc-sidebar" id="streamcreed-sidebar" aria-label="Admin navigation">
+		<aside class="sc-sidebar<?php echo $streamcreedActiveDrill ? ' is-drilling' : ''; ?>" id="streamcreed-sidebar" aria-label="Admin navigation">
 			<a class="sc-brand" href="dashboard" aria-label="<?php echo htmlspecialchars($streamcreedServerName, ENT_QUOTES, 'UTF-8'); ?> dashboard">
 				<span class="sc-brand-mark" aria-hidden="true"><i class="fe-zap"></i></span>
 				<span class="sc-brand-copy"><strong>XC_VM</strong><small>STREAM</small></span>
@@ -81,8 +89,8 @@ $streamcreedDrillNav = [
 					<?php echo $drill ? '</button>' : '</a>'; ?>
 				<?php endforeach; ?>
 			</nav>
-			<?php foreach ($streamcreedDrillNav as $streamcreedKey => [$streamcreedTitle, $streamcreedSections]): ?>
-				<aside class="sc-nav-drill" data-sc-nav-panel="<?php echo $streamcreedKey; ?>" aria-label="<?php echo htmlspecialchars($streamcreedTitle, ENT_QUOTES, 'UTF-8'); ?> navigation" hidden><header><span>Navigation</span><button type="button" data-sc-nav-close><i class="fe-chevron-left"></i> Back</button></header><?php foreach ($streamcreedSections as [$sectionLabel, $sectionItems]): $streamcreedSectionItems=array_filter($sectionItems, static fn(array $item): bool => $streamcreedCanAny($item[2])); if(!$streamcreedSectionItems) continue; ?><section><?php if ($sectionLabel !== ''): ?><h3><?php echo htmlspecialchars($sectionLabel, ENT_QUOTES, 'UTF-8'); ?></h3><?php endif; ?><?php foreach($streamcreedSectionItems as [$itemLabel,$itemUrl]): ?><a href="<?php echo htmlspecialchars($itemUrl, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($itemLabel, ENT_QUOTES, 'UTF-8'); ?></a><?php endforeach; ?></section><?php endforeach; ?></aside>
+			<?php foreach ($streamcreedDrillNav as $streamcreedKey => [$streamcreedTitle, $streamcreedSections]): $streamcreedPanelActive = $streamcreedKey === $streamcreedActiveDrill; ?>
+				<aside class="sc-nav-drill<?php echo $streamcreedPanelActive ? ' is-open' : ''; ?>" data-sc-nav-panel="<?php echo $streamcreedKey; ?>" aria-label="<?php echo htmlspecialchars($streamcreedTitle, ENT_QUOTES, 'UTF-8'); ?> navigation"<?php echo $streamcreedPanelActive ? '' : ' hidden'; ?>><header><span>Navigation</span><button type="button" data-sc-nav-close><i class="fe-chevron-left"></i> Back</button></header><?php foreach ($streamcreedSections as [$sectionLabel, $sectionItems]): $streamcreedSectionItems=array_filter($sectionItems, static fn(array $item): bool => $streamcreedCanAny($item[2])); if(!$streamcreedSectionItems) continue; ?><section><?php if ($sectionLabel !== ''): ?><h3><?php echo htmlspecialchars($sectionLabel, ENT_QUOTES, 'UTF-8'); ?></h3><?php endif; ?><?php foreach($streamcreedSectionItems as [$itemLabel,$itemUrl]): $streamcreedItemPage = explode('?', $itemUrl, 2)[0]; ?><a<?php echo $streamcreedItemPage === $streamcreedPage ? ' class="is-active"' : ''; ?> href="<?php echo htmlspecialchars($itemUrl, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($itemLabel, ENT_QUOTES, 'UTF-8'); ?></a><?php endforeach; ?></section><?php endforeach; ?></aside>
 			<?php endforeach; ?>
 		</aside>
 
