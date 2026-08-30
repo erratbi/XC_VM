@@ -1,4 +1,5 @@
 			</main>
+			</div>
 			<footer class="sc-footer">
 				<span><?php echo htmlspecialchars($streamcreedServerName, ENT_QUOTES, 'UTF-8'); ?></span>
 				<span>XC_VM v<?php echo htmlspecialchars((string) XC_VM_VERSION, ENT_QUOTES, 'UTF-8'); ?></span>

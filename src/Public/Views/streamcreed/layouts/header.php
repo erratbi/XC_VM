@@ -115,4 +115,12 @@ $streamcreedIsDashboard = in_array($streamcreedPage, ['dashboard', 'index'], tru
 				</details>
 			</header>
 
-			<main class="sc-main" id="main-content">
+			<div class="sc-content-layout<?php echo $streamcreedActiveDrill ? ' has-context-nav' : ''; ?>">
+				<?php if ($streamcreedActiveDrill): [$streamcreedContextTitle, $streamcreedContextSections] = $streamcreedDrillNav[$streamcreedActiveDrill]; ?>
+					<nav class="sc-context-nav" aria-label="<?php echo htmlspecialchars($streamcreedContextTitle, ENT_QUOTES, 'UTF-8'); ?> navigation">
+						<?php foreach ($streamcreedContextSections as [$sectionLabel, $sectionItems]): $streamcreedContextItems = array_filter($sectionItems, static fn(array $item): bool => $streamcreedCanAny($item[2])); if (!$streamcreedContextItems) continue; ?>
+							<section><?php if ($sectionLabel !== ''): ?><h2><?php echo htmlspecialchars($sectionLabel, ENT_QUOTES, 'UTF-8'); ?></h2><?php endif; ?><?php foreach ($streamcreedContextItems as [$itemLabel, $itemUrl]): $streamcreedContextPage = explode('?', $itemUrl, 2)[0]; ?><a<?php echo $streamcreedContextPage === $streamcreedPage ? ' class="is-active"' : ''; ?> href="<?php echo htmlspecialchars($itemUrl, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($itemLabel, ENT_QUOTES, 'UTF-8'); ?></a><?php endforeach; ?></section>
+						<?php endforeach; ?>
+					</nav>
+				<?php endif; ?>
+				<main class="sc-main" id="main-content">
