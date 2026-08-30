@@ -29,7 +29,7 @@ $streamcreedPrimaryNav = [
 ];
 $streamcreedDrillNav = [
 	'lines' => ['Streaming Lines', [
-		['', [['Create New Line', 'line', ['add_user']], ['Manage Lines', 'lines', ['users']]]],
+		['', [['Create New Line', 'line', ['add_user']], ['Manage Lines', 'lines', ['users']], ['Mass Edit Lines', 'line_mass', ['mass_edit_users']]]],
 	]],
 	'users' => ['Users', [
 		['', [['Registered Users', 'users', ['mng_regusers']], ['Mass Edit Users', 'user_mass', ['mass_edit_reguser']], ['Packages', 'packages', ['mng_packages']], ['Groups', 'groups', ['mng_groups']]]],
