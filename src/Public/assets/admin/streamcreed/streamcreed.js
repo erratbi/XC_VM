@@ -78,6 +78,7 @@
 	function closeDrill() { if (!sidebar) return; sidebar.classList.remove('is-drilling', 'is-menu-drilling'); if (document.body.classList.contains('sc-page-inner')) document.body.classList.remove('sc-has-context-nav'); navPanels.forEach(function (panel) { panel.classList.remove('is-open'); panel.hidden = true; }); }
 	document.querySelectorAll('[data-sc-nav-open]').forEach(function (button) { button.addEventListener('click', function () { var panel = document.querySelector('[data-sc-nav-panel="' + button.getAttribute('data-sc-nav-open') + '"]'); if (!panel || !sidebar) return; navPanels.forEach(function (item) { item.classList.remove('is-open'); item.hidden = true; }); panel.hidden = false; sidebar.classList.add('is-drilling'); if (document.body.classList.contains('sc-page-inner')) { document.body.classList.add('sc-has-context-nav'); if (window.matchMedia('(min-width: 921px)').matches) sidebar.classList.add('is-menu-drilling'); } requestAnimationFrame(function () { panel.classList.add('is-open'); }); }); });
 	document.querySelectorAll('[data-sc-nav-close]').forEach(function (button) { button.addEventListener('click', closeDrill); });
+	document.addEventListener('click', function (event) { if (sidebar && sidebar.classList.contains('is-menu-drilling') && !sidebar.contains(event.target)) closeDrill(); });
 
 	var dashboard = document.querySelector('[data-sc-dashboard]');
 	if (!dashboard) {
