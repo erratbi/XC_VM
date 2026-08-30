@@ -42,7 +42,7 @@ $streamcreedCountJson = static function (array $package, string $field): int {
 						$streamcreedGroups = $streamcreedCountJson($streamcreedPackage, 'groups');
 						$streamcreedOutputs = $streamcreedCountJson($streamcreedPackage, 'output_formats');
 						?>
-						<tr data-sc-package-row data-type="<?php echo $streamcreedTrial ? 'trial' : 'standard'; ?>" data-official="<?php echo $streamcreedOfficial ? '1' : '0'; ?>" data-search="<?php echo htmlspecialchars(strtolower($streamcreedID . ' ' . $streamcreedName), ENT_QUOTES, 'UTF-8'); ?>">
+						<tr data-sc-package-row data-package-id="<?php echo $streamcreedID; ?>" data-type="<?php echo $streamcreedTrial ? 'trial' : 'standard'; ?>" data-official="<?php echo $streamcreedOfficial ? '1' : '0'; ?>" data-search="<?php echo htmlspecialchars(strtolower($streamcreedID . ' ' . $streamcreedName), ENT_QUOTES, 'UTF-8'); ?>">
 							<td><div class="sc-table-identity"><?php if ($streamcreedCanEditPackage): ?><a href="package?id=<?php echo $streamcreedID; ?>"><?php echo htmlspecialchars($streamcreedName, ENT_QUOTES, 'UTF-8'); ?></a><?php else: ?><strong><?php echo htmlspecialchars($streamcreedName, ENT_QUOTES, 'UTF-8'); ?></strong><?php endif; ?><small>#<?php echo $streamcreedID; ?></small></div></td>
 							<td><span class="sc-row-status <?php echo $streamcreedTrial ? 'is-expired' : 'is-active'; ?>"><?php echo $streamcreedTrial ? 'Trial' : 'Standard'; ?></span></td>
 							<td><span class="sc-row-status <?php echo $streamcreedOfficial ? 'is-active' : 'is-disabled'; ?>"><?php echo $streamcreedOfficial ? 'Yes' : 'No'; ?></span></td>
@@ -50,7 +50,7 @@ $streamcreedCountJson = static function (array $package, string $field): int {
 							<td><span class="sc-connection-link"><?php echo number_format($streamcreedBouquets); ?></span></td>
 							<td><span class="sc-connection-link"><?php echo number_format($streamcreedGroups); ?></span></td>
 							<td><span class="sc-connection-link"><?php echo number_format($streamcreedOutputs); ?></span></td>
-							<td class="sc-table-actions"><?php if ($streamcreedCanEditPackage): ?><a class="sc-row-action" href="package?id=<?php echo $streamcreedID; ?>">Edit in legacy</a><?php endif; ?></td>
+							<td class="sc-table-actions"><?php if ($streamcreedCanEditPackage): ?><a class="sc-row-action" href="package?id=<?php echo $streamcreedID; ?>">Edit</a><button class="sc-row-action is-danger" type="button" data-sc-package-delete>Delete</button><?php endif; ?></td>
 						</tr>
 					<?php endforeach; ?>
 					<tr data-sc-package-empty<?php echo count($streamcreedPackages) ? ' hidden' : ''; ?>><td class="sc-table-state" colspan="8">No packages have been created yet.</td></tr>

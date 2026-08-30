@@ -35,15 +35,16 @@ $streamcreedCanEditGroup = Authorization::check('adv', 'edit_group');
 						$streamcreedAdmin = !empty($streamcreedGroup['is_admin']);
 						$streamcreedReseller = !empty($streamcreedGroup['is_reseller']);
 						$streamcreedSubreseller = !empty($streamcreedGroup['create_sub_resellers']);
+						$streamcreedCanDeleteGroup = $streamcreedCanEditGroup && !empty($streamcreedGroup['can_delete']);
 						$streamcreedRole = $streamcreedAdmin ? 'admin' : ($streamcreedReseller ? 'reseller' : ($streamcreedSubreseller ? 'subreseller' : 'standard'));
 						?>
-						<tr data-sc-group-row data-role="<?php echo $streamcreedRole; ?>" data-search="<?php echo htmlspecialchars(strtolower($streamcreedID . ' ' . $streamcreedName), ENT_QUOTES, 'UTF-8'); ?>">
+						<tr data-sc-group-row data-group-id="<?php echo $streamcreedID; ?>" data-role="<?php echo $streamcreedRole; ?>" data-search="<?php echo htmlspecialchars(strtolower($streamcreedID . ' ' . $streamcreedName), ENT_QUOTES, 'UTF-8'); ?>">
 							<td><div class="sc-table-identity"><?php if ($streamcreedCanEditGroup): ?><a href="group?id=<?php echo $streamcreedID; ?>"><?php echo htmlspecialchars($streamcreedName, ENT_QUOTES, 'UTF-8'); ?></a><?php else: ?><strong><?php echo htmlspecialchars($streamcreedName, ENT_QUOTES, 'UTF-8'); ?></strong><?php endif; ?><small>#<?php echo $streamcreedID; ?></small></div></td>
 							<td><span class="sc-row-status <?php echo $streamcreedAdmin ? 'is-active' : 'is-disabled'; ?>"><?php echo $streamcreedAdmin ? 'Yes' : 'No'; ?></span></td>
 							<td><span class="sc-row-status <?php echo $streamcreedReseller ? 'is-active' : 'is-disabled'; ?>"><?php echo $streamcreedReseller ? 'Yes' : 'No'; ?></span></td>
 							<td><span class="sc-row-status <?php echo $streamcreedSubreseller ? 'is-active' : 'is-disabled'; ?>"><?php echo $streamcreedSubreseller ? 'Yes' : 'No'; ?></span></td>
 							<td><div class="sc-tag-list"><?php if ($streamcreedAdmin): ?><span class="sc-tag">Admin</span><?php endif; ?><?php if ($streamcreedReseller): ?><span class="sc-tag is-trial">Reseller</span><?php endif; ?><?php if ($streamcreedSubreseller): ?><span class="sc-tag">Subresellers</span><?php endif; ?><?php if (!$streamcreedAdmin && !$streamcreedReseller && !$streamcreedSubreseller): ?><span class="sc-table-muted">Standard access</span><?php endif; ?></div></td>
-							<td class="sc-table-actions"><?php if ($streamcreedCanEditGroup): ?><a class="sc-row-action" href="group?id=<?php echo $streamcreedID; ?>">Edit in legacy</a><?php endif; ?></td>
+							<td class="sc-table-actions"><?php if ($streamcreedCanEditGroup): ?><a class="sc-row-action" href="group?id=<?php echo $streamcreedID; ?>">Edit</a><?php if ($streamcreedCanDeleteGroup): ?><button class="sc-row-action is-danger" type="button" data-sc-group-delete>Delete</button><?php endif; ?><?php endif; ?></td>
 						</tr>
 					<?php endforeach; ?>
 					<tr data-sc-group-empty<?php echo count($streamcreedGroups) ? ' hidden' : ''; ?>><td class="sc-table-state" colspan="6">No groups have been created yet.</td></tr>
