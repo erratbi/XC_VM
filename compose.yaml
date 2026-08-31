@@ -1,0 +1,113 @@
+services:
+  # ─── 1. MariaDB Database Service ──────────────────────────────
+  mariadb:
+    image: mariadb:11.4
+    container_name: xcvm-mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: "yes"
+      MARIADB_DATABASE: "xtream_iptvpro"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./src/bin/install/database.sql:/docker-entrypoint-initdb.d/01_database.sql:ro
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # ─── 2. Redis In-Memory Cache Service ─────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: xcvm-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  # ─── 3. phpMyAdmin Database Web GUI ───────────────────────────
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: xcvm-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: "mariadb"
+      PMA_PORT: 3306
+      PMA_USER: "root"
+      PMA_PASSWORD: ""
+      UPLOAD_LIMIT: "256M"
+    ports:
+      - "${PMA_PORT:-8080}:80"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  # ─── 4. XC_VM Application Container (PHP 8.1 + Nginx) ──────────
+  xcvm-app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.app
+    image: xcvm-app:dev
+    container_name: xcvm-app
+    hostname: xcvm-dev
+    restart: unless-stopped
+    privileged: true
+    environment:
+      XCVM_ADMIN_CODE: "${XCVM_ADMIN_CODE:-admin}"
+      XCVM_ADMIN_USER: "${XCVM_ADMIN_USER:-admin}"
+      XCVM_ADMIN_PASS: "${XCVM_ADMIN_PASS:-admin1234}"
+      XCVM_ADMIN_EMAIL: "${XCVM_ADMIN_EMAIL:-admin@example.com}"
+      DB_HOST: "mariadb"
+      DB_PORT: "3306"
+      DB_NAME: "xtream_iptvpro"
+      DB_USER: "root"
+      DB_PASS: ""
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+    volumes:
+      # ── Entrypoint & Config Mounts ──
+      - ./docker/entrypoint.sh:/docker-entrypoint.sh:ro
+      # ── Live Dev Mounts (Host ./src -> Container /home/xc_vm) ──
+      - ./src/Core:/home/xc_vm/Core
+      - ./src/Domain:/home/xc_vm/Domain
+      - ./src/Streaming:/home/xc_vm/Streaming
+      - ./src/Public:/home/xc_vm/Public
+      - ./src/Cli:/home/xc_vm/Cli
+      - ./src/Infrastructure:/home/xc_vm/Infrastructure
+      - ./src/Modules:/home/xc_vm/Modules
+      - ./src/Ministra:/home/xc_vm/Ministra
+      - ./src/resources:/home/xc_vm/resources
+      - ./src/migrations:/home/xc_vm/migrations
+      - ./src/vendor:/home/xc_vm/vendor
+      - ./src/signals:/home/xc_vm/signals
+      - ./src/bootstrap.php:/home/xc_vm/bootstrap.php
+      - ./src/console.php:/home/xc_vm/console.php
+      - ./src/api_reseller.php:/home/xc_vm/api_reseller.php
+      # ── Persistent Storage & Cache Volumes ──
+      - xcvm_tmp:/home/xc_vm/tmp
+      - xcvm_streams:/home/xc_vm/content/streams
+      - xcvm_storage:/home/xc_vm/storage
+    ports:
+      - "${XCVM_HTTP_PORT:-8880}:80"
+      - "${XCVM_HTTPS_PORT:-8443}:443"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  mariadb_data:
+  redis_data:
+  xcvm_tmp:
+  xcvm_streams:
+  xcvm_storage:
