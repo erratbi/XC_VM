@@ -680,17 +680,14 @@ class StreamProcess {
 		// (PHP-FPM cannot read ffmpeg's open-ended chunked progress POST, so the HTTP
 		// /progress endpoint only ever ran at stream end -> speed was stuck at "1x".)
 		$rProgressFile = STREAMS_PATH . intval($rStreamID) . '_.progress';
-		// LLOD input resilience: an on-demand HTTP source that drops the
-		// connection makes ffmpeg exit ("Stream ends prematurely"), which the
-		// watchdog then restarts — turning a brief upstream hiccup into a
-		// multi-second re-probe gap and client re-buffering. Reconnecting keeps
-		// ffmpeg alive across drops instead of dying. Guarded to HTTP(S): these
-		// options are http-protocol-only and are a fatal "Option not found"
-		// error on udp/rtmp/file inputs.
-		$rLLODReconnect = ($rLLOD && !$rLoopback && is_string($rSource) && preg_match('#^https?://#i', $rSource))
-			? '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 '
+		// HTTP(S) input resilience: remote streaming servers / CDNs often close
+		// idle keep-alives or reset connection chunks after 60-120 seconds.
+		// Without reconnect flags, ffmpeg sees EOF and dies, causing watchdog restarts.
+		// Adding reconnect options keeps ffmpeg streaming continuously across drops.
+		$rHttpReconnect = (!$rLoopback && is_string($rSource) && preg_match('#^https?://#i', $rSource))
+			? '-reconnect 1 -reconnect_at_eof 1 -reconnect_streamed 1 -reconnect_on_network_error 1 -reconnect_on_http_error 4xx,5xx -reconnect_delay_max 5 -tcp_keepalive 1 '
 			: '';
-		$rLLODInputFlags = ($rLLOD && !$rLoopback ? $rLLODReconnect . '-fflags +discardcorrupt ' : '');
+		$rInputFlags = ($rLLOD && !$rLoopback ? '-fflags +discardcorrupt ' : '') . $rHttpReconnect;
 
 		// Command-template defaults: only the non-custom_ffmpeg branch below
 		// assigns these, yet the {MAP}/{GEN_PTS}/{READ_NATIVE} substitution and
@@ -732,8 +729,8 @@ class StreamProcess {
 				$rGenPTS = $rNoFix . ' -start_at_zero -copyts -vsync 0 -correct_ts_overflow 0 -avoid_negative_ts disabled -max_interleave_delta 0';
 			}
 
-			$container = (isset($rFFProbeOutput) && is_array($rFFProbeOutput)) ? ($rFFProbeOutput['container'] ?? null) : null;
-			if (empty($rStream['server_info']['parent_id']) && (($rStream['stream_info']['read_native'] == 1) || empty($rProtocol) || ($container && (stristr($container, 'mp4') || stristr($container, 'matroska'))))) {
+			$container = (isset($rFFProbeOutput) && is_array($rFFProbeOutput)) ? ($rFFProbeOutput['container'] ?? $rFFProbeOutput['format']['format_name'] ?? null) : null;
+			if (empty($rStream['server_info']['parent_id']) && (($rStream['stream_info']['read_native'] == 1) || empty($rProtocol) || ($container && (stristr($container, 'mp4') || stristr($container, 'matroska') || stristr($container, 'dash'))))) {
 				$rReadNative = '-re';
 			} else {
 				$rReadNative = '';
@@ -749,7 +746,7 @@ class StreamProcess {
 				$rStream['stream_info']['transcode_attributes'] = array();
 			}
 
-			$rFFMPEG = ((isset($rStream['stream_info']['transcode_attributes']['gpu']) ? $rFFMPEG_GPU : $rFFMPEG_CPU)) . ' -y -nostdin -hide_banner -loglevel ' . (($rSettings['ffmpeg_warnings'] ? 'warning' : 'error')) . ' -err_detect ignore_err -thread_queue_size 1024 ' . $rOptions . ' {GEN_PTS} {READ_NATIVE} ' . $rLLODInputFlags . '-probesize ' . $rProbesize . ' -analyzeduration ' . $rAnalyseDuration . ' -progress "' . $rProgressFile . '" {CONCAT} -i {STREAM_SOURCE} {LOGO} -max_muxing_queue_size 1024 ';
+			$rFFMPEG = ((isset($rStream['stream_info']['transcode_attributes']['gpu']) ? $rFFMPEG_GPU : $rFFMPEG_CPU)) . ' -y -nostdin -hide_banner -loglevel ' . (($rSettings['ffmpeg_warnings'] ? 'warning' : 'error')) . ' -err_detect ignore_err -thread_queue_size 1024 ' . $rOptions . ' {GEN_PTS} {READ_NATIVE} ' . $rInputFlags . '-probesize ' . $rProbesize . ' -analyzeduration ' . $rAnalyseDuration . ' -progress "' . $rProgressFile . '" {CONCAT} -i {STREAM_SOURCE} {LOGO} -max_muxing_queue_size 1024 ';
 
 			self::applyDefaultCopyCodecs($rStream['stream_info']['transcode_attributes']);
 

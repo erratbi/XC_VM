@@ -153,30 +153,35 @@ class MonitorCommand implements CommandInterface {
 		while (true) {
 			if (0 < $rPID) {
 				$db->close_mysql();
-				$rStartedTime = $rDurationChecked = $rAudioChecked = $rCheckedTime = $rBackupsChecked = time();
-				$rMD5 = file_exists($rPlaylist) ? md5_file($rPlaylist) : false;
+				$rStartedTime = $rDurationChecked = $rAudioChecked = $rBackupsChecked = time();
+				$rLastPlaylistUpdate = time();
+				clearstatcache(true, $rPlaylist);
+				$rLastPlaylistMTime = file_exists($rPlaylist) ? filemtime($rPlaylist) : 0;
 				$rStreamFailed = ProcessManager::isStreamRunning($rPID, $rStreamID) && file_exists($rPlaylist);
 				$rBaselineFps = null;
 				while (ProcessManager::isStreamRunning($rPID, $rStreamID) && file_exists($rPlaylist)) {
 					if (self::isAutoRestartDue($rAutoRestart)) {
+						file_put_contents(STREAMS_PATH . $rStreamID . '.monitor.log', date('Y-m-d H:i:s') . " [MONITOR] break: isAutoRestartDue\n", FILE_APPEND);
 						echo "Auto-restart\n";
 						StreamProcess::streamLog($rStreamID, SERVER_ID, 'AUTO_RESTART', $rCurrentSource);
 						$rStreamFailed = false;
 						break;
 					}
-					if (($rStreamProbe || (!file_exists(STREAMS_PATH . $rStreamID . '_.dur') && (300 < (time() - $rDurationChecked))))) {
-						echo "Probe Stream\n";
+					if ($rStreamProbe || (!file_exists(STREAMS_PATH . $rStreamID . '_.dur') && (300 < (time() - $rDurationChecked)))) {
 						$rSegment = StreamUtils::getPlaylistSegments($rPlaylist, 10)[0];
 						if (!empty($rSegment)) {
 							if (((300 < (time() - $rDurationChecked)) && ($rSegment == $rLastSegment))) {
+								file_put_contents(STREAMS_PATH . $rStreamID . '.monitor.log', date('Y-m-d H:i:s') . " [MONITOR] break: FFMPEG_ERROR probe same segment\n", FILE_APPEND);
 								StreamProcess::streamLog($rStreamID, SERVER_ID, 'FFMPEG_ERROR', $rCurrentSource);
 								break;
 							}
 							$rLastSegment = $rSegment;
 							$rProbe = FFprobeRunner::probeStream($rFolder . $rSegment);
-							list($rProbe, $rSegmentTime) = self::persistSegmentDuration($rProbe, $rStreamID, $rSegmentTime);
-							file_put_contents(STREAMS_PATH . $rStreamID . '_.stream_info', json_encode($rProbe, JSON_UNESCAPED_UNICODE));
-							$rStreamInfo['stream_info'] = json_encode($rProbe, JSON_UNESCAPED_UNICODE);
+							if (!empty($rProbe)) {
+								list($rProbe, $rSegmentTime) = self::persistSegmentDuration($rProbe, $rStreamID, $rSegmentTime);
+								file_put_contents(STREAMS_PATH . $rStreamID . '_.stream_info', json_encode($rProbe, JSON_UNESCAPED_UNICODE));
+								$rStreamInfo['stream_info'] = json_encode($rProbe, JSON_UNESCAPED_UNICODE);
+							}
 						}
 						$rStreamProbe = false;
 						$rDurationChecked = time();
@@ -208,6 +213,7 @@ class MonitorCommand implements CommandInterface {
 									$rBaselineFps = $rFps;
 								}
 							} elseif ($rBaselineFps && (($rFps * ($rStreamInfo['fps_threshold'] ?: 100)) < $rBaselineFps)) {
+								file_put_contents(STREAMS_PATH . $rStreamID . '.monitor.log', date('Y-m-d H:i:s') . " [MONITOR] break: FPS drop below threshold ({$rFps} < {$rBaselineFps})\n", FILE_APPEND);
 								echo "FPS dropped below threshold! Break\n";
 								StreamProcess::streamLog($rStreamID, SERVER_ID, 'FPS_DROP_THRESHOLD', $rCurrentSource);
 								break;
@@ -221,21 +227,24 @@ class MonitorCommand implements CommandInterface {
 						if (!empty($rSegment)) {
 							$rProbe = FFprobeRunner::probeStream($rFolder . $rSegment);
 							if ((!isset($rProbe['codecs']['audio']) || empty($rProbe['codecs']['audio']))) {
+								file_put_contents(STREAMS_PATH . $rStreamID . '.monitor.log', date('Y-m-d H:i:s') . " [MONITOR] break: Lost audio\n", FILE_APPEND);
 								echo "Lost audio! Break\n";
 								StreamProcess::streamLog($rStreamID, SERVER_ID, 'AUDIO_LOSS', $rCurrentSource);
 								break;
 							}
 							$rAudioChecked = time();
 						} else {
+							file_put_contents(STREAMS_PATH . $rStreamID . '.monitor.log', date('Y-m-d H:i:s') . " [MONITOR] break: audio check segment empty\n", FILE_APPEND);
 							break;
 						}
 					}
-					$rMaxStaleTime = max(60, $rSegmentTime * 6);
-					if ($rMaxStaleTime <= (time() - $rCheckedTime)) {
-						$rNewMd5 = file_exists($rPlaylist) ? md5_file($rPlaylist) : false;
-						if ($rMD5 !== $rNewMd5) {
-							$rMD5 = $rNewMd5;
-							$rCheckedTime = time();
+					$rMaxStaleTime = max(90, $rSegmentTime * 6);
+					clearstatcache(true, $rPlaylist);
+					if (file_exists($rPlaylist)) {
+						$rCurrMTime = filemtime($rPlaylist);
+						if ($rCurrMTime != $rLastPlaylistMTime) {
+							$rLastPlaylistMTime = $rCurrMTime;
+							$rLastPlaylistUpdate = time();
 							if (SettingsManager::getAll()['encrypt_hls']) {
 								foreach (glob(STREAMS_PATH . $rStreamID . '_*.ts.enc') as $rFile) {
 									if (!file_exists(rtrim($rFile, '.enc'))) {
@@ -243,14 +252,12 @@ class MonitorCommand implements CommandInterface {
 									}
 								}
 							}
-							if ((!is_array(json_decode($rStreamInfo['stream_info'], true)) || count(json_decode($rStreamInfo['stream_info'], true)) == 0)) {
-								$rStreamProbe = true;
-							}
-							$rCheckedTime = time();
-						} elseif (!file_exists($rPlaylist) || (time() - filemtime($rPlaylist) >= $rMaxStaleTime)) {
-							echo "Playlist is stale (not updated for {$rMaxStaleTime}s)! Break\n";
-							break;
 						}
+					}
+					if (time() - $rLastPlaylistUpdate >= $rMaxStaleTime) {
+						file_put_contents(STREAMS_PATH . $rStreamID . '.monitor.log', date('Y-m-d H:i:s') . " [MONITOR] break: Playlist stale (not updated for {$rMaxStaleTime}s)\n", FILE_APPEND);
+						echo "Playlist is stale (not updated for {$rMaxStaleTime}s)! Break\n";
+						break;
 					}
 					if (((SettingsManager::getAll()['priority_backup'] == 1) && (1 < count($rSources)) && ($rParentID == 0) && (300 < (time() - $rBackupsChecked)))) {
 						echo "Checking backups...\n";
@@ -298,6 +305,9 @@ class MonitorCommand implements CommandInterface {
 					}
 					sleep(1);
 				}
+				$isRun = ProcessManager::isStreamRunning($rPID, $rStreamID) ? '1' : '0';
+				$m3u8Ex = file_exists($rPlaylist) ? '1' : '0';
+				file_put_contents(STREAMS_PATH . $rStreamID . '.monitor.log', date('Y-m-d H:i:s') . " [MONITOR] loop exited: isStreamRunning={$isRun}, m3u8Exists={$m3u8Ex}, streamFailed=" . ($rStreamFailed ? '1' : '0') . "\n", FILE_APPEND);
 				if ($rStreamFailed) {
 					StreamProcess::streamLog($rStreamID, SERVER_ID, 'STREAM_FAILED', $rCurrentSource);
 					echo "Stream failed!\n";
@@ -564,12 +574,15 @@ class MonitorCommand implements CommandInterface {
 	 * @return array{0:mixed,1:mixed} [clamped probe, updated segment time]
 	 */
 	private static function persistSegmentDuration($rProbe, $rStreamID, $rSegmentTime): array {
-		if (10 < intval($rProbe['of_duration'])) {
-			$rProbe['of_duration'] = 10;
+		$rRawDur = floatval($rProbe['of_duration'] ?? $rProbe['duration'] ?? 10);
+		$rDur = ceil($rRawDur);
+		if ($rDur <= 0 || $rDur > 10) {
+			$rDur = 10;
 		}
-		file_put_contents(STREAMS_PATH . $rStreamID . '_.dur', intval($rProbe['of_duration']));
-		if ($rSegmentTime < intval($rProbe['of_duration'])) {
-			$rSegmentTime = intval($rProbe['of_duration']);
+		$rProbe['of_duration'] = $rDur;
+		file_put_contents(STREAMS_PATH . $rStreamID . '_.dur', $rDur);
+		if ($rSegmentTime < $rDur) {
+			$rSegmentTime = $rDur;
 		}
 		return array($rProbe, $rSegmentTime);
 	}

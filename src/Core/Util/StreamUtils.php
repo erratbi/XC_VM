@@ -301,12 +301,11 @@ class StreamUtils {
 				if (in_array($rHost, $rPlatforms)) {
 					$rURLs = trim(shell_exec(YOUTUBE_BIN . ' ' . escapeshellarg($rCleanURL) . ' -q --get-url --skip-download -f best'));
 					list($rCleanURL) = explode("\n", $rURLs);
-				} else {
-					$rCleanURL = CurlClient::getEffectiveURL($rCleanURL, 4, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', $rProxy, $rHeaders);
+					return self::cleanStreamURL($rCleanURL);
 				}
 			}
 		}
-		return self::cleanStreamURL($rCleanURL);
+		return $rCleanURL;
 	}
 
 	/**
