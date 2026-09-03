@@ -59,6 +59,16 @@ This document provides complete, high-density context for developers and AI agen
 * Nginx writes its master PID to `/home/xc_vm/bin/nginx/logs/nginx.pid` (owned by user `xc_vm`), avoiding `/run/nginx.pid` root permission errors.
 * **Nginx Route Isolation:** Streaming endpoints (`location ~ ^/admin/(live|proxy_api|thumb|timeshift|vod)$`) are strictly isolated from the front controller (`@fc_admin`) so that `/admin/api` (UI stats and AJAX) and `/admin/login` are never shadowed by cluster node streaming handlers.
 
+### Multiarch Codec Libraries & FFmpeg Setup (Apple Silicon / Docker)
+* **Bundled Binaries:** Bundled FFmpeg / FFprobe binaries in `/home/xc_vm/bin/ffmpeg_bin/` are compiled for AMD64 (`x86_64`) and require dynamic multimedia libraries (`libopenal1`, `libdc1394-25`, `libass9`, `libpulse0`, `libstdc++6`, `libglib2.0-0t64`, `libunibreak5`, `libflac12t64`, etc.).
+* **Library Search Path:** The multiarch library directories `/usr/lib/x86_64-linux-gnu` and `/home/xc_vm/bin/ffmpeg_bin/lib` must be registered in `/etc/ld.so.conf.d/x86_64-cross.conf` followed by `ldconfig`.
+* **FFmpeg Version Invariant:** Modern bundled FFmpeg binaries remove obsolete flags like `-nofix_dts`. Database default setting `ffmpeg_cpu` and `ffmpeg_gpu` is set to `8.0` in `database.sql` and seeded in `entrypoint.sh`.
+
+### Automatic Administrator Seeding (`entrypoint.sh`)
+* On fresh container boot (`docker compose down -v && docker compose up`), `entrypoint.sh` auto-provisions the administrator if the `users` table contains zero admins.
+* **Credentials:** Uses `XCVM_ADMIN_USER` (default `admin`) and `XCVM_ADMIN_PASS` (default `admin1234`).
+* **Hashing Rule:** Password hashing **must** use `\XcVm\Core\Auth\Authenticator::hashPassword($pass)` directly rather than inline bash `crypt()` strings to avoid bash variable expansion corrupting the salt.
+
 ---
 
 ## 4. StreamCreed UI Architecture
