@@ -202,6 +202,7 @@ if (\$db) {
         \$hash = crypt(\$pass, '\\\$6\\\$rounds=20000\\\$' . md5(random_bytes(16)) . '\\\$');
         \$db->query('INSERT INTO \`users\` (\`username\`, \`password\`, \`email\`, \`member_group_id\`, \`date_registered\`, \`last_login\`, \`ip\`, \`status\`) VALUES (?, ?, ?, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), \"127.0.0.1\", 1)', \$user, \$hash, \$email);
         \$db->query('UPDATE \`servers\` SET \`server_ip\` = \"127.0.0.1\" WHERE \`is_main\` = 1 LIMIT 1');
+        \$db->query('UPDATE \`settings\` SET \`ffmpeg_cpu\` = \"8.0\", \`ffmpeg_gpu\` = \"8.0\" WHERE \`id\` = 1');
         echo '==> [XC_VM Dev] Fresh installation initialized! Default admin created: ' . \$user . PHP_EOL;
     }
 }
