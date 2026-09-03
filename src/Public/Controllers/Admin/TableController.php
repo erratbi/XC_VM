@@ -395,9 +395,15 @@ class TableController extends BaseAdminController {
 						$rReturn["data"][] = [
 							"id" => (int) $rRow["id"],
 							"username" => (string) $rRow["username"],
+							"password" => (string) $rRow["password"],
+							"adminNotes" => (string) ($rRow["admin_notes"] ?? ""),
+							"resellerNotes" => (string) ($rRow["reseller_notes"] ?? ""),
+							"contact" => (string) ($rRow["contact"] ?? ""),
 							"owner" => (string) ($rRow["owner_name"] ?? ""),
 							"status" => $rStatusKey,
 							"statusLabel" => $rStatusLabel,
+							"enabled" => !empty($rRow["enabled"]),
+							"adminEnabled" => !empty($rRow["admin_enabled"]),
 							"online" => 0 < (int) $rRow["active_connections"],
 							"trial" => (bool) $rRow["is_trial"],
 							"restreamer" => (bool) $rRow["is_restreamer"],
@@ -699,7 +705,7 @@ class TableController extends BaseAdminController {
 						elseif (!$rRow["enabled"]) { $rStatus = ["disabled", "Disabled"]; }
 						elseif ($rRow["exp_date"] && $rRow["exp_date"] < time()) { $rStatus = ["expired", "Expired"]; }
 						else { $rStatus = ["active", "Active"]; }
-						$rReturn["data"][] = ["id" => (int) $rRow["id"], "magId" => (int) $rRow["mag_id"], "username" => (string) ($rRow["username"] ?? ""), "mac" => (string) ($rRow["mac"] ?? ""), "device" => (string) ($rRow["stb_type"] ?? ""), "owner" => (string) ($rRow["owner_name"] ?? ""), "status" => $rStatus[0], "statusLabel" => $rStatus[1], "online" => (int) $rRow["active_connections"] > 0, "trial" => !empty($rRow["is_trial"]), "expires" => $rRow["exp_date"] ? date($rSettings["date_format"] . " H:i", $rRow["exp_date"]) : "Never", "lastActive" => !empty($rRow["last_active"]) ? date($rSettings["date_format"] . " H:i", $rRow["last_active"]) : "Never"];
+						$rReturn["data"][] = ["id" => (int) $rRow["id"], "magId" => (int) $rRow["mag_id"], "username" => (string) ($rRow["username"] ?? ""), "mac" => (string) ($rRow["mac"] ?? ""), "device" => (string) ($rRow["stb_type"] ?? ""), "owner" => (string) ($rRow["owner_name"] ?? ""), "status" => $rStatus[0], "statusLabel" => $rStatus[1], "enabled" => !empty($rRow["enabled"]), "adminEnabled" => !empty($rRow["admin_enabled"]), "connections" => (int) $rRow["active_connections"], "online" => (int) $rRow["active_connections"] > 0, "trial" => !empty($rRow["is_trial"]), "expires" => $rRow["exp_date"] ? date($rSettings["date_format"] . " H:i", $rRow["exp_date"]) : "Never", "lastActive" => !empty($rRow["last_active"]) ? date($rSettings["date_format"] . " H:i", $rRow["last_active"]) : "Never"];
 					} elseif ($rIsAPI) {
 						$rReturn["data"][] = self::filterRow($rRow, RequestManager::getAll()["show_columns"] ?? '', RequestManager::getAll()["hide_columns"] ?? '');
 					} else {
@@ -972,7 +978,7 @@ class TableController extends BaseAdminController {
 					}
 					if ($rStreamcreed) {
 						if (!$rRow["id"]) { $rStatus = ["damaged", "Line missing"]; } elseif (!$rRow["admin_enabled"]) { $rStatus = ["banned", "Banned"]; } elseif (!$rRow["enabled"]) { $rStatus = ["disabled", "Disabled"]; } elseif ($rRow["exp_date"] && $rRow["exp_date"] < time()) { $rStatus = ["expired", "Expired"]; } else { $rStatus = ["active", "Active"]; }
-						$rReturn["data"][] = ["id"=>(int)$rRow["id"],"deviceId"=>(int)$rRow["device_id"],"username"=>(string)($rRow["username"]??""),"mac"=>(string)($rRow["mac"]??""),"publicIp"=>(string)($rRow["public_ip"]??""),"owner"=>(string)($rRow["owner_name"]??""),"status"=>$rStatus[0],"statusLabel"=>$rStatus[1],"online"=>(int)$rRow["active_connections"]>0,"expires"=>$rRow["exp_date"]?date($rSettings["date_format"]." H:i",$rRow["exp_date"]):"Never","lastActive"=>!empty($rRow["last_active"])?date($rSettings["date_format"]." H:i",$rRow["last_active"]):"Never"];
+						$rReturn["data"][] = ["id"=>(int)$rRow["id"],"deviceId"=>(int)$rRow["device_id"],"username"=>(string)($rRow["username"]??""),"mac"=>(string)($rRow["mac"]??""),"publicIp"=>(string)($rRow["public_ip"]??""),"owner"=>(string)($rRow["owner_name"]??""),"status"=>$rStatus[0],"statusLabel"=>$rStatus[1],"enabled"=>!empty($rRow["enabled"]),"adminEnabled"=>!empty($rRow["admin_enabled"]),"connections"=>(int)$rRow["active_connections"],"online"=>(int)$rRow["active_connections"]>0,"trial"=>!empty($rRow["is_trial"]),"expires"=>$rRow["exp_date"]?date($rSettings["date_format"]." H:i",$rRow["exp_date"]):"Never","lastActive"=>!empty($rRow["last_active"])?date($rSettings["date_format"]." H:i",$rRow["last_active"]):"Never"];
 					} elseif ($rIsAPI) {
 						$rReturn["data"][] = self::filterRow($rRow, RequestManager::getAll()["show_columns"] ?? '', RequestManager::getAll()["hide_columns"] ?? '');
 					} else {
@@ -1112,6 +1118,7 @@ class TableController extends BaseAdminController {
 		if (!Authorization::check("adv", "streams") && !Authorization::check("adv", "mass_edit_streams")) {
 			exit;
 		}
+		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
 		$rCategories = CategoryService::getAllByType("live");
 		$rOrder = ["`streams`.`id`", "`streams`.`stream_icon`", "`streams`.`stream_display_name`", "`streams_servers`.`current_source`", "`clients`", "`streams_servers`.`stream_started`", false, false, false, "`streams_servers`.`bitrate`"];
 		if (isset(RequestManager::getAll()["order"]) && 0 < strlen(RequestManager::getAll()["order"][0]["column"] ?? '')) {
@@ -1685,7 +1692,9 @@ class TableController extends BaseAdminController {
 						if (!$rSettings["streams_grouped"] && 1 < $rStreamServerCount) {
 							$rID .= "-" . $rRow["server_id"];
 						}
-						if ($rCreated) {
+						if ($rStreamcreed) {
+							$rReturn["data"][] = ["id" => (int) $rRow["id"], "serverId" => (int) ($rRow["server_id"] ?? 0), "name" => trim(strip_tags((string) $rStreamName)), "server" => trim(strip_tags((string) $rServerName)), "connections" => (int) strip_tags((string) $rClients), "uptime" => trim(strip_tags((string) $rUptime)), "status" => (int) $rActualStatus, "statusLabel" => (string) ($rStatusArray[$rActualStatus] ?? "Unknown"), "bitrate" => (int) ($rRow["bitrate"] ?? 0), "icon" => (string) ($rRow["stream_icon"] ?? "")];
+						} elseif ($rCreated) {
 							$rReturn["data"][] = ["<a href='stream_view?id=" . $rRow["id"] . "'>" . $rID . "</a>", $rIcon, $rStreamName, $rServerName, $rClients, $rUptime, $rButtons, $rPlayer, $rStreamInfoText];
 						} else {
 							$rReturn["data"][] = ["<a href='stream_view?id=" . $rRow["id"] . "'>" . $rID . "</a>", $rIcon, $rStreamName, $rServerName, $rClients, $rUptime, $rButtons, $rPlayer, $rEPG, $rStreamInfoText];

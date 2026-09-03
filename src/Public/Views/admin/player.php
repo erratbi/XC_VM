@@ -57,7 +57,11 @@ if (isset(RequestManager::getAll()['id'])) {
                 }
             }
 
-            $rURL = $rProtocol . '://' . (($rServers[$rServerID]['domain_name'] ? explode(',', $rServers[$rServerID]['domain_name'])[0] : $rServers[$rServerID]['server_ip'])) . ':' . ((AdminHelpers::issecure() ? $rServers[$rServerID]['https_broadcast_port'] : $rServers[$rServerID]['http_broadcast_port'])) . '/admin/' . ((RequestManager::getAll()['type'] == 'live' ? 'live' : (RequestManager::getAll()['type'] == 'timeshift' ? 'timeshift' : 'vod'))) . '?uitoken=' . $rUIToken . ((RequestManager::getAll()['type'] == 'live' ? '&extension=.m3u8' : ''));
+            if ($rServerID == SERVER_ID) {
+                $rURL = '/admin/' . ((RequestManager::getAll()['type'] == 'live' ? 'live' : (RequestManager::getAll()['type'] == 'timeshift' ? 'timeshift' : 'vod'))) . '?uitoken=' . $rUIToken . ((RequestManager::getAll()['type'] == 'live' ? '&extension=.m3u8' : ''));
+            } else {
+                $rURL = $rProtocol . '://' . (($rServers[$rServerID]['domain_name'] ? explode(',', $rServers[$rServerID]['domain_name'])[0] : $rServers[$rServerID]['server_ip'])) . ':' . ((AdminHelpers::issecure() ? $rServers[$rServerID]['https_broadcast_port'] : $rServers[$rServerID]['http_broadcast_port'])) . '/admin/' . ((RequestManager::getAll()['type'] == 'live' ? 'live' : (RequestManager::getAll()['type'] == 'timeshift' ? 'timeshift' : 'vod'))) . '?uitoken=' . $rUIToken . ((RequestManager::getAll()['type'] == 'live' ? '&extension=.m3u8' : ''));
+            }
 
             // canPlayType() rejects made-up MIMEs like video/mkv, so unknown containers
             // are declared as video/mp4 — the browser sniffs the real container itself.

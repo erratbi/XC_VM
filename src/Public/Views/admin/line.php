@@ -146,7 +146,7 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                                                     <label class="col-md-4 col-form-label" for="force_server_id">Forced Connection <i title="<?= $language::get('force_this_user_to_connect_tooltip') ?>" class="tooltip text-secondary far fa-circle"></i></label>
                                                     <div class="col-md-8">
                                                         <select name="force_server_id" id="force_server_id" class="form-control select2" data-toggle="select2">
-                                                            <option <?php echo !isset($rLine) || intval($rLine['force_server_id']) == 0 ? 'selected' : ''; ?><?= $language::get('value0disabled') ?></option>
+                                                            <option value="0"<?php echo !isset($rLine) || intval($rLine['force_server_id']) == 0 ? ' selected' : ''; ?>>Disabled</option>
                                                             <?php
                                                             foreach ($rServers as $rServer) {
                                                                 echo '<option ' . (isset($rLine) && intval($rLine['force_server_id']) == intval($rServer['id']) ? 'selected' : '') . ' value="' . $rServer['id'] . '">' . htmlspecialchars($rServer['server_name']) . '</option>';

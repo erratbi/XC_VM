@@ -1894,12 +1894,12 @@ if (isset($_SESSION['hash'])) {
 
 					$db->query('SELECT COUNT(`id`) AS `count` FROM `streams_series` WHERE `title` LIKE ?;', '%' . RequestManager::getAll()['search'] . '%');
 					$rReturn['total_count'] = $db->get_row()['count'];
-					$db->query('SELECT `id`, `title` FROM `streams_series` WHERE `title` LIKE ? ORDER BY `title` ASC LIMIT ' . ($rPage - 1) * 100 . ', 100;', '%' . RequestManager::getAll()['search'] . '%');
+					$db->query('SELECT `id`, `title`, `category_id` FROM `streams_series` WHERE `title` LIKE ? ORDER BY `title` ASC LIMIT ' . ($rPage - 1) * 100 . ', 100;', '%' . RequestManager::getAll()['search'] . '%');
 
 					if (0 >= $db->num_rows()) {
 					} else {
 						foreach ($db->get_rows() as $rRow) {
-							$rReturn['items'][] = array('id' => $rRow['id'], 'text' => $rRow['title']);
+							$rItem = array('id' => $rRow['id'], 'text' => $rRow['title']); if (!empty(RequestManager::getAll()['include_meta'])) { $rItem['category_ids'] = json_decode($rRow['category_id'], true) ?: array(); } $rReturn['items'][] = $rItem;
 						}
 					}
 				}
@@ -1997,12 +1997,12 @@ if (isset($_SESSION['hash'])) {
 
 					$db->query('SELECT COUNT(`id`) AS `id` FROM `streams` WHERE `stream_display_name` LIKE ?;', '%' . RequestManager::getAll()['search'] . '%');
 					$rReturn['total_count'] = $db->get_row()['id'];
-					$db->query('SELECT `id`, `stream_display_name` FROM `streams` WHERE `stream_display_name` LIKE ? ORDER BY `stream_display_name` ASC LIMIT ' . ($rPage - 1) * 100 . ', 100;', '%' . RequestManager::getAll()['search'] . '%');
+					$db->query('SELECT `id`, `stream_display_name`, `type`, `category_id` FROM `streams` WHERE `stream_display_name` LIKE ? ORDER BY `stream_display_name` ASC LIMIT ' . ($rPage - 1) * 100 . ', 100;', '%' . RequestManager::getAll()['search'] . '%');
 
 					if (0 >= $db->num_rows()) {
 					} else {
 						foreach ($db->get_rows() as $rRow) {
-							$rReturn['items'][] = array('id' => $rRow['id'], 'text' => $rRow['stream_display_name']);
+							$rItem = array('id' => $rRow['id'], 'text' => $rRow['stream_display_name']); if (!empty(RequestManager::getAll()['include_meta'])) { $rItem['type'] = intval($rRow['type']); $rItem['category_ids'] = json_decode($rRow['category_id'], true) ?: array(); } $rReturn['items'][] = $rItem;
 						}
 					}
 				}

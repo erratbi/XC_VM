@@ -61,4 +61,15 @@ class LineRepository {
 		$db->query('SELECT * FROM `output_formats` ORDER BY `access_output_id` ASC;');
 		return (0 < $db->num_rows() ? $db->get_rows() : array());
 	}
+
+	/**
+	 * Get playlist device definitions used by the legacy download dialog.
+	 *
+	 * @return array Device names, keys, and optional copy-command templates.
+	 */
+	public static function getOutputDevices() {
+		$db = self::db();
+		$db->query('SELECT * FROM `output_devices` ORDER BY `device_id` ASC;');
+		return (0 < $db->num_rows() ? $db->get_rows() : array());
+	}
 }

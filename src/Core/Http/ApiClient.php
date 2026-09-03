@@ -25,7 +25,63 @@ class ApiClient {
 	 */
 	public static function request($rData, $rTimeout = 5) {
 		ini_set('default_socket_timeout', $rTimeout);
-		$rAPI = 'http://127.0.0.1:' . intval(ServerRepository::getAll()[SERVER_ID]['http_broadcast_port']) . '/admin/api';
+		$rAction = $rData['action'] ?? '';
+		$rSubAction = $rData['sub'] ?? '';
+
+		if ($rAction === 'stream' && in_array($rSubAction, ['start', 'stop'], true)) {
+			$rAllServers = ServerRepository::getAll();
+			$rStreamIDs = !empty($rData['stream_ids'])
+				? array_map('intval', (array) $rData['stream_ids'])
+				: (!empty($rData['stream_id']) ? [intval($rData['stream_id'])] : []);
+			$rServerIDs = !empty($rData['servers'])
+				? array_map('intval', (array) $rData['servers'])
+				: (!empty($rData['server_id']) && $rData['server_id'] > 0 ? [intval($rData['server_id'])] : array_keys($rAllServers));
+			$rURLs = [];
+
+			foreach ($rServerIDs as $rServerID) {
+				if (!empty($rAllServers[$rServerID]['api_url_ip'])) {
+					$rURLs[$rServerID] = [
+						'url' => $rAllServers[$rServerID]['api_url_ip'] . '&action=stream',
+						'postdata' => ['function' => $rSubAction, 'stream_ids' => $rStreamIDs]
+					];
+				}
+			}
+			if (!empty($rURLs)) {
+				CurlClient::getMultiCURL($rURLs);
+			}
+			return json_encode(['result' => true]);
+		}
+
+		if (in_array($rAction, ['vod', 'movie', 'episode'], true) && in_array($rSubAction, ['start', 'stop'], true)) {
+			$rAllServers = ServerRepository::getAll();
+			$rStreamIDs = !empty($rData['stream_ids'])
+				? array_map('intval', (array) $rData['stream_ids'])
+				: (!empty($rData['stream_id']) ? [intval($rData['stream_id'])] : []);
+			$rServerIDs = !empty($rData['servers'])
+				? array_map('intval', (array) $rData['servers'])
+				: (!empty($rData['server_id']) && $rData['server_id'] > 0 ? [intval($rData['server_id'])] : array_keys($rAllServers));
+			$rForce = !empty($rData['force']);
+			$rURLs = [];
+
+			foreach ($rServerIDs as $rServerID) {
+				if (!empty($rAllServers[$rServerID]['api_url_ip'])) {
+					$rPostData = ['function' => $rSubAction, 'stream_ids' => $rStreamIDs];
+					if ($rSubAction === 'start') {
+						$rPostData['force'] = $rForce;
+					}
+					$rURLs[$rServerID] = [
+						'url' => $rAllServers[$rServerID]['api_url_ip'] . '&action=vod',
+						'postdata' => $rPostData
+					];
+				}
+			}
+			if (!empty($rURLs)) {
+				CurlClient::getMultiCURL($rURLs);
+			}
+			return json_encode(['result' => true]);
+		}
+
+		$rAPI = 'http://127.0.0.1:' . intval(ServerRepository::getAll()[SERVER_ID]['http_broadcast_port']) . '/api';
 
 		if (!empty(SettingsManager::getAll()['api_pass'])) {
 			$rData['api_pass'] = SettingsManager::getAll()['api_pass'];
