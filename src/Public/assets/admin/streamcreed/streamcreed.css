@@ -297,6 +297,15 @@ a.sc-metric-card:hover { border-color: #c9cccf; box-shadow: 0 8px 24px rgba(25, 
 .sc-row-status.is-active { background: #e9f7ee; color: #198a43; }
 .sc-row-status.is-banned { background: #fff0f2; color: #bc3045; }
 .sc-row-status.is-expired { background: #fff5e6; color: #a86b09; }
+.sc-row-status.is-warning { background: #fff8e6; color: #b26a00; }
+.sc-row-status.is-warning::before { animation: sc-status-pulse 1.2s infinite ease-in-out; }
+.sc-row-status.is-neutral { background: #edf4fa; color: #18689c; }
+.sc-row-status.is-disabled { background: #f0f1f2; color: #73787c; }
+
+@keyframes sc-status-pulse {
+	0%, 100% { opacity: 1; transform: scale(1); }
+	50% { opacity: 0.3; transform: scale(0.65); }
+}
 .sc-connection-link { display: inline-flex; min-width: 48px; justify-content: center; padding: 4px 7px; border-radius: 4px; background: #f0f2f3; color: #51565a; font-size: 10px; font-weight: 700; font-variant-numeric: tabular-nums; }
 a.sc-connection-link:hover { background: #e8f4fb; color: #1177b9; }
 .sc-tag-list { display: flex; flex-wrap: wrap; gap: 4px; }

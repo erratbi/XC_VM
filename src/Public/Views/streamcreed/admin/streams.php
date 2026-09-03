@@ -164,3 +164,35 @@ if (!in_array($streamcreedDefaultEntries, [10, 25, 50, 100], true)) {
         </div>
     </form>
 </dialog>
+
+<!-- Failures / Restarts Modal Dialog -->
+<dialog class="sc-playlist-dialog sc-failures-dialog" data-sc-failures-dialog>
+    <div class="sc-dialog-heading">
+        <div>
+            <p class="sc-eyebrow">Stream Diagnostics</p>
+            <h2 data-sc-failures-title>Stream Restarts &amp; Logs</h2>
+        </div>
+        <button class="sc-dialog-close" type="button" data-sc-failures-close aria-label="Close"><i class="fe-x" aria-hidden="true"></i></button>
+    </div>
+    <div class="sc-dialog-body">
+        <div class="sc-table-scroll" style="max-height: 380px;">
+            <table class="sc-data-table">
+                <thead>
+                    <tr>
+                        <th>Server</th>
+                        <th>Source IP</th>
+                        <th>Status</th>
+                        <th>Date &amp; Time</th>
+                    </tr>
+                </thead>
+                <tbody data-sc-failures-rows>
+                    <tr><td class="sc-table-state" colspan="4">Loading log entries…</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
+            <button class="sc-button sc-button-secondary" type="button" data-sc-failures-clear><i class="fe-trash-2" aria-hidden="true"></i> Clear logs</button>
+            <button class="sc-button sc-button-secondary" type="button" data-sc-failures-close-btn>Close</button>
+        </div>
+    </div>
+</dialog>
