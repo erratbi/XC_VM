@@ -103,6 +103,10 @@ class QueryHelper {
 				}
 			} else {
 				if ($rOnlyExisting) {
+				} else if (self::isCurrentTimestampDefault($rRow['column_default'], $rRow['data_type'])) {
+					// Leave expression-backed timestamp columns out of INSERTs so the
+					// database evaluates CURRENT_TIMESTAMP instead of binding its
+					// information_schema representation as a literal datetime value.
 				} else {
 					$rReturn[$rRow['column_name']] = $rRow['column_default'];
 				}
@@ -110,6 +114,22 @@ class QueryHelper {
 		}
 
 		return $rReturn;
+	}
+
+	/**
+	 * Determine whether a metadata default must be evaluated by the database.
+	 *
+	 * MariaDB 11 exposes CURRENT_TIMESTAMP defaults through information_schema
+	 * as the string "current_timestamp()". Binding that string to a timestamp
+	 * column produces an invalid datetime instead of invoking the expression.
+	 */
+	private static function isCurrentTimestampDefault($rDefault, $rDataType) {
+		if (!in_array(strtolower((string) $rDataType), array('timestamp', 'datetime'), true)) {
+			return false;
+		}
+
+		return is_string($rDefault)
+			&& preg_match('/^current_timestamp(?:\(\d*\))?$/i', trim($rDefault)) === 1;
 	}
 
 	/**
