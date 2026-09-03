@@ -93,6 +93,7 @@ services:
       - ./src/bootstrap.php:/home/xc_vm/bootstrap.php
       - ./src/console.php:/home/xc_vm/console.php
       - ./src/api_reseller.php:/home/xc_vm/api_reseller.php
+      - ./src/bin/nginx/conf/nginx.conf:/home/xc_vm/bin/nginx/conf/nginx.conf:ro
       # ── Persistent Storage & Cache Volumes ──
       - xcvm_tmp:/home/xc_vm/tmp
       - xcvm_streams:/home/xc_vm/content/streams
