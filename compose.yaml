@@ -61,6 +61,7 @@ services:
     hostname: xcvm-dev
     restart: unless-stopped
     privileged: true
+    init: true
     environment:
       XCVM_ADMIN_CODE: "${XCVM_ADMIN_CODE:-admin}"
       XCVM_ADMIN_USER: "${XCVM_ADMIN_USER:-admin}"
