@@ -24,6 +24,8 @@ EOF
     mkdir -p /lib64 /usr/lib/x86_64-linux-gnu /lib/x86_64-linux-gnu
     ln -sf /usr/x86_64-linux-gnu/lib/ld-linux-x86-64.so.2 /lib64/ld-linux-x86-64.so.2
     echo "/usr/x86_64-linux-gnu/lib" > /etc/ld.so.conf.d/x86_64-cross.conf
+    echo "/usr/lib/x86_64-linux-gnu" >> /etc/ld.so.conf.d/x86_64-cross.conf
+    echo "/home/xc_vm/bin/ffmpeg_bin/lib" >> /etc/ld.so.conf.d/x86_64-cross.conf
 
     cd /tmp
     apt-get download \
@@ -49,7 +51,8 @@ EOF
         libapparmor1:amd64 libmd0:amd64 libpixman-1-0:amd64 libxcb-shm0:amd64 \
         libxcb-render0:amd64 libxrender1:amd64 libxext6:amd64 libxau6:amd64 \
         libxdmcp6:amd64 liblz4-1:amd64 libcap2:amd64 libgomp1:amd64 libdrm2:amd64 \
-        libpcre2-8-0:amd64 libmpg123-0t64:amd64
+        libpcre2-8-0:amd64 libmpg123-0t64:amd64 \
+        libstdc++6:amd64 libglib2.0-0t64:amd64 libunibreak5:amd64 libflac12t64:amd64
 
     for deb in *.deb; do
         dpkg -x "$deb" /
