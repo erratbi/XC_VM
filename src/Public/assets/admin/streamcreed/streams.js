@@ -30,9 +30,9 @@
 	var pollTimer = null;
 	var currentStreams = {};
 
-	// Player dialog
+	// Player dialog (Legacy UI Magnific-Popup Style)
 	var playerDialog = document.querySelector('[data-sc-player-dialog]');
-	var playerTitle = playerDialog ? playerDialog.querySelector('[data-sc-player-title]') : null;
+	var playerScaler = playerDialog ? playerDialog.querySelector('[data-sc-player-scaler]') : null;
 	var playerFrame = playerDialog ? playerDialog.querySelector('[data-sc-player-frame]') : null;
 	var playerClose = playerDialog ? playerDialog.querySelector('[data-sc-player-close]') : null;
 
@@ -412,26 +412,60 @@
 
 	function openPlayer(item) {
 		if (!playerDialog || !playerFrame) return;
-		var title = stripHtml(item.name) || ('Stream #' + item.id);
-		if (playerTitle) playerTitle.textContent = title;
 		playerFrame.src = './player?type=live&id=' + encodeURIComponent(item.id);
-		playerDialog.showModal();
+		if (typeof playerDialog.showModal === 'function') {
+			playerDialog.showModal();
+		} else {
+			playerDialog.setAttribute('open', '');
+		}
 	}
 
 	function closePlayer() {
 		if (!playerDialog) return;
 		if (playerFrame) playerFrame.src = '';
-		playerDialog.close();
+		if (typeof playerDialog.close === 'function' && playerDialog.open) {
+			playerDialog.close();
+		} else {
+			playerDialog.removeAttribute('open');
+		}
 	}
 
 	if (playerClose) {
-		playerClose.addEventListener('click', closePlayer);
+		playerClose.addEventListener('click', function (event) {
+			event.stopPropagation();
+			closePlayer();
+		});
 	}
+
 	if (playerDialog) {
 		playerDialog.addEventListener('cancel', function () {
 			if (playerFrame) playerFrame.src = '';
 		});
+
+		// Close when clicking anywhere on the dark backdrop outside the video frame
+		playerDialog.addEventListener('click', function (event) {
+			if (playerScaler) {
+				var rect = playerScaler.getBoundingClientRect();
+				var isInside = (
+					rect.top <= event.clientY &&
+					event.clientY <= rect.bottom &&
+					rect.left <= event.clientX &&
+					event.clientX <= rect.right
+				);
+				if (!isInside) {
+					closePlayer();
+				}
+			} else if (event.target === playerDialog) {
+				closePlayer();
+			}
+		});
 	}
+
+	// Expose legacy player() globally for any legacy scripts or shortcuts
+	window.player = function (id) {
+		var item = currentStreams[String(id)] || { id: id };
+		openPlayer(item);
+	};
 
 	function openFingerprint(item) {
 		if (!fingerprintDialog) return;
@@ -692,6 +726,20 @@
 
 		// 7. Actions column
 		var actionTd = element('td', 'sc-table-actions');
+
+		if (canPlay) {
+			var playBtn = element('button', 'sc-row-action sc-row-play');
+			playBtn.type = 'button';
+			playBtn.title = 'Play stream';
+			playBtn.setAttribute('aria-label', 'Play ' + streamName);
+			playBtn.appendChild(element('i', 'fe-play'));
+			playBtn.addEventListener('click', function (event) {
+				event.stopPropagation();
+				openPlayer(item);
+			});
+			actionTd.appendChild(playBtn);
+		}
+
 		var trigger = element('button', 'sc-row-action sc-action-menu-trigger');
 		trigger.type = 'button';
 		trigger.title = 'Actions';

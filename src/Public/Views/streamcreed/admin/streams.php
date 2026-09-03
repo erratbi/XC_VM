@@ -119,17 +119,11 @@ if (!in_array($streamcreedDefaultEntries, [10, 25, 50, 100], true)) {
     </div>
 </section>
 
-<!-- Player Modal Dialog -->
-<dialog class="sc-playlist-dialog sc-player-dialog" data-sc-player-dialog>
-    <div class="sc-dialog-heading">
-        <div>
-            <p class="sc-eyebrow">Live preview</p>
-            <h2 data-sc-player-title>Stream Player</h2>
-        </div>
-        <button class="sc-dialog-close" type="button" data-sc-player-close aria-label="Close"><i class="fe-x" aria-hidden="true"></i></button>
-    </div>
-    <div class="sc-dialog-body" style="padding: 16px;">
-        <iframe class="sc-player-frame" data-sc-player-frame allow="autoplay; fullscreen"></iframe>
+<!-- Legacy UI Style Stream Player Modal -->
+<dialog class="sc-player-dialog" data-sc-player-dialog aria-label="Live Stream Player">
+    <div class="sc-player-scaler" data-sc-player-scaler>
+        <button class="sc-player-close" type="button" data-sc-player-close title="Close (Esc)" aria-label="Close (Esc)">&#215;</button>
+        <iframe class="sc-player-frame" data-sc-player-frame allow="autoplay; fullscreen" frameborder="0"></iframe>
     </div>
 </dialog>
 
