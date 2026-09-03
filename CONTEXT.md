@@ -77,6 +77,21 @@ StreamCreed is the modern, responsive administrative interface providing a dark/
   * `streams.js`, `lines.js`, `mag.js`, `enigma.js`, `stream-*.js` — Self-contained ES6/Vanilla JS modules with zero dependencies.
 * **Navigation:** Drill-in collapsible sidebar categorized by Content, User Management, Device Management, and Service Setup with user group permission checks.
 
+### Visual Aesthetics & Code Consistency Standards
+* **Super User-Friendly & Visually Appealing:** StreamCreed interfaces must look visually stunning, modern, clean, and intuitive. Avoid generic colors, raw unstyled buttons, or clunky layouts. Use subtle micro-animations, consistent padding, badges with indicator dots, and crisp typography.
+* **Consistency Check Before Coding:** Whenever creating or updating a StreamCreed page, always inspect existing reference pages (`lines.php`, `streams.php`, `mag.php`, `stream.php`, `bouquet.php`) to preserve identical visual styling, layout rhythm, class conventions, and JavaScript architecture:
+  * **Standard DOM Architecture:**
+    - Container: `<section data-sc-<feature>>`
+    - Header: `<div class="sc-page-heading"><div><p class="sc-eyebrow">Category</p><h1>Page Title</h1></div><div class="sc-page-actions">...</div></div>`
+    - Controls: `<div class="sc-toolbar">` with live search, dropdown filters, and per-page entries selector.
+    - Data Container: `<div class="sc-data-panel"><div class="sc-table-scroll"><table class="sc-data-table">...`
+    - Pagination Footer: `<footer class="sc-table-footer"><span data-range></span><div class="sc-pagination">...</div></footer>`
+  * **Standard JavaScript Architecture:**
+    - Scoped self-invoking closure: `(function () { 'use strict'; ... })();`
+    - Safe DOM building helper: `el(tag, className, text)` using `textContent` for safety.
+    - Loading & empty states: `state('Loading...')` and `state('No items match these filters.')`.
+    - Resilient frontend parsing: Always parse and sanitize responses in the theme layer rather than requiring core controller changes.
+
 ---
 
 ## 5. Ingestion & Streaming Engine Architecture
