@@ -58,7 +58,7 @@ $streamcreedCountItems = static function (array $bouquet, string $key): int {
 							<td><?php echo number_format($streamcreedSeries); ?></td>
 							<td><?php echo number_format($streamcreedRadio); ?></td>
 							<td><span class="sc-row-status is-active"><?php echo number_format($streamcreedTotal); ?> items</span></td>
-							<td class="sc-table-actions"><?php if ($streamcreedCanEditBouquet): ?><a class="sc-row-action" href="bouquet?id=<?php echo $streamcreedID; ?>">Edit in legacy</a><?php endif; ?></td>
+							<td class="sc-table-actions"><?php if ($streamcreedCanEditBouquet): ?><a class="sc-row-action" href="bouquet?id=<?php echo $streamcreedID; ?>">Edit</a><?php endif; ?></td>
 						</tr>
 					<?php endforeach; ?>
 					<tr data-sc-bouquet-empty<?php echo count($streamcreedBouquets) ? ' hidden' : ''; ?>><td class="sc-table-state" colspan="7">No bouquets have been created yet.</td></tr>

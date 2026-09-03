@@ -1,53 +1,7 @@
 <?php
-
 use XcVm\Core\Auth\Authorization;
-
-$streamcreedPageScripts = ['assets/streamcreed/categories.js'];
-$streamcreedCategories = is_array($rCategories ?? null) ? $rCategories : [];
-$streamcreedCategoryTypes = [1 => ['live', 'Live'], 2 => ['movie', 'Movies'], 3 => ['series', 'Series'], 4 => ['radio', 'Radio']];
-$streamcreedCanAddCategory = Authorization::check('adv', 'add_cat');
-$streamcreedCanEditCategory = Authorization::check('adv', 'edit_cat');
+$streamcreedPageScripts=['assets/streamcreed/categories.js'];$streamcreedCategories=is_array($rCategories??null)?$rCategories:[];$streamcreedCanAdd=Authorization::check('adv','add_cat');$streamcreedCanEdit=Authorization::check('adv','edit_cat');$types=[1=>['live','fe-play','Live Streams'],2=>['movie','fe-film','Movies'],3=>['series','fe-tv','Series'],4=>['radio','fe-radio','Radio']];
 ?>
-<section class="sc-categories" data-sc-categories>
-	<div class="sc-page-heading">
-		<div>
-			<p class="sc-eyebrow">Service setup</p>
-			<h1>Streaming Categories</h1>
-		</div>
-		<div class="sc-page-actions">
-			<?php if ($streamcreedCanAddCategory): ?><a class="sc-button sc-button-primary" href="stream_category"><i class="fe-plus" aria-hidden="true"></i> Add category</a><?php endif; ?>
-		</div>
-	</div>
-
-	<div class="sc-toolbar">
-		<label class="sc-search-field"><i class="fe-search" aria-hidden="true"></i><span class="sc-visually-hidden">Search categories</span><input type="search" placeholder="Search category name or ID" data-sc-category-search></label>
-		<label class="sc-filter-field"><span>Content type</span><select data-sc-category-filter><option value="all">All categories</option><option value="live">Live</option><option value="movie">Movies</option><option value="series">Series</option><option value="radio">Radio</option></select></label>
-	</div>
-
-	<div class="sc-data-panel">
-		<div class="sc-table-scroll">
-			<table class="sc-data-table">
-				<thead><tr><th>Category</th><th>Content type</th><th>Audience</th><th>Display order</th><th><span class="sc-visually-hidden">Actions</span></th></tr></thead>
-				<tbody data-sc-category-rows>
-					<?php foreach ($streamcreedCategoryTypes as $streamcreedTypeKey => [$streamcreedType, $streamcreedTypeLabel]): ?>
-						<?php foreach ($streamcreedCategories[$streamcreedTypeKey] ?? [] as $streamcreedCategory): ?>
-							<?php
-							$streamcreedID = intval($streamcreedCategory['id'] ?? 0);
-							$streamcreedName = (string) ($streamcreedCategory['category_name'] ?? 'Untitled category');
-							$streamcreedAdult = !empty($streamcreedCategory['is_adult']);
-							?>
-							<tr data-sc-category-row data-type="<?php echo $streamcreedType; ?>" data-search="<?php echo htmlspecialchars(strtolower($streamcreedID . ' ' . $streamcreedName), ENT_QUOTES, 'UTF-8'); ?>">
-								<td><div class="sc-table-identity"><?php if ($streamcreedCanEditCategory): ?><a href="stream_category?id=<?php echo $streamcreedID; ?>"><?php echo htmlspecialchars($streamcreedName, ENT_QUOTES, 'UTF-8'); ?></a><?php else: ?><strong><?php echo htmlspecialchars($streamcreedName, ENT_QUOTES, 'UTF-8'); ?></strong><?php endif; ?><small>#<?php echo $streamcreedID; ?></small></div></td>
-								<td><span class="sc-row-status is-active"><?php echo $streamcreedTypeLabel; ?></span></td>
-								<td><?php if ($streamcreedAdult): ?><span class="sc-tag is-trial">Adult</span><?php else: ?><span class="sc-table-muted">General</span><?php endif; ?></td>
-								<td><?php echo intval($streamcreedCategory['cat_order'] ?? 0) ?: '—'; ?></td>
-								<td class="sc-table-actions"><?php if ($streamcreedCanEditCategory): ?><a class="sc-row-action" href="stream_category?id=<?php echo $streamcreedID; ?>">Edit in legacy</a><?php endif; ?></td>
-							</tr>
-						<?php endforeach; ?>
-					<?php endforeach; ?>
-					<tr data-sc-category-empty><td class="sc-table-state" colspan="5"<?php echo array_filter($streamcreedCategories) ? ' hidden' : ''; ?>>No categories have been created yet.</td></tr>
-				</tbody>
-			</table>
-		</div>
-	</div>
-</section>
+<section class="sc-categories" data-sc-categories><div class="sc-page-heading"><div><p class="sc-eyebrow">Content Setup</p><h1>Streaming Categories</h1></div><div class="sc-page-actions"><?php if($streamcreedCanAdd):?><a class="sc-button sc-button-primary" href="stream_category"><i class="fe-plus"></i> Add category</a><?php endif;?></div></div>
+<div class="sc-category-manager"><nav class="sc-category-tabs" role="tablist"><?php $first=true;foreach($types as $id=>[$key,$icon,$label]):?><button type="button" role="tab" data-sc-category-tab="<?php echo $id;?>" class="<?php echo $first?'is-active':'';?>"><i class="<?php echo $icon;?>"></i><span><?php echo $label;?></span><small><?php echo count($streamcreedCategories[$id]??[]);?></small></button><?php $first=false;endforeach;?></nav>
+<?php $first=true;foreach($types as $id=>[$key,$icon,$label]):?><section class="sc-category-panel" data-sc-category-panel="<?php echo $id;?>"<?php echo $first?'':' hidden';?>><div class="sc-category-panel-head"><div><h2><?php echo $label;?></h2><p>Drag categories into the required display order, then save the changes.</p></div><label class="sc-search-field"><i class="fe-search"></i><input type="search" placeholder="Search <?php echo strtolower($label);?>" data-sc-category-search></label></div><div class="sc-category-list" data-sc-category-list><?php foreach($streamcreedCategories[$id]??[] as $category):?><?php $categoryId=intval($category['id']);$categoryName=(string)$category['category_name'];?><article class="sc-category-item" draggable="true" data-id="<?php echo $categoryId;?>" data-search="<?php echo htmlspecialchars(strtolower($categoryId.' '.$categoryName),ENT_QUOTES,'UTF-8');?>"><i class="fe-menu sc-category-handle"></i><div><strong><?php echo htmlspecialchars($categoryName,ENT_QUOTES,'UTF-8');?></strong><small>#<?php echo $categoryId;?></small></div><?php if(!empty($category['is_adult'])):?><span class="sc-tag is-trial">Adult</span><?php endif;?><div class="sc-category-actions"><?php if($streamcreedCanEdit):?><a href="stream_category?id=<?php echo $categoryId;?>" aria-label="Edit"><i class="fe-edit-2"></i></a><button type="button" data-sc-category-delete="<?php echo $categoryId;?>" aria-label="Delete"><i class="fe-trash-2"></i></button><?php endif;?></div></article><?php endforeach;?><p class="sc-category-empty" data-sc-category-empty<?php echo !empty($streamcreedCategories[$id])?' hidden':'';?>>No categories in this section.</p></div><div class="sc-form-error" data-sc-category-error hidden></div><div class="sc-category-save"><button type="button" class="sc-button sc-button-primary" data-sc-category-save>Save order</button></div></section><?php $first=false;endforeach;?></div></section>
