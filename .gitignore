@@ -1,7 +1,9 @@
 .vscode/
 dist/
 .DS_Store
+._*
 .env
+XC_VM.zip
 __pycache__/
 *.pyc
 *.phpunit.result.cache
@@ -12,6 +14,12 @@ EXTENSION.md
 src/tmp/**
 !src/tmp/**/
 !src/tmp/**/.gitkeep
+
+# Installed modules & runtime asset symlinks
+src/Modules/**
+!src/Modules/**/
+!src/Modules/**/.gitkeep
+src/Public/assets/reseller
 tests/.cache/
 # Runtime test scratch dir created by tests/bootstrap.php (bin/, vod/, fake_bin)
 tests/.tmp/

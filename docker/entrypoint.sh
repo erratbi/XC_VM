@@ -18,10 +18,17 @@ echo "==> [XC_VM Dev] Booting development container..."
 
 # 1. Setup multiarch library links if on ARM64
 if [ -d /usr/x86_64-linux-gnu/lib ]; then
-    mkdir -p /lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu /lib64
+    mkdir -p /lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu /lib64 /usr/local/lib
     ln -sf /usr/x86_64-linux-gnu/lib/* /lib/x86_64-linux-gnu/ 2>/dev/null || true
     ln -sf /usr/x86_64-linux-gnu/lib/* /usr/lib/x86_64-linux-gnu/ 2>/dev/null || true
     ln -sf /usr/x86_64-linux-gnu/lib/ld-linux-x86-64.so.2 /lib64/ld-linux-x86-64.so.2 2>/dev/null || true
+fi
+if [ -d /home/xc_vm/bin/ffmpeg_bin/lib ]; then
+    mkdir -p /usr/local/lib
+    cp -d /home/xc_vm/bin/ffmpeg_bin/lib/* /usr/local/lib/ 2>/dev/null || true
+    cp -d /home/xc_vm/bin/ffmpeg_bin/lib/* /usr/lib/x86_64-linux-gnu/ 2>/dev/null || true
+    echo "/usr/local/lib" > /etc/ld.so.conf.d/xcvm-ffmpeg.conf
+    ldconfig 2>/dev/null || true
 fi
 
 # 2. Wait for MariaDB to be ready
@@ -40,10 +47,29 @@ echo "==> [XC_VM Dev] Redis is reachable!"
 
 # 4. Create required runtime directories and set permissions
 mkdir -p /home/xc_vm/content/streams /home/xc_vm/tmp /home/xc_vm/storage /home/xc_vm/config /home/xc_vm/bin/nginx/sbin /home/xc_vm/bin/nginx/conf/codes /home/xc_vm/bin/nginx/logs /home/xc_vm/bin/php/sockets /home/xc_vm/bin/php/sessions /var/lib/nginx/body /var/lib/nginx/fastcgi /var/lib/nginx/proxy /var/lib/nginx/uwsgi /var/lib/nginx/scgi
+chmod 1777 /tmp /home/xc_vm/tmp /home/xc_vm/content/streams 2>/dev/null || true
 chown -R xc_vm:xc_vm /home/xc_vm/content/streams /home/xc_vm/tmp /home/xc_vm/storage /home/xc_vm/config /home/xc_vm/bin/nginx/logs /home/xc_vm/bin/php /var/lib/nginx 2>/dev/null || true
 chmod 777 /home/xc_vm/config 2>/dev/null || true
-chmod 1777 /home/xc_vm/tmp /home/xc_vm/content/streams 2>/dev/null || true
 touch /var/log/php-fpm.log && chmod 666 /var/log/php-fpm.log
+
+# 4.1. Fallback: Download distribution PHP binaries if missing
+if [ ! -f /home/xc_vm/bin/php/sbin/php-fpm ]; then
+    echo "==> [XC_VM Dev] Installing distribution PHP binaries..."
+    BIN_TAG=$(curl -s https://api.github.com/repos/Vateron-Media/XC_VM_Binaries/releases/latest | grep '"tag_name":' | head -n 1 | cut -d '"' -f 4)
+    BIN_TAG="${BIN_TAG:-29062026}"
+    mkdir -p /tmp/xcvm_extract /home/xc_vm/bin
+    curl -sL "https://github.com/Vateron-Media/XC_VM_Binaries/releases/download/${BIN_TAG}/ubuntu_24.tar.gz" -o /tmp/ubuntu_24.tar.gz
+    tar -xzf /tmp/ubuntu_24.tar.gz -C /tmp/xcvm_extract/
+    if [ -d /tmp/xcvm_extract/bin/php ]; then
+        cp -r /tmp/xcvm_extract/bin/php /home/xc_vm/bin/
+    elif [ -d /tmp/xcvm_extract/ubuntu_24/bin/php ]; then
+        cp -r /tmp/xcvm_extract/ubuntu_24/bin/php /home/xc_vm/bin/
+    fi
+    chmod -R 755 /home/xc_vm/bin/php 2>/dev/null || true
+    chmod +x /home/xc_vm/bin/php/bin/* /home/xc_vm/bin/php/sbin/* 2>/dev/null || true
+    chown -R xc_vm:xc_vm /home/xc_vm/bin/php 2>/dev/null || true
+    rm -rf /tmp/ubuntu_24.tar.gz /tmp/xcvm_extract
+fi
 
 # 5. Write config.ini if config.enc does not exist
 if [ ! -f /home/xc_vm/config/config.enc ]; then
@@ -93,7 +119,24 @@ location ^~ /${ADMIN_CODE}/assets/ {
     add_header Cache-Control "no-cache";
 }
 
-location ^~ /${ADMIN_CODE} {
+location ~ ^/${ADMIN_CODE}/(live|vod|timeshift|thumb|proxy_api)$ {
+    limit_req zone=one burst=8;
+    include limit_queue.conf;
+    fastcgi_index index.php;
+    fastcgi_pass php;
+    include fastcgi_params;
+    fastcgi_buffering on;
+    fastcgi_buffers 128 32k;
+    fastcgi_buffer_size 32k;
+    fastcgi_busy_buffers_size 128k;
+    fastcgi_max_temp_file_size 0;
+    fastcgi_keep_conn on;
+    fastcgi_param SCRIPT_FILENAME /home/xc_vm/Public/admin/index.php;
+    fastcgi_param SCRIPT_NAME /public/admin/index.php;
+    fastcgi_param XC_ADMIN \$1;
+}
+
+location /${ADMIN_CODE} {
     alias /home/xc_vm/Public/Views/admin;
     try_files \$uri \$uri.html @fc_${ADMIN_CODE};
     
@@ -148,17 +191,17 @@ sudo /home/xc_vm/bin/php/bin/php /home/xc_vm/console.php startup >/dev/null 2>&1
 echo "==> [XC_VM Dev] Checking administrator account..."
 sudo /home/xc_vm/bin/php/bin/php -r "
 require_once '/home/xc_vm/bootstrap.php';
-\$db = \XcVm\Core\Database\DatabaseFactory::getConnection();
+\XC_Bootstrap::boot(\XcVm\Core\Enum\BootContext::Cli, ['process' => 'AdminInit']);
+\$db = \XcVm\Infrastructure\Database\DatabaseFactory::get();
 if (\$db) {
     \$res = \$db->query('SELECT COUNT(\`id\`) AS \`count\` FROM \`users\` LEFT JOIN \`users_groups\` ON \`users_groups\`.\`group_id\` = \`users\`.\`member_group_id\` WHERE \`users_groups\`.\`is_admin\` = 1');
     if (\$res && \$db->get_row()['count'] == 0) {
         \$user = '${ADMIN_USER}';
         \$pass = '${ADMIN_PASS}';
         \$email = '${ADMIN_EMAIL}';
-        \$hash = \XcVm\Core\Auth\Authenticator::hashPassword(\$pass);
+        \$hash = crypt(\$pass, '\\\$6\\\$rounds=20000\\\$' . md5(random_bytes(16)) . '\\\$');
         \$db->query('INSERT INTO \`users\` (\`username\`, \`password\`, \`email\`, \`member_group_id\`, \`date_registered\`, \`last_login\`, \`ip\`, \`status\`) VALUES (?, ?, ?, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), \"127.0.0.1\", 1)', \$user, \$hash, \$email);
         \$db->query('UPDATE \`servers\` SET \`server_ip\` = \"127.0.0.1\" WHERE \`is_main\` = 1 LIMIT 1');
-        \$db->query('UPDATE \`settings\` SET \`live_streaming_pass\` = ? WHERE \`id\` = 1', \XcVm\Core\Util\AdminHelpers::generateString(25));
         echo '==> [XC_VM Dev] Fresh installation initialized! Default admin created: ' . \$user . PHP_EOL;
     }
 }

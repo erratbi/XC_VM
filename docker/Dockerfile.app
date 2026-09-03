@@ -7,7 +7,7 @@ ENV TZ=UTC
 
 # Install native system utilities and runtime tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    sudo cron curl unzip iproute2 net-tools ca-certificates \
+    sudo cron curl wget xz-utils unzip iproute2 net-tools ca-certificates \
     procps psmisc netcat-openbsd mariadb-client \
     libmaxminddb0 libxml2 libsodium23 \
     && apt-get clean \

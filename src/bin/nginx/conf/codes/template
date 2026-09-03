@@ -7,7 +7,24 @@ location ^~ /#CODE#/assets/ {
     add_header Cache-Control "no-cache";
 }
 
-location ^~ /#CODE# {
+location ~ ^/#CODE#/(live|vod|timeshift|thumb|proxy_api)$ {
+    limit_req zone=one burst=8;
+    include limit_queue.conf;
+    fastcgi_index index.php;
+    fastcgi_pass php;
+    include fastcgi_params;
+    fastcgi_buffering on;
+    fastcgi_buffers 128 32k;
+    fastcgi_buffer_size 32k;
+    fastcgi_busy_buffers_size 128k;
+    fastcgi_max_temp_file_size 0;
+    fastcgi_keep_conn on;
+    fastcgi_param SCRIPT_FILENAME /home/xc_vm/Public/admin/index.php;
+    fastcgi_param SCRIPT_NAME /public/admin/index.php;
+    fastcgi_param XC_ADMIN $1;
+}
+
+location /#CODE# {
     alias /home/xc_vm/#ALIAS#;
     try_files $uri $uri.html @fc_#CODE#;
     #WHITELIST#
