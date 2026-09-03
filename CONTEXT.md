@@ -1,6 +1,6 @@
 # CONTEXT.md — XC_VM System & Streaming Architecture
 
-This document provides complete, high-density context for AI agents working in this repository. It documents recent additions, streaming pipeline mechanics, DASH Clearkey DRM handling, HTTP redirect resolution, security settings, and deployment conventions.
+This document provides complete, high-density context for developers and AI agents working in this repository. It documents architectural invariants, the theme isolation layer, streaming pipeline mechanics, DASH Clearkey DRM handling, HTTP redirect resolution, Docker development environment details, security settings, and deployment conventions.
 
 ---
 
@@ -9,16 +9,81 @@ This document provides complete, high-density context for AI agents working in t
 * **Upstream Repository:** [Vateron-Media/XC_VM](https://github.com/Vateron-Media/XC_VM)
 * **Active Working Fork:** [erratbi/XC_VM](https://github.com/erratbi/XC_VM) (`main` branch)
 * **Application Root:** `src/` (deployed verbatim to `/home/xc_vm/` on servers, aliased to `MAIN_HOME`).
-* **Technology Stack:** PHP 8.1+ (PSR-4 autoloading via `XcVm\` namespace), Nginx, Redis, MySQL/MariaDB, FFmpeg/FFprobe.
-* **Database Access:** Classes use `\XcVm\Infrastructure\Database\DatabaseAware` and call `self::db()`.
+* **Technology Stack:** PHP 8.1+ (PSR-4 autoloading via `XcVm\` namespace), Nginx, Redis, MariaDB 10.11, FFmpeg/FFprobe.
+* **Database Access:** Core classes use `\XcVm\Infrastructure\Database\DatabaseAware` (`self::db()`) or `DatabaseFactory::get()`.
 
 ---
 
-## 2. Ingestion & Streaming Engine Architecture
+## 2. Absolute Architectural Rules & Invariants (CRITICAL)
+
+### A. Theme Layer Isolation (Never Touch Core for Themes)
+* **Rule:** StreamCreed (`src/Public/Views/streamcreed/`, `src/Public/assets/admin/streamcreed/`) is an overlay theme.
+* **Core files must remain 100% untouched:** Never edit core controllers (e.g. [`src/Public/Controllers/Admin/TableController.php`](file:///Users/amir/work/IPTV/project_manhattan/XC_VM/xtream_ui/src/Public/Controllers/Admin/TableController.php)), domain models, or legacy views in `src/Public/Views/admin/` to accommodate theme aesthetics, formatting, or data structures.
+* **Legacy Compatibility:** The original legacy theme must remain completely intact and functional at all times.
+* **Theme-Side Adaptation:** Any data normalization, HTML tag stripping, status badge rendering, or layout adaptation **must** be implemented inside the theme layer (client-side JS in `src/Public/assets/admin/streamcreed/` or theme views in `src/Public/Views/streamcreed/`).
+
+### B. Git Workflow Rules
+* Commit logically with atomic Conventional Commits (`feat(...)`, `fix(...)`, `ci(...)`).
+* **Never push to remote (`git push`)** unless explicitly instructed by the user.
+* Keep the working tree clean and test every change.
+
+### C. IonCube Loader & PHP CLI Testing Caveat
+* The bundled PHP distribution includes the ionCube loader extension, which hooks into PHP's compilation engine.
+* Running `php -l` without the `-n` flag causes an immediate **segmentation fault (exit code 139)** in CLI environments.
+* **Always run CLI syntax checks with `-n` (disable php.ini extensions):**
+  ```bash
+  php -n -l <filepath>
+  ```
+
+---
+
+## 3. Docker Local Development Stack (`compose.yaml`)
+
+### Topology & Ports
+* **`xcvm-app`:** Primary application container running PHP 8.1 FPM + Nginx on Ubuntu 24.
+  * HTTP: `8880` (maps to container port `80`)
+  * HTTPS: `8443` (maps to container port `443`)
+* **`mariadb`:** MariaDB 10.11 (`xtream_iptvpro` database, port `3306`).
+* **`redis`:** Redis 7.0 for session management, stream connection tracking, and caching (port `6379`).
+* **`phpmyadmin`:** Database GUI accessible at `http://localhost:8080`.
+
+### Zombie Process Reaping (`init: true`)
+* In Docker, cron runs internal maintenance jobs (`cron:root_signals`, `cron:root_mysql`) every minute.
+* Because containerized cron jobs exit frequently, their parent exits and children reparent to PID 1.
+* **`init: true`** is configured under `xcvm-app` in `compose.yaml` to run Docker's `tini` as PID 1.
+* Tini handles `SIGCHLD` and calls `waitpid()` to reap terminated child processes. Without `init: true`, zombie processes accumulate rapidly (30,000+ over a few days), exhausting the kernel `nproc` table and freezing PHP-FPM worker forking (`EAGAIN: Resource temporarily unavailable`).
+
+### Live Mounts & Nginx IPC
+* Live source directories (`Core`, `Domain`, `Streaming`, `Public`, `Infrastructure`, `Modules`, etc.) are mounted from `./src` into `/home/xc_vm/`.
+* Host `./src/bin/nginx/conf/nginx.conf` is mounted read-only into `/home/xc_vm/bin/nginx/conf/nginx.conf:ro`.
+* Nginx writes its master PID to `/home/xc_vm/bin/nginx/logs/nginx.pid` (owned by user `xc_vm`), avoiding `/run/nginx.pid` root permission errors.
+* **Nginx Route Isolation:** Streaming endpoints (`location ~ ^/admin/(live|proxy_api|thumb|timeshift|vod)$`) are strictly isolated from the front controller (`@fc_admin`) so that `/admin/api` (UI stats and AJAX) and `/admin/login` are never shadowed by cluster node streaming handlers.
+
+---
+
+## 4. StreamCreed UI Architecture
+
+StreamCreed is the modern, responsive administrative interface providing a dark/light design system built on pure Vanilla CSS and modular JavaScript.
+
+* **Views Location:** `src/Public/Views/streamcreed/admin/`
+  * `dashboard.php` — Server metrics, real-time load, connection sparklines.
+  * `stream.php` — Stream editor, source probe, adaptive streaming, track mapping, failover.
+  * `streams.php` — Live streams overview, search, category filter, connection counts, status badges.
+  * `lines.php` — User subscriptions, line credentials, connection caps, expiration badges.
+  * `mag.php`, `enigma.php`, `hmac.php` — Device management tables and activation handoffs.
+  * `bouquet.php`, `stream_category.php` — Bouquet and category management.
+* **Assets Location:** `src/Public/assets/admin/streamcreed/`
+  * `streamcreed.css` — Modern design system tokens, OKLCH color palettes, smooth transitions, mobile responsiveness.
+  * `streams.js`, `lines.js`, `mag.js`, `enigma.js`, `stream-*.js` — Self-contained ES6/Vanilla JS modules with zero dependencies.
+* **Navigation:** Drill-in collapsible sidebar categorized by Content, User Management, Device Management, and Service Setup with user group permission checks.
+
+---
+
+## 5. Ingestion & Streaming Engine Architecture
 
 ### Ingestion Protocol Flow
 1. **Source Configuration:** Sources are stored in `streams` and `streams_options` tables.
-2. **URL Normalization & Key Extraction ([`src/Core/Util/StreamUtils.php`](file:///Users/amir/Desktop/project_manhattan/XC_VM/xtream_ui/src/Core/Util/StreamUtils.php)):**
+2. **URL Normalization & Key Extraction ([`src/Core/Util/StreamUtils.php`](file:///Users/amir/work/IPTV/project_manhattan/XC_VM/xtream_ui/src/Core/Util/StreamUtils.php)):**
    * **CENC DRM Keys:** `StreamUtils::extractDecryptionKey($rURL)` extracts and normalizes Clearkey hex keys from query strings or pipe parameters:
      * `?decryption_key=KID1:KEY1,KID2:KEY2,...` $\implies$ returns formatted `"KID1:KEY1,KID2:KEY2,..."`
      * `?decryption_key=KID:KEY` $\implies$ returns formatted `"KID:KEY"`
@@ -26,49 +91,47 @@ This document provides complete, high-density context for AI agents working in t
      * `|decryption_key=KID1:KEY1,KID2:KEY2` $\implies$ returns formatted `"KID1:KEY1,KID2:KEY2"`
    * **Proxy Extraction:** `StreamUtils::extractProxy($rURL, $rFetchArguments)` extracts HTTP proxies from query params (`?proxy=...`, `?http_proxy=...`), pipe syntax (`|proxy=...`), or FFmpeg args (`-http_proxy '...'`).
    * **HTTP Redirects:** `StreamUtils::parseStreamURL($rURL, $rProxy)` resolves 301/302 redirects via `CurlClient::getEffectiveURL($rURL, 4, $userAgent, $rProxy)` to find the final `.mpd` manifest URL on the CDN.
-3. **FFmpeg Command Generation ([`src/Domain/Stream/StreamProcess.php`](file:///Users/amir/Desktop/project_manhattan/XC_VM/xtream_ui/src/Domain/Stream/StreamProcess.php)):**
-   * If decryption keys are present, `-decryption_key '<KEYS>'` is automatically appended to `$rFetchOptions` and `$rProbeOptions` before `-i '<EFFECTIVE_URL>'`.
-4. **Stream Prober ([`src/Streaming/Codec/FFprobeRunner.php`](file:///Users/amir/Desktop/project_manhattan/XC_VM/xtream_ui/src/Streaming/Codec/FFprobeRunner.php)):**
-   * `FFprobeRunner::probeStream($url)` resolves the effective URL via proxy, attaches `-decryption_key '<KEYS>'`, and invokes FFprobe with JSON output.
+3. **FFmpeg Command Generation ([`src/Domain/Stream/StreamProcess.php`](file:///Users/amir/work/IPTV/project_manhattan/XC_VM/xtream_ui/src/Domain/Stream/StreamProcess.php)):**
+   * Decryption keys are appended via `-decryption_key '<KEYS>'` before `-i '<EFFECTIVE_URL>'`.
+   * Live network reconnect options (`-reconnect 1 -reconnect_at_eof 1 -reconnect_streamed 1 -reconnect_delay_max 5`) maintain stream stability during upstream hiccups.
+   * Container format detection disables `-re` for DASH streams to preserve native segment delivery rate.
+4. **Stream Prober ([`src/Streaming/Codec/FFprobeRunner.php`](file:///Users/amir/work/IPTV/project_manhattan/XC_VM/xtream_ui/src/Streaming/Codec/FFprobeRunner.php)):**
+   * `FFprobeRunner::probeStream($url)` resolves the effective URL via proxy, attaches `-decryption_key '<KEYS>'`, and invokes FFprobe with structured JSON output.
 
 ---
 
-## 3. Critical Gotchas & Troubleshooting
+## 6. Critical Gotchas & Troubleshooting
 
 ### A. DASH Relative Segments Behind 302 Redirects
-* **Symptom:** FFmpeg fails to fetch `.m4s` segments with `404 Not Found` when source URL is a proxy that returns HTTP 302 redirect to a CDN.
+* **Symptom:** FFmpeg fails to fetch `.m4s` segments with `404 Not Found` when source URL is a proxy that returns an HTTP 302 redirect to a CDN.
 * **Cause:** FFmpeg's DASH demuxer (`dashdec.c`) computes relative segment URLs against the *input URL* rather than the *redirect target*.
-* **Fix:** [`CurlClient::getEffectiveURL()`](file:///Users/amir/Desktop/project_manhattan/XC_VM/xtream_ui/src/Core/Http/CurlClient.php) resolves the target URL before FFmpeg is executed.
+* **Fix:** [`CurlClient::getEffectiveURL()`](file:///Users/amir/work/IPTV/project_manhattan/XC_VM/xtream_ui/src/Core/Http/CurlClient.php) resolves the target URL before FFmpeg is executed.
 
 ### B. Subnet IP Matching (`ip_subnet_match`)
 * **Symptom:** Client requests return 404/401 when accessing streams generated by the web panel or client apps.
-* **Cause:** If client IP differs across requests (e.g., Docker NAT `192.168.97.1` vs `192.168.97.0`, mobile networks, multi-WAN), token verification fails if subnet matching is disabled.
+* **Cause:** If client IP differs across requests (Docker NAT `192.168.97.1` vs `192.168.97.0`, mobile networks, multi-WAN), token verification fails if subnet matching is disabled.
 * **Setting:** Database `settings.ip_subnet_match` (UI: **Settings** $\to$ **Security** $\to$ **`Match Subnet of IP`**). Keep enabled (`1`).
 
-### C. Bootstrap & Globals in CLI, Docker, and `php -r` Tests
-* **Crucial for CLI / Docker testing:** Merely running `require "/home/xc_vm/bootstrap.php";` only registers autoloaders and does **not** connect to the database or populate `$GLOBALS`.
-* If writing a scratch script or running `php -r` in Docker/CLI, you **must** explicitly call `XC_Bootstrap::boot()`:
+### C. Database Strict Mode & Timestamp Handling
+* **Symptom:** `SQLSTATE[HY000]: General error: 1364 Field 'date_added' doesn't have a default value` or invalid default value for `CURRENT_TIMESTAMP`.
+* **Fix:** [`QueryHelper::verifyPostTable()`](file:///Users/amir/work/IPTV/project_manhattan/XC_VM/xtream_ui/src/Core/Database/QueryHelper.php) checks column defaults and skips emitting explicit string literals for `current_timestamp()` defaults on INSERT.
+
+### D. Multi-Server Cluster Streaming
+* [`ApiClient::queryServer()`](file:///Users/amir/work/IPTV/project_manhattan/XC_VM/xtream_ui/src/Core/Http/ApiClient.php) handles parallel multi-cURL dispatch across cluster nodes when starting, stopping, or probing streams across multiple server nodes.
+
+### E. Bootstrap & Globals in CLI Scratch Scripts
+* Merely including `bootstrap.php` only registers autoloaders.
+* For CLI scripts, always boot with explicit context:
   ```php
   require_once "/home/xc_vm/bootstrap.php";
-  XC_Bootstrap::boot(XC_Bootstrap::CONTEXT_CLI, ["process" => "XC_VM[Test]"]);
+  \XC_Bootstrap::boot(\XcVm\Core\Enum\BootContext::Cli, ["process" => "XC_VM[Test]"]);
   ```
-* This triggers `LegacyInitializer::initCore()`, which executes `DatabaseFactory::connect()`, resolves `FfmpegPaths::resolve()`, and runs `LegacyInitializer::exportGlobals()`, correctly populating `$GLOBALS['rSettings']`, `$GLOBALS['rServers']`, and `$GLOBALS['rFFPROBE']`.
-* In production application code, prefer direct singleton calls where possible: `SettingsManager::getAll()`, `ServerRepository::getAll()`, and `FfmpegPaths::probe()`.
 
 ---
 
-## 4. Module System vs. Core Engine Boundaries
+## 7. VPS Deployment & Updating
 
-* **Core Engine (`src/Core/`, `src/Domain/`, `src/Streaming/`):**
-  * Core video/audio pipeline, FFmpeg arguments, DRM key extraction, HLS/DASH demuxing, URL resolution, authentication guards, load balancer distribution.
-* **Module System (`src/Modules/<name>_<hash5>/`):**
-  * Plugins, custom APIs, third-party payment/CRM integrations, custom admin pages, UI widgets, and custom CLI commands. Modules own their own schema migrations in `migrations/<semver>.up.sql`.
-
----
-
-## 5. VPS Deployment & Updating
-
-### To apply local fork patches to a live VPS:
+### To apply local fork patches to a live production server:
 ```bash
 # Clone the patched fork into a temporary staging folder
 git clone https://github.com/erratbi/XC_VM.git /tmp/xc_vm_patch
@@ -81,11 +144,3 @@ chown -R xc_vm:xc_vm /home/xc_vm/
 /home/xc_vm/service restart
 rm -rf /tmp/xc_vm_patch
 ```
-
----
-
-## 6. Development Rules & Guidelines
-
-1. **Working Directory:** All code changes belong in `src/`.
-2. **Git Workflow:** Commit logically with Conventional Commits (`feat(...)`, `fix(...)`). Never push to remote (`git push`) unless explicitly requested by the user.
-3. **No Unnecessary Dependencies:** Keep core clean, fast, and dependency-light.
