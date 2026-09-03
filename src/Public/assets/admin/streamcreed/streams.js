@@ -49,6 +49,12 @@
 	var failuresCloseX = failuresDialog ? failuresDialog.querySelector('[data-sc-failures-close]') : null;
 	var failuresItem = null;
 
+	// EPG schedule dialog
+	var epgDialog = document.querySelector('[data-sc-epg-dialog]');
+	var epgTitle = epgDialog ? epgDialog.querySelector('[data-sc-epg-title]') : null;
+	var epgRows = epgDialog ? epgDialog.querySelector('[data-sc-epg-rows]') : null;
+	var epgClose = epgDialog ? epgDialog.querySelector('[data-sc-epg-close]') : null;
+
 	// Action menu dropdown
 	var actionMenu = element('div', 'sc-row-action-menu');
 	var activeActionTrigger = null;
@@ -196,6 +202,12 @@
 				}));
 			}
 
+			if (item.has_epg) {
+				actionMenu.appendChild(menuAction('View EPG', 'fe-calendar', function () {
+					openEPG(item);
+				}));
+			}
+
 			actionMenu.appendChild(menuAction('Restarts & logs', 'fe-activity', function () {
 				openFailures(item);
 			}));
@@ -242,18 +254,60 @@
 
 		var label = resolveStatusLabel(current);
 
-		// 1. Status badge
-		var statusBadge = tr.querySelector('[data-sc-status]');
-		if (statusBadge) {
-			statusBadge.className = 'sc-row-status ' + statusClass(current.status);
-			statusBadge.textContent = label;
+		// 1. Status badge & restarts pill
+		var statusTd = tr.querySelector('.sc-col-status');
+		if (statusTd) {
+			var statusCell = statusTd.querySelector('.sc-status-cell');
+			if (statusCell) {
+				var statusBadge = statusCell.querySelector('[data-sc-status]');
+				if (statusBadge) {
+					statusBadge.className = 'sc-row-status ' + statusClass(current.status);
+					statusBadge.textContent = label;
+				}
+				var rBtn = statusCell.querySelector('.sc-restarts-pill');
+				var restarts = Number(current.restarts || 0);
+				if (restarts > 0 && Number(current.status) === 1) {
+					var level = current.failures_level || (restarts <= 2 ? 'success' : (restarts <= 4 ? 'info' : (restarts <= 144 ? 'warning' : 'danger')));
+					if (!rBtn) {
+						rBtn = element('button', 'sc-restarts-pill is-' + level);
+						rBtn.type = 'button';
+						rBtn.title = restarts + ' restart' + (restarts === 1 ? '' : 's') + ' (Click to view logs)';
+						rBtn.appendChild(element('i', restarts > 2 ? 'fe-alert-triangle' : 'fe-check'));
+						rBtn.appendChild(document.createTextNode(' ' + restarts));
+						rBtn.addEventListener('click', function (e) {
+							e.stopPropagation();
+							openFailures(current);
+						});
+						statusCell.appendChild(rBtn);
+					} else {
+						rBtn.className = 'sc-restarts-pill is-' + level;
+						rBtn.title = restarts + ' restart' + (restarts === 1 ? '' : 's') + ' (Click to view logs)';
+						rBtn.replaceChildren(element('i', restarts > 2 ? 'fe-alert-triangle' : 'fe-check'), document.createTextNode(' ' + restarts));
+					}
+				} else if (rBtn) {
+					rBtn.remove();
+				}
+			}
 		}
 
-		// 2. Server name
+		// 2. Server name & IP
 		var serverTd = tr.querySelector('[data-sc-server]');
 		if (serverTd && current.server) {
-			var sName = stripHtml(current.server) || '—';
-			if (serverTd.textContent !== sName) serverTd.textContent = sName;
+			var sCell = serverTd.querySelector('.sc-server-cell');
+			if (sCell) {
+				var sName = sCell.querySelector('.sc-server-name');
+				if (sName) sName.textContent = stripHtml(current.server) || '—';
+				var sIp = sCell.querySelector('.sc-server-ip');
+				if (current.server_ip) {
+					if (sIp) {
+						sIp.textContent = current.server_ip;
+					} else {
+						sCell.appendChild(element('span', 'sc-server-ip', current.server_ip));
+					}
+				} else if (sIp) {
+					sIp.remove();
+				}
+			}
 		}
 
 		// 3. Connections
@@ -274,17 +328,21 @@
 		var uptimeTd = tr.querySelector('[data-sc-uptime]');
 		if (uptimeTd) {
 			var upText = resolveUptime(current, label);
-			if (uptimeTd.textContent !== upText) uptimeTd.textContent = upText;
+			var upSpan = uptimeTd.querySelector('.sc-uptime-text');
+			if (upSpan) {
+				upSpan.textContent = upText;
+			} else {
+				uptimeTd.textContent = upText;
+			}
 		}
 
-		// 5. Bitrate
-		var bitrateTd = tr.querySelector('[data-sc-bitrate]');
-		if (bitrateTd) {
-			var bText = current.bitrate ? current.bitrate + ' Kbps' : '—';
-			if (bitrateTd.textContent !== bText) bitrateTd.textContent = bText;
+		// 5. Stream Info
+		var infoTd = tr.querySelector('[data-sc-streaminfo]');
+		if (infoTd) {
+			infoTd.replaceChildren(buildStreamInfo(current));
 		}
 
-		// 6. If action menu is open for this row, refresh its buttons (e.g. Stop vs Start)
+		// 6. If action menu is open for this row, refresh its buttons
 		if (!actionMenu.hidden && activeMenuItem && String(activeMenuItem.id) === streamId) {
 			populateActionMenu(current);
 		}
@@ -652,6 +710,107 @@
 	window.addEventListener('resize', closeActionMenu);
 	window.addEventListener('scroll', closeActionMenu, true);
 
+	function openEPG(item) {
+		if (!epgDialog) return;
+		var title = item.stream_display_name || stripHtml(item.name) || ('Stream #' + item.id);
+		if (epgTitle) epgTitle.textContent = title + ' — EPG Schedule';
+		if (epgRows) {
+			epgRows.replaceChildren();
+			var tr = element('tr');
+			var td = element('td', 'sc-table-state', 'Loading EPG schedule…');
+			td.colSpan = 3;
+			tr.appendChild(td);
+			epgRows.appendChild(tr);
+		}
+		epgDialog.showModal();
+
+		fetch(endpoint + '?id=epg_modal&stream_id=' + encodeURIComponent(item.id), {
+			credentials: 'same-origin',
+			headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+		}).then(function (res) {
+			if (!res.ok) throw new Error('Failed to load EPG');
+			return res.json();
+		}).then(function (data) {
+			if (!epgRows) return;
+			epgRows.replaceChildren();
+			var items = Array.isArray(data.data) ? data.data : [];
+			if (!items.length) {
+				var emptyTr = element('tr');
+				var emptyTd = element('td', 'sc-table-state', 'No EPG schedule data available for this stream.');
+				emptyTd.colSpan = 3;
+				emptyTr.appendChild(emptyTd);
+				epgRows.appendChild(emptyTr);
+				return;
+			}
+			items.forEach(function (row) {
+				var rtr = element('tr');
+				rtr.appendChild(element('td', 'sc-table-secondary', row[0] || '—'));
+				rtr.appendChild(element('td', '', stripHtml(row[1] || '—')));
+				rtr.appendChild(element('td', 'sc-table-secondary', stripHtml(row[2] || '—')));
+				epgRows.appendChild(rtr);
+			});
+		}).catch(function () {
+			if (!epgRows) return;
+			epgRows.replaceChildren();
+			var errTr = element('tr');
+			var errTd = element('td', 'sc-table-state is-error', 'Failed to load EPG schedule.');
+			errTd.colSpan = 3;
+			errTr.appendChild(errTd);
+			epgRows.appendChild(errTr);
+		});
+	}
+
+	if (epgClose && epgDialog) {
+		epgClose.addEventListener('click', function () { epgDialog.close(); });
+	}
+	if (epgDialog) {
+		epgDialog.addEventListener('click', function (e) {
+			if (e.target === epgDialog) epgDialog.close();
+		});
+	}
+
+	function buildStreamInfo(item) {
+		var statusNum = Number(item.status);
+		var hasTechInfo = (item.bitrate > 0 || (item.width && item.width !== '?') || (item.video_codec && item.video_codec !== 'N/A'));
+		if ((statusNum === 1 || statusNum === 4 || hasTechInfo) && (item.bitrate || item.width || item.video_codec)) {
+			var specs = element('div', 'sc-stream-specs');
+
+			// Line 1: Primary specs (Resolution • Bitrate • FPS)
+			var pLine = element('div', 'sc-specs-primary');
+			var res = (item.width && item.height && item.width !== '?') ? (item.width + '×' + item.height) : (item.width || '');
+			if (res) {
+				pLine.appendChild(element('span', 'sc-spec-res', res));
+			}
+			if (item.bitrate) {
+				if (res) pLine.appendChild(element('span', 'sc-spec-sep', '•'));
+				pLine.appendChild(element('span', 'sc-spec-bitrate', Number(item.bitrate).toLocaleString() + ' Kbps'));
+			}
+			if (item.fps && item.fps !== '--') {
+				if (res || item.bitrate) pLine.appendChild(element('span', 'sc-spec-sep', '•'));
+				pLine.appendChild(element('span', 'sc-spec-fps', item.fps));
+			}
+			specs.appendChild(pLine);
+
+			// Line 2: Secondary badges (Codecs & Speed)
+			var sLine = element('div', 'sc-specs-secondary');
+			if (item.video_codec && item.video_codec !== 'N/A') {
+				sLine.appendChild(element('span', 'sc-spec-badge', item.video_codec));
+			}
+			if (item.audio_codec && item.audio_codec !== 'N/A') {
+				sLine.appendChild(element('span', 'sc-spec-badge', item.audio_codec));
+			}
+			if (item.speed && item.speed !== '1x') {
+				sLine.appendChild(element('span', 'sc-spec-badge', item.speed));
+			}
+			if (sLine.children.length > 0) {
+				specs.appendChild(sLine);
+			}
+			return specs;
+		}
+
+		return element('span', 'sc-spec-empty', 'No stream data');
+	}
+
 	function addStateRow(message, isError) {
 		rows.replaceChildren();
 		var tr = element('tr');
@@ -666,42 +825,90 @@
 		tr.dataset.streamId = String(item.id);
 		currentStreams[String(item.id)] = item;
 
-		// 1. Stream identity column
-		var td = element('td');
-		var identity = element('div', 'sc-table-identity');
-		var streamName = stripHtml(item.name) || 'Untitled stream';
+		// 1. Stream column (Logo + Name + #ID • Category)
+		var streamTd = element('td', 'sc-col-stream');
+		var streamCell = element('div', 'sc-stream-cell');
+
+		var thumbWrap = element(item.icon && item.icon.trim() ? 'a' : 'div', 'sc-stream-thumb-wrap');
+		if (item.icon && item.icon.trim()) {
+			thumbWrap.href = 'javascript:void(0);';
+			thumbWrap.title = 'Logo preview';
+			var img = element('img', 'sc-stream-thumb');
+			img.src = 'resize?maxw=96&maxh=32&url=' + encodeURIComponent(item.icon.trim());
+			img.alt = '';
+			img.loading = 'lazy';
+			thumbWrap.appendChild(img);
+			thumbWrap.addEventListener('click', function (e) {
+				e.stopPropagation();
+				if (playerDialog && playerFrame) {
+					playerFrame.src = 'resize?maxw=512&maxh=512&url=' + encodeURIComponent(item.icon.trim());
+					playerDialog.showModal();
+				}
+			});
+		} else {
+			thumbWrap.appendChild(element('i', 'fe-tv sc-stream-thumb-placeholder'));
+		}
+		streamCell.appendChild(thumbWrap);
+
+		var metaDiv = element('div', 'sc-stream-meta');
+		var streamName = stripHtml(item.stream_display_name || item.name) || 'Untitled stream';
 		var title;
 		if (canEdit) {
-			title = element('a', '', streamName);
+			title = element('a', 'sc-stream-name', streamName);
 			title.href = 'stream?id=' + encodeURIComponent(item.id);
 		} else {
-			title = element('strong', '', streamName);
+			title = element('span', 'sc-stream-name', streamName);
 		}
-		var meta = '#' + item.id;
-		if (item.category) {
-			meta += ' • ' + stripHtml(item.category);
-		}
-		identity.appendChild(title);
-		identity.appendChild(element('small', '', meta));
-		td.appendChild(identity);
-		tr.appendChild(td);
+		metaDiv.appendChild(title);
 
-		// 2. Server column
-		var serverName = stripHtml(item.server) || '—';
-		var serverTd = element('td', 'sc-table-secondary', serverName);
+		var subText = '#' + (item.display_id || item.id);
+		if (item.category) {
+			subText += ' • ' + stripHtml(item.category);
+		}
+		metaDiv.appendChild(element('span', 'sc-stream-sub', subText));
+		streamCell.appendChild(metaDiv);
+
+		streamTd.appendChild(streamCell);
+		tr.appendChild(streamTd);
+
+		// 2. Server column (Server Name + IP/Host)
+		var serverTd = element('td', 'sc-col-server sc-table-secondary');
 		serverTd.setAttribute('data-sc-server', '');
+		var sCell = element('div', 'sc-server-cell');
+		sCell.appendChild(element('span', 'sc-server-name', stripHtml(item.server) || '—'));
+		if (item.server_ip) {
+			sCell.appendChild(element('span', 'sc-server-ip', item.server_ip));
+		}
+		serverTd.appendChild(sCell);
 		tr.appendChild(serverTd);
 
-		// 3. Status column
+		// 3. Status column (Status Badge + Restarts Warning)
 		var label = resolveStatusLabel(item);
-		var statusTd = element('td');
+		var statusTd = element('td', 'sc-col-status');
+		var statusCell = element('div', 'sc-status-cell');
 		var statusBadge = element('span', 'sc-row-status ' + statusClass(item.status), label);
 		statusBadge.setAttribute('data-sc-status', '');
-		statusTd.appendChild(statusBadge);
+		statusCell.appendChild(statusBadge);
+
+		var restarts = Number(item.restarts || 0);
+		if (restarts > 0 && Number(item.status) === 1) {
+			var level = item.failures_level || (restarts <= 2 ? 'success' : (restarts <= 4 ? 'info' : (restarts <= 144 ? 'warning' : 'danger')));
+			var rBtn = element('button', 'sc-restarts-pill is-' + level);
+			rBtn.type = 'button';
+			rBtn.title = restarts + ' restart' + (restarts === 1 ? '' : 's') + ' (Click to view logs)';
+			rBtn.appendChild(element('i', restarts > 2 ? 'fe-alert-triangle' : 'fe-check'));
+			rBtn.appendChild(document.createTextNode(' ' + restarts));
+			rBtn.addEventListener('click', function (e) {
+				e.stopPropagation();
+				openFailures(item);
+			});
+			statusCell.appendChild(rBtn);
+		}
+		statusTd.appendChild(statusCell);
 		tr.appendChild(statusTd);
 
 		// 4. Connections column
-		var connTd = element('td', 'sc-table-center');
+		var connTd = element('td', 'sc-col-conn sc-table-center');
 		connTd.setAttribute('data-sc-connections', '');
 		var connCount = Number(item.connections || 0);
 		if (canViewConnections && connCount > 0) {
@@ -714,30 +921,33 @@
 		tr.appendChild(connTd);
 
 		// 5. Uptime column
-		var uptimeTd = element('td', 'sc-table-secondary', resolveUptime(item, label));
+		var uptimeTd = element('td', 'sc-col-uptime sc-table-secondary');
 		uptimeTd.setAttribute('data-sc-uptime', '');
+		var upText = resolveUptime(item, label);
+		uptimeTd.appendChild(element('span', 'sc-uptime-text', upText));
 		tr.appendChild(uptimeTd);
 
-		// 6. Bitrate column
-		var bitrateText = item.bitrate ? item.bitrate + ' Kbps' : '—';
-		var bitrateTd = element('td', 'sc-table-secondary', bitrateText);
-		bitrateTd.setAttribute('data-sc-bitrate', '');
-		tr.appendChild(bitrateTd);
+		// 6. Stream Info column
+		var infoTd = element('td', 'sc-col-info');
+		infoTd.setAttribute('data-sc-streaminfo', '');
+		infoTd.appendChild(buildStreamInfo(item));
+		tr.appendChild(infoTd);
 
-		// 7. Actions column
-		var actionTd = element('td', 'sc-table-actions');
+		// 7. Actions column (Play, EPG, 3-dots)
+		var actionTd = element('td', 'sc-col-actions sc-table-actions');
 
-		if (canPlay) {
-			var playBtn = element('button', 'sc-row-action sc-row-play');
-			playBtn.type = 'button';
-			playBtn.title = 'Play stream';
-			playBtn.setAttribute('aria-label', 'Play ' + streamName);
-			playBtn.appendChild(element('i', 'fe-play'));
-			playBtn.addEventListener('click', function (event) {
+
+		if (item.has_epg || item.epg_status === 'has_data' || item.epg_status === 'assigned') {
+			var epgBtn = element('button', 'sc-row-action sc-row-epg' + (item.epg_status === 'assigned' ? ' is-assigned' : ''));
+			epgBtn.type = 'button';
+			epgBtn.title = item.epg_status === 'assigned' ? 'EPG Assigned (Waiting for schedule data)' : 'View EPG schedule';
+			epgBtn.setAttribute('aria-label', 'EPG for ' + streamName);
+			epgBtn.appendChild(element('i', 'fe-calendar'));
+			epgBtn.addEventListener('click', function (event) {
 				event.stopPropagation();
-				openPlayer(item);
+				openEPG(item);
 			});
-			actionTd.appendChild(playBtn);
+			actionTd.appendChild(epgBtn);
 		}
 
 		var trigger = element('button', 'sc-row-action sc-action-menu-trigger');

@@ -1693,7 +1693,34 @@ class TableController extends BaseAdminController {
 							$rID .= "-" . $rRow["server_id"];
 						}
 						if ($rStreamcreed) {
-							$rReturn["data"][] = ["id" => (int) $rRow["id"], "serverId" => (int) ($rRow["server_id"] ?? 0), "name" => trim(strip_tags((string) $rStreamName)), "server" => trim(strip_tags((string) $rServerName)), "connections" => (int) strip_tags((string) $rClients), "uptime" => trim(strip_tags((string) $rUptime)), "status" => (int) $rActualStatus, "statusLabel" => (string) ($rStatusArray[$rActualStatus] ?? "Unknown"), "bitrate" => (int) ($rRow["bitrate"] ?? 0), "icon" => (string) ($rRow["stream_icon"] ?? "")];
+							$rReturn["data"][] = [
+								"id" => (int) $rRow["id"],
+								"display_id" => (string) $rID,
+								"serverId" => (int) ($rRow["server_id"] ?? 0),
+								"name" => (string) ($rRow["stream_display_name"] ?? ""),
+								"stream_display_name" => (string) ($rRow["stream_display_name"] ?? ""),
+								"category" => (string) ($rCategory ?? "No Category"),
+								"server" => (string) ($rRow["server_name"] ?: "No Server Selected"),
+								"server_ip" => (string) ((isset($rRow['parent_id']) && (int)$rRow['parent_id'] > 0) ? ("loop: " . strtolower(ServerRepository::getAll()[$rRow["parent_id"]]["server_name"] ?? "")) : (strtolower(parse_url($rRow['current_source'] ?? '')['host'] ?? '') ?: ($rServers[$rRow["server_id"]]["server_ip"] ?? ""))),
+								"connections" => (int) strip_tags((string) $rClients),
+								"uptime" => trim(strip_tags((string) $rUptime)),
+								"status" => (int) $rActualStatus,
+								"statusLabel" => (string) ($rStatusArray[$rActualStatus] ?? "Unknown"),
+								"restarts" => (int) ($rFailRow[0] ?? 0),
+								"failures_level" => (!isset($rFailRow) || $rFailRow[0] <= 2) ? "success" : (($rFailRow[0] <= 4 || 21600 < $rFailRow[1]) ? "info" : (($rFailRow[0] <= 144 || 600 < $rFailRow[1]) ? "warning" : "danger")),
+								"bitrate" => is_numeric($rRow["bitrate"]) ? (int) $rRow["bitrate"] : 0,
+								"width" => (string) ($rStreamInfo["codecs"]["video"]["width"] ?? ""),
+								"height" => (string) ($rStreamInfo["codecs"]["video"]["height"] ?? ""),
+								"video_codec" => (string) ($rStreamInfo["codecs"]["video"]["codec_name"] ?? ""),
+								"audio_codec" => (string) ($rStreamInfo["codecs"]["audio"]["codec_name"] ?? ""),
+								"speed" => (string) ($rSpeed ?? "1x"),
+								"fps" => (string) ($rFPS ?? "--"),
+								"icon" => (string) ($rRow["stream_icon"] ?? ""),
+								"has_epg" => (bool) (file_exists(EPG_PATH . "stream_" . $rRow["id"]) || !empty($rRow["channel_id"])),
+								"epg_status" => file_exists(EPG_PATH . "stream_" . $rRow["id"]) ? "has_data" : (!empty($rRow["channel_id"]) ? "assigned" : "none"),
+								"stream_info_html" => (string) $rStreamInfoText,
+								"notes" => (string) ($rRow["notes"] ?? "")
+							];
 						} elseif ($rCreated) {
 							$rReturn["data"][] = ["<a href='stream_view?id=" . $rRow["id"] . "'>" . $rID . "</a>", $rIcon, $rStreamName, $rServerName, $rClients, $rUptime, $rButtons, $rPlayer, $rStreamInfoText];
 						} else {

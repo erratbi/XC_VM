@@ -91,16 +91,16 @@ if (!in_array($streamcreedDefaultEntries, [10, 25, 50, 100], true)) {
 
     <div class="sc-data-panel">
         <div class="sc-table-scroll">
-            <table class="sc-data-table">
+            <table class="sc-data-table sc-streams-table">
                 <thead>
                     <tr>
-                        <th>Stream</th>
-                        <th>Server</th>
-                        <th>Status</th>
-                        <th>Connections</th>
-                        <th>Uptime</th>
-                        <th>Bitrate</th>
-                        <th><span class="sc-visually-hidden">Actions</span></th>
+                        <th class="sc-col-stream">Stream</th>
+                        <th class="sc-col-server">Server</th>
+                        <th class="sc-col-status">Status</th>
+                        <th class="sc-col-conn">Clients</th>
+                        <th class="sc-col-uptime">Uptime</th>
+                        <th class="sc-col-info">Stream Info</th>
+                        <th class="sc-col-actions"><span class="sc-visually-hidden">Actions</span></th>
                     </tr>
                 </thead>
                 <tbody data-sc-stream-rows>
@@ -124,6 +124,33 @@ if (!in_array($streamcreedDefaultEntries, [10, 25, 50, 100], true)) {
     <div class="sc-player-scaler" data-sc-player-scaler>
         <button class="sc-player-close" type="button" data-sc-player-close title="Close (Esc)" aria-label="Close (Esc)">&#215;</button>
         <iframe class="sc-player-frame" data-sc-player-frame allow="autoplay; fullscreen" frameborder="0"></iframe>
+    </div>
+</dialog>
+
+<!-- EPG Schedule Modal Dialog -->
+<dialog class="sc-playlist-dialog sc-epg-dialog" data-sc-epg-dialog>
+    <div class="sc-dialog-heading">
+        <div>
+            <p class="sc-eyebrow">Electronic Program Guide</p>
+            <h2 data-sc-epg-title>Stream EPG</h2>
+        </div>
+        <button class="sc-dialog-close" type="button" data-sc-epg-close aria-label="Close"><i class="fe-x" aria-hidden="true"></i></button>
+    </div>
+    <div class="sc-dialog-body" style="padding: 16px 20px;">
+        <div class="sc-table-scroll">
+            <table class="sc-data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">Time</th>
+                        <th>Program Title</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody data-sc-epg-rows>
+                    <tr><td class="sc-table-state" colspan="3">Loading EPG…</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </dialog>
 
