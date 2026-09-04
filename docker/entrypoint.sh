@@ -187,6 +187,15 @@ sudo /home/xc_vm/bin/php/bin/php /home/xc_vm/console.php status 1 >/dev/null 2>&
 sudo /home/xc_vm/bin/php/bin/php /home/xc_vm/console.php status >/dev/null 2>&1 || true
 sudo /home/xc_vm/bin/php/bin/php /home/xc_vm/console.php startup >/dev/null 2>&1 || true
 
+# 11.1. Provision the free GeoLite2 country database when a fresh dev
+# container starts. The normal weekly cron maintains it afterwards. Failure is
+# non-fatal so offline development still starts, with GeoIP safely unavailable.
+if [ ! -s /home/xc_vm/bin/maxmind/GeoLite2-Country.mmdb ]; then
+    echo "==> [XC_VM Dev] Downloading the GeoLite2 Country database..."
+    sudo /home/xc_vm/bin/php/bin/php /home/xc_vm/console.php cron:maxmind >/dev/null 2>&1 \
+        || echo "==> [XC_VM Dev] GeoLite2 download unavailable; continuing without GeoIP data."
+fi
+
 # 12. Auto-seed default Administrator if database is fresh
 echo "==> [XC_VM Dev] Checking administrator account..."
 sudo /home/xc_vm/bin/php/bin/php -r "
