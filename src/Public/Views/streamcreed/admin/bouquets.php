@@ -51,14 +51,14 @@ $streamcreedCountItems = static function (array $bouquet, string $key): int {
 						$streamcreedRadio = $streamcreedCountItems($streamcreedBouquet, 'bouquet_radios');
 						$streamcreedTotal = $streamcreedLive + $streamcreedMovies + $streamcreedSeries + $streamcreedRadio;
 						?>
-						<tr data-sc-bouquet-row data-search="<?php echo htmlspecialchars(strtolower($streamcreedID . ' ' . $streamcreedName), ENT_QUOTES, 'UTF-8'); ?>">
+						<tr data-sc-bouquet-row data-bouquet-id="<?php echo $streamcreedID; ?>" data-search="<?php echo htmlspecialchars(strtolower($streamcreedID . ' ' . $streamcreedName), ENT_QUOTES, 'UTF-8'); ?>">
 							<td><div class="sc-table-identity"><?php if ($streamcreedCanEditBouquet): ?><a href="bouquet?id=<?php echo $streamcreedID; ?>"><?php echo htmlspecialchars($streamcreedName, ENT_QUOTES, 'UTF-8'); ?></a><?php else: ?><strong><?php echo htmlspecialchars($streamcreedName, ENT_QUOTES, 'UTF-8'); ?></strong><?php endif; ?><small>#<?php echo $streamcreedID; ?></small></div></td>
 							<td><?php echo number_format($streamcreedLive); ?></td>
 							<td><?php echo number_format($streamcreedMovies); ?></td>
 							<td><?php echo number_format($streamcreedSeries); ?></td>
 							<td><?php echo number_format($streamcreedRadio); ?></td>
 							<td><span class="sc-row-status is-active"><?php echo number_format($streamcreedTotal); ?> items</span></td>
-							<td class="sc-table-actions"><?php if ($streamcreedCanEditBouquet): ?><a class="sc-row-action" href="bouquet?id=<?php echo $streamcreedID; ?>">Edit</a><?php endif; ?></td>
+							<td class="sc-table-actions"><?php if ($streamcreedCanEditBouquet): ?><a class="sc-row-action" href="bouquet?id=<?php echo $streamcreedID; ?>" title="Edit bouquet"><i class="fe-edit-2" aria-hidden="true"></i></a><a class="sc-row-action" href="bouquet?duplicate=<?php echo $streamcreedID; ?>" title="Duplicate bouquet"><i class="fe-copy" aria-hidden="true"></i></a><button class="sc-row-action" type="button" title="Delete bouquet" aria-label="Delete bouquet" data-sc-bouquet-delete="<?php echo $streamcreedID; ?>"><i class="fe-trash-2" aria-hidden="true"></i></button><?php endif; ?></td>
 						</tr>
 					<?php endforeach; ?>
 					<tr data-sc-bouquet-empty<?php echo count($streamcreedBouquets) ? ' hidden' : ''; ?>><td class="sc-table-state" colspan="7">No bouquets have been created yet.</td></tr>

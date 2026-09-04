@@ -1745,6 +1745,8 @@ class TableController extends BaseAdminController {
 		if (!Authorization::check("adv", "radio") && !Authorization::check("adv", "mass_edit_radio")) {
 			exit;
 		}
+		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
+		$rStreamcreedStatusLabels = [-1 => "No server", 0 => "Stopped", 1 => "Online", 2 => "Starting", 3 => "Down", 4 => "On demand", 5 => "Direct source"];
 		$rCategories = CategoryService::getAllByType("radio");
 		$rOrder = ["`streams`.`id`", "`streams`.`stream_icon`", "`streams`.`stream_display_name`", "`server_name`", "`clients`", "`streams_servers`.`stream_started`", false, "`streams_servers`.`bitrate`"];
 		if (isset(RequestManager::getAll()["order"]) && 0 < strlen(RequestManager::getAll()["order"][0]["column"] ?? '')) {
@@ -1929,6 +1931,31 @@ class TableController extends BaseAdminController {
 						}
 						if ($rSettings["streams_grouped"] == 1) {
 							$rRow["server_id"] = -1;
+						}
+						if ($rStreamcreed) {
+							$rRadioInfo = json_decode((string) ($rRow["stream_info"] ?? ""), true);
+							if (!is_array($rRadioInfo)) {
+								$rRadioInfo = [];
+							}
+							$rRadioCategories = json_decode((string) ($rRow["category_id"] ?? "[]"), true);
+							if (!is_array($rRadioCategories)) {
+								$rRadioCategories = [];
+							}
+							$rRadioCategory = $rCategories[(int) ($rRadioCategories[0] ?? 0)]["category_name"] ?? "No Category";
+							if (count($rRadioCategories) > 1) {
+								$rRadioCategory .= " (+" . (count($rRadioCategories) - 1) . " others)";
+							}
+							$rRadioCanStop = in_array((int) $rActualStatus, [1, 2, 3, 5], true) || (int) $rRow["on_demand"] === 1;
+							$rReturn["data"][] = [
+								"id" => (int) $rRow["id"], "serverId" => (int) $rRow["server_id"],
+								"name" => trim(strip_tags((string) ($rRow["stream_display_name"] ?? ""))), "category" => trim(strip_tags((string) $rRadioCategory)),
+								"image" => (string) ($rRow["stream_icon"] ?? ""), "server" => trim(strip_tags((string) ($rRow["server_name"] ?? "No server selected"))),
+								"connections" => (int) ($rRow["clients"] ?? 0), "status" => (int) $rActualStatus,
+								"statusLabel" => $rStreamcreedStatusLabels[(int) $rActualStatus] ?? "Unknown", "can_stop" => $rRadioCanStop,
+								"bitrate" => is_numeric($rRow["bitrate"] ?? null) ? (int) $rRow["bitrate"] : 0,
+								"audio_codec" => (string) ($rRadioInfo["codecs"]["audio"]["codec_name"] ?? ""), "notes" => trim(strip_tags((string) ($rRow["notes"] ?? "")))
+							];
+							continue;
 						}
 						if (Authorization::check("adv", "live_connections")) {
 							if (0 < $rRow["clients"]) {
