@@ -20,6 +20,7 @@
 	var canPlay = root.getAttribute('data-can-play') === '1';
 	var canFingerprint = root.getAttribute('data-can-fingerprint') === '1';
 	var canViewConnections = root.getAttribute('data-can-view-connections') === '1';
+	var showImages = root.getAttribute('data-show-images') === '1';
 
 	var page = 1;
 	var total = 0;
@@ -72,10 +73,12 @@
 	function stripHtml(html) {
 		if (!html) return '';
 		if (typeof html !== 'string') return String(html);
-		if (html.indexOf('<') === -1) return html.trim();
-		var tmp = document.createElement('div');
-		tmp.innerHTML = html;
-		return (tmp.textContent || tmp.innerText || '').trim();
+		return html.replace(/<[^>]*>/g, '').trim();
+	}
+
+	function streamKey(item) {
+		var serverId = item.serverId !== undefined && item.serverId !== null ? item.serverId : -1;
+		return String(item.id) + ':' + String(serverId);
 	}
 
 	function toast(message, isError) {
@@ -168,15 +171,15 @@
 	function populateActionMenu(item) {
 		actionMenu.replaceChildren();
 
-		if (canPlay) {
+		if (canPlay && item.can_play) {
 			actionMenu.appendChild(menuAction('Play', 'fe-play', function () {
 				openPlayer(item);
 			}));
 		}
 
 		if (canEdit) {
-			var statusNum = Number(item.status);
-			if (statusNum === 1) {
+			var canStop = item.can_stop === true;
+			if (canStop) {
 				actionMenu.appendChild(menuAction('Stop', 'fe-pause-circle', function () {
 					runStreamAction('stop', item);
 				}));
@@ -186,11 +189,13 @@
 				}));
 			}
 
-			actionMenu.appendChild(menuAction('Restart', 'fe-rotate-cw', function () {
-				runStreamAction('restart', item);
-			}));
+			if (canStop) {
+				actionMenu.appendChild(menuAction('Restart', 'fe-rotate-cw', function () {
+					runStreamAction('restart', item);
+				}));
+			}
 
-			if (Number(item.connections || 0) > 0) {
+			if (canStop && Number(item.connections || 0) > 0) {
 				actionMenu.appendChild(menuAction('Kill connections', 'fe-zap-off', function () {
 					runStreamAction('purge', item);
 				}, 'is-warning'));
@@ -245,11 +250,11 @@
 	// Update existing DOM row in-place without rebuilding or flashing
 	function updateRowInPlace(item) {
 		if (!item || !item.id) return;
-		var streamId = String(item.id);
-		currentStreams[streamId] = Object.assign(currentStreams[streamId] || {}, item);
-		var current = currentStreams[streamId];
+		var itemKey = streamKey(item);
+		currentStreams[itemKey] = Object.assign(currentStreams[itemKey] || {}, item);
+		var current = currentStreams[itemKey];
 
-		var tr = rows.querySelector('tr[data-stream-id="' + streamId + '"]');
+		var tr = rows.querySelector('tr[data-stream-key="' + itemKey + '"]');
 		if (!tr) return;
 
 		var label = resolveStatusLabel(current);
@@ -343,7 +348,7 @@
 		}
 
 		// 6. If action menu is open for this row, refresh its buttons
-		if (!actionMenu.hidden && activeMenuItem && String(activeMenuItem.id) === streamId) {
+		if (!actionMenu.hidden && activeMenuItem && streamKey(activeMenuItem) === itemKey) {
 			populateActionMenu(current);
 		}
 	}
@@ -352,8 +357,6 @@
 		var details = actionDetails(action, item);
 		if (actionBusy || (details.confirm && !window.confirm(details.confirm))) return;
 		actionBusy = true;
-
-		var streamId = String(item.id);
 
 		// Optimistic UI updates — update row immediately without wiping table
 		if (action === 'start' || action === 'restart') {
@@ -387,13 +390,8 @@
 			toast(details.success, false);
 
 			if (action === 'delete') {
-				// Remove the row smoothly from DOM
-				var tr = rows.querySelector('tr[data-stream-id="' + streamId + '"]');
-				if (tr) tr.remove();
-				delete currentStreams[streamId];
-				if (!rows.querySelector('tr[data-stream-id]')) {
-					load();
-				}
+				// Reload the current page so totals, pagination, and multi-server rows stay accurate.
+				load();
 			} else {
 				// Schedule immediate poll in 1.5s to catch status transition
 				schedulePoll(1500);
@@ -425,13 +423,13 @@
 			return;
 		}
 
-		var visibleIds = [];
+		var visibleIds = {};
 		trList.forEach(function (tr) {
-			visibleIds.push(tr.dataset.streamId);
+			visibleIds[tr.dataset.streamId] = true;
 		});
 
 		isPolling = true;
-		var url = endpoint + '?id=streams&view=streamcreed&refresh=' + encodeURIComponent(visibleIds.join(','));
+		var url = endpoint + '?id=streams&view=streamcreed&refresh=' + encodeURIComponent(Object.keys(visibleIds).join(','));
 
 		fetch(url, {
 			credentials: 'same-origin',
@@ -521,7 +519,14 @@
 
 	// Expose legacy player() globally for any legacy scripts or shortcuts
 	window.player = function (id) {
-		var item = currentStreams[String(id)] || { id: id };
+		var item = null;
+		for (var key in currentStreams) {
+			if (String(currentStreams[key].id) === String(id)) {
+				item = currentStreams[key];
+				break;
+			}
+		}
+		item = item || { id: id };
 		openPlayer(item);
 	};
 
@@ -552,11 +557,6 @@
 			xy_offset: fingerprintDialog.querySelector('[data-sc-fingerprint-x]').value + 'x' + fingerprintDialog.querySelector('[data-sc-fingerprint-y]').value
 		};
 
-		var formBody = [];
-		for (var key in data) {
-			formBody.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
-		}
-
 		fetch('./api?action=fingerprint', {
 			method: 'POST',
 			credentials: 'same-origin',
@@ -564,7 +564,7 @@
 				'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
 				'X-Requested-With': 'XMLHttpRequest'
 			},
-			body: formBody.join('&')
+			body: 'data=' + encodeURIComponent(JSON.stringify(data))
 		}).then(function (response) {
 			if (!response.ok) throw new Error('Failed');
 			return response.json();
@@ -823,14 +823,15 @@
 	function renderRow(item) {
 		var tr = element('tr');
 		tr.dataset.streamId = String(item.id);
-		currentStreams[String(item.id)] = item;
+		tr.dataset.streamKey = streamKey(item);
+		currentStreams[streamKey(item)] = item;
 
 		// 1. Stream column (Logo + Name + #ID • Category)
 		var streamTd = element('td', 'sc-col-stream');
 		var streamCell = element('div', 'sc-stream-cell');
 
-		var thumbWrap = element(item.icon && item.icon.trim() ? 'a' : 'div', 'sc-stream-thumb-wrap');
-		if (item.icon && item.icon.trim()) {
+		var thumbWrap = element(showImages && item.icon && item.icon.trim() ? 'a' : 'div', 'sc-stream-thumb-wrap');
+		if (showImages && item.icon && item.icon.trim()) {
 			thumbWrap.href = 'javascript:void(0);';
 			thumbWrap.title = 'Logo preview';
 			var img = element('img', 'sc-stream-thumb');

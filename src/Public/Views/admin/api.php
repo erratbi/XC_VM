@@ -4504,7 +4504,7 @@ if (isset($_SESSION['hash'])) {
 			exit();
 		}
 		if (RequestManager::getAll()['action'] == 'clear_failures') {
-			if (Authorization::check('adv', 'streams')) {
+			if (Authorization::check('adv', 'edit_stream')) {
 				if (!(isset(RequestManager::getAll()['id']) && 0 < intval(RequestManager::getAll()['id']))) {
 					echo json_encode(array('result' => false));
 

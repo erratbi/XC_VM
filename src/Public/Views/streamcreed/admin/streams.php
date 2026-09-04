@@ -25,7 +25,8 @@ if (!in_array($streamcreedDefaultEntries, [10, 25, 50, 100], true)) {
     data-can-edit="<?php echo $streamcreedCanEdit ? '1' : '0'; ?>"
     data-can-play="<?php echo $streamcreedCanPlay ? '1' : '0'; ?>"
     data-can-fingerprint="<?php echo $streamcreedCanFingerprint ? '1' : '0'; ?>"
-    data-can-view-connections="<?php echo $streamcreedCanViewConnections ? '1' : '0'; ?>">
+    data-can-view-connections="<?php echo $streamcreedCanViewConnections ? '1' : '0'; ?>"
+    data-show-images="<?php echo !empty($rSettings['show_images']) ? '1' : '0'; ?>">
 
     <div class="sc-page-heading">
         <div>
@@ -212,7 +213,9 @@ if (!in_array($streamcreedDefaultEntries, [10, 25, 50, 100], true)) {
             </table>
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
+            <?php if ($streamcreedCanEdit): ?>
             <button class="sc-button sc-button-secondary" type="button" data-sc-failures-clear><i class="fe-trash-2" aria-hidden="true"></i> Clear logs</button>
+            <?php endif; ?>
             <button class="sc-button sc-button-secondary" type="button" data-sc-failures-close-btn>Close</button>
         </div>
     </div>

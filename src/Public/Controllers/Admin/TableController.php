@@ -1342,6 +1342,7 @@ class TableController extends BaseAdminController {
 						if (1 < count($rCategoryIDs)) {
 							$rCategory .= " (+" . (count($rCategoryIDs) - 1) . " others)";
 						}
+						$rStreamDisplayName = trim(strip_tags((string) ($rRow['stream_display_name'] ?? '')));
 						if (0 < $rRow['tv_archive_duration'] && 0 < $rRow['tv_archive_server_id']) {
 							$rRow['stream_display_name'] .= " &nbsp;<a href='archive?id=" . $rRow['id'] . "'><i class='text-danger mdi mdi-record'></i></a>";
 						}
@@ -1439,6 +1440,7 @@ class TableController extends BaseAdminController {
 						if ($rSettings["streams_grouped"] == 1) {
 							$rRow["server_id"] = -1;
 						}
+						$rCanStop = in_array((int) $rActualStatus, [1, 2, 3, 5], true) || (int) $rRow["on_demand"] === 1;
 						if (Authorization::check("adv", "live_connections")) {
 							if (0 < $rRow["clients"]) {
 								$rClients = "<a href='javascript: void(0);' onClick='viewLiveConnections(" . (int) $rRow["id"] . ", " . (int) $rRow["server_id"] . ");'><button type='button' class='btn btn-info btn-xs waves-effect waves-light'>" . number_format($rRow["clients"], 0) . "</button></a>";
@@ -1662,13 +1664,14 @@ class TableController extends BaseAdminController {
 							}
 							$rStreamInfoText .= "<td>" . $rFPS . "</td></tr></tbody></table>";
 						}
+						$rVideoCodec = strtoupper((string) ($rStreamInfo["codecs"]["video"]["codec_name"] ?? ""));
+						$rCanUsePlayer = ((int) $rActualStatus === 1 || (int) $rActualStatus === 4) && !(int) $rRow["direct_proxy"];
+						$rCanPlay = $rCanUsePlayer && ($rVideoCodec === "" || in_array($rVideoCodec, ["H264", "N/A", "HEVC", "H265"], true));
 						if (Authorization::check("adv", "player")) {
-							if (((int) $rActualStatus == 1 || $rActualStatus == 4) && !$rRow["direct_proxy"]) {
-								if (empty($rStreamInfo["codecs"]["video"]["codec_name"]) || strtoupper($rStreamInfo["codecs"]["video"]["codec_name"]) == "H264" || strtoupper($rStreamInfo["codecs"]["video"]["codec_name"]) == "N/A" || strtoupper($rStreamInfo["codecs"]["video"]["codec_name"]) == "HEVC" || strtoupper($rStreamInfo["codecs"]["video"]["codec_name"]) == "H265") {
-									$rPlayer = "<button title=\"Play\" type=\"button\" class=\"btn btn-info waves-effect waves-light btn-xs tooltip\" onClick=\"player(" . $rRow["id"] . ");\"><i class=\"mdi mdi-play\"></i></button>";
-								} else {
-									$rPlayer = "<button type=\"button\" class=\"btn btn-dark waves-effect waves-light btn-xs tooltip\" title=\"Incompatible Video Codec\"><i class=\"mdi mdi-play\"></i></button>";
-								}
+							if ($rCanPlay) {
+								$rPlayer = "<button title=\"Play\" type=\"button\" class=\"btn btn-info waves-effect waves-light btn-xs tooltip\" onClick=\"player(" . $rRow["id"] . ");\"><i class=\"mdi mdi-play\"></i></button>";
+							} elseif ($rCanUsePlayer) {
+								$rPlayer = "<button type=\"button\" class=\"btn btn-dark waves-effect waves-light btn-xs tooltip\" title=\"Incompatible Video Codec\"><i class=\"mdi mdi-play\"></i></button>";
 							} else {
 								$rPlayer = "<button type=\"button\" disabled class=\"btn btn-light waves-effect waves-light btn-xs\"><i class=\"mdi mdi-play\"></i></button>";
 							}
@@ -1697,8 +1700,8 @@ class TableController extends BaseAdminController {
 								"id" => (int) $rRow["id"],
 								"display_id" => (string) $rID,
 								"serverId" => (int) ($rRow["server_id"] ?? 0),
-								"name" => (string) ($rRow["stream_display_name"] ?? ""),
-								"stream_display_name" => (string) ($rRow["stream_display_name"] ?? ""),
+								"name" => $rStreamDisplayName,
+								"stream_display_name" => $rStreamDisplayName,
 								"category" => (string) ($rCategory ?? "No Category"),
 								"server" => (string) ($rRow["server_name"] ?: "No Server Selected"),
 								"server_ip" => (string) ((isset($rRow['parent_id']) && (int)$rRow['parent_id'] > 0) ? ("loop: " . strtolower(ServerRepository::getAll()[$rRow["parent_id"]]["server_name"] ?? "")) : (strtolower(parse_url($rRow['current_source'] ?? '')['host'] ?? '') ?: ($rServers[$rRow["server_id"]]["server_ip"] ?? ""))),
@@ -1706,6 +1709,8 @@ class TableController extends BaseAdminController {
 								"uptime" => trim(strip_tags((string) $rUptime)),
 								"status" => (int) $rActualStatus,
 								"statusLabel" => (string) ($rStatusArray[$rActualStatus] ?? "Unknown"),
+								"can_stop" => $rCanStop,
+								"can_play" => $rCanPlay,
 								"restarts" => (int) ($rFailRow[0] ?? 0),
 								"failures_level" => (!isset($rFailRow) || $rFailRow[0] <= 2) ? "success" : (($rFailRow[0] <= 4 || 21600 < $rFailRow[1]) ? "info" : (($rFailRow[0] <= 144 || 600 < $rFailRow[1]) ? "warning" : "danger")),
 								"bitrate" => is_numeric($rRow["bitrate"]) ? (int) $rRow["bitrate"] : 0,
@@ -2052,6 +2057,7 @@ class TableController extends BaseAdminController {
 		if (!Authorization::check("adv", "movies") && !Authorization::check("adv", "mass_sedits_vod")) {
 			exit;
 		}
+		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
 		$rCategories = CategoryService::getAllByType("movie");
 		$rOrder = ["`streams`.`id`", false, "`streams`.`stream_display_name`", "`server_name`", "`clients`", "`streams_servers`.`stream_started`", false, false, false, "`streams_servers`.`bitrate`"];
 		if (isset(RequestManager::getAll()["order"]) && 0 < strlen(RequestManager::getAll()["order"][0]["column"] ?? '')) {
@@ -2411,7 +2417,50 @@ class TableController extends BaseAdminController {
 						if (!$rSettings["streams_grouped"] && 1 < $rServerCount[$rRow["id"]]) {
 							$rID .= "-" . $rRow["server_id"];
 						}
-						$rReturn["data"][] = ["<a href='stream_view?id=" . $rRow["id"] . "'>" . $rID . "</a>", $rImage, $rStreamName, $rServerName, $rClients, $rVODStatusArray[$rActualStatus], $rTMDB, $rButtons, $rPlayer, $rStreamInfoText];
+						if ($rStreamcreed) {
+							$rMovieDisplayName = trim(strip_tags((string) $rRow["stream_display_name"]));
+							if ($rMovieDisplayName === "") {
+								$rMovieDisplayName = "Movie #" . (int) $rRow["id"];
+							}
+							$rMovieCategory = trim(strip_tags((string) ($rCategory ?? "No Category")));
+							$rMovieInfo = json_decode((string) ($rRow["stream_info"] ?? ""), true);
+							if (!is_array($rMovieInfo)) {
+								$rMovieInfo = [];
+							}
+							$rMovieAction = "";
+							if ((int) $rActualStatus === 2) {
+								$rMovieAction = "stop";
+							} elseif (!in_array((int) $rActualStatus, [3, 5], true)) {
+								$rMovieAction = "start";
+							}
+							$rReturn["data"][] = [
+								"id" => (int) $rRow["id"],
+								"display_id" => (string) $rID,
+								"serverId" => (int) ($rRow["server_id"] ?? 0),
+								"name" => $rMovieDisplayName,
+								"category" => $rMovieCategory ?: "No Category",
+								"year" => (string) ($rRow["year"] ?? ""),
+								"rating" => is_numeric($rProperties["rating"] ?? null) ? (float) $rProperties["rating"] : null,
+								"image" => (string) ($rProperties["movie_image"] ?? ""),
+								"has_metadata" => !empty($rProperties["kinopoisk_url"]),
+								"server" => trim(strip_tags((string) ($rRow["server_name"] ?: "No Server Selected"))),
+								"connections" => (int) ($rRow["clients"] ?? 0),
+								"status" => (int) $rActualStatus,
+								"statusLabel" => trim(strip_tags((string) ($rVODStatusArray[$rActualStatus] ?? "Unknown"))),
+								"encode_action" => $rMovieAction,
+								"can_play" => in_array((int) $rActualStatus, [1, 3], true),
+								"target_container" => (string) ($rRow["target_container"] ?? ""),
+								"bitrate" => is_numeric($rRow["bitrate"] ?? null) ? (int) $rRow["bitrate"] : 0,
+								"width" => (string) ($rMovieInfo["codecs"]["video"]["width"] ?? ""),
+								"height" => (string) ($rMovieInfo["codecs"]["video"]["height"] ?? ""),
+								"video_codec" => (string) ($rMovieInfo["codecs"]["video"]["codec_name"] ?? ""),
+								"audio_codec" => (string) ($rMovieInfo["codecs"]["audio"]["codec_name"] ?? ""),
+								"duration" => (string) ($rMovieInfo["duration"] ?? ""),
+								"notes" => trim(strip_tags((string) ($rRow["notes"] ?? "")))
+							];
+						} else {
+							$rReturn["data"][] = ["<a href='stream_view?id=" . $rRow["id"] . "'>" . $rID . "</a>", $rImage, $rStreamName, $rServerName, $rClients, $rVODStatusArray[$rActualStatus], $rTMDB, $rButtons, $rPlayer, $rStreamInfoText];
+						}
 					}
 				}
 			}
