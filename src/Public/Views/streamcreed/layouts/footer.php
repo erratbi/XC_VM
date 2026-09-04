@@ -6,6 +6,8 @@
 			</footer>
 		</div>
 	</div>
+	<script>window.streamcreedTranslations=<?php echo json_encode($streamcreedTranslationMap ?? [], JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_HEX_TAG); ?>;</script>
+	<script src="assets/streamcreed/translate.js"></script>
 	<script src="assets/streamcreed/streamcreed.js"></script>
 	<?php foreach (($streamcreedPageScripts ?? []) as $streamcreedScript): ?>
 		<script src="<?php echo htmlspecialchars($streamcreedScript, ENT_QUOTES, 'UTF-8'); ?>"></script>

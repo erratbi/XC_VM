@@ -301,6 +301,9 @@ a.sc-metric-card:hover { border-color: #c9cccf; box-shadow: 0 8px 24px rgba(25, 
 .sc-sort-group-heading h3 i { margin-right: 6px; color: var(--sc-primary-fallback); color: var(--sc-primary); }
 .sc-sort-group .sc-sort-list { max-width: none; }
 .sc-sort-empty { margin: 0; color: var(--sc-muted); font-size: 12px; }
+.sc-inline-input { display: flex; gap: 8px; align-items: center; }
+.sc-inline-input input { min-width: 0; flex: 1; }
+.sc-inline-input .sc-button { flex: 0 0 auto; }
 .sc-movies-table .sc-stream-cell { min-width: 220px; }
 .sc-series-table .sc-stream-cell { min-width: 240px; }
 .sc-movie-editor .sc-package-options { grid-template-columns: repeat(5, minmax(150px, 1fr)); margin-top: 24px; }
