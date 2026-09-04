@@ -23,8 +23,9 @@ $streamcreedPrimaryNav = [
 	['Users', '#', 'fe-users', ['mng_regusers', 'mass_edit_reguser', 'mng_packages', 'mng_groups'], ['users', 'user', 'user_mass', 'packages', 'package', 'groups', 'group'], 'users'],
 	['Devices', '#', 'fe-monitor', ['manage_mag', 'manage_e2', 'add_hmac'], ['mags', 'mag', 'enigmas', 'enigma', 'hmacs', 'hmac'], 'devices'],
 	['Content', '#', 'fe-play', ['streams', 'movies', 'series', 'radio', 'categories', 'bouquets'], ['streams', 'stream', 'movies', 'movie', 'series', 'serie', 'series_mass', 'episodes', 'episode', 'episodes_mass', 'radios', 'radio', 'stream_categories', 'stream_category', 'bouquets', 'bouquet', 'bouquet_order', 'bouquet_sort'], 'content'],
+	['Servers', '#', 'fe-server', ['servers', 'add_server', 'edit_server', 'server_order', 'process_monitor'], ['servers', 'server', 'server_view', 'server_install', 'server_order', 'proxies', 'proxy', 'process_monitor'], 'servers'],
 	['Logs', '#', 'fe-clock', ['panel_logs', 'client_request_log', 'login_logs'], ['panel_logs', 'client_logs', 'login_logs', 'user_logs', 'stream_errors'], 'logs'],
-	['System', '#', 'fe-settings', ['settings', 'servers'], ['settings', 'modules', 'backups', 'cache', 'process_monitor', 'servers', 'server', 'server_view', 'server_install'], 'system'],
+	['System', '#', 'fe-settings', ['settings'], ['settings', 'modules', 'backups', 'cache', 'rtmp_monitor', 'stream_rank', 'theft_detection'], 'system'],
 	['Tickets Support', 'tickets', 'fe-help-circle', ['tickets'], ['tickets', 'ticket', 'ticket_view'], null],
 ];
 $streamcreedDrillNav = [
@@ -42,9 +43,12 @@ $streamcreedDrillNav = [
 	'content' => ['Content', [
 		['', [['Live Streams', 'streams', ['streams']], ['VOD Movies', 'movies', ['movies']], ['TV Series', 'series', ['series']], ['Radio', 'radios', ['radio']], ['Streaming Categories', 'stream_categories', ['categories']], ['Bouquets', 'bouquets', ['bouquets']]]],
 	]],
+	'servers' => ['Servers', [
+		['', [['Install Load Balancer', 'server_install', ['add_server']], ['Manage Servers', 'servers', ['servers']], ['Manage Proxies', 'proxies', ['servers']], ['Server Order', 'server_order', ['server_order']], ['Process Monitor', 'process_monitor', ['process_monitor']]]],
+	]],
 	'logs' => ['Logs', [['', [['Panel Logs', 'panel_logs', ['panel_logs']], ['Client Logs', 'client_logs', ['client_request_log']], ['Login Logs', 'login_logs', ['login_logs']], ['User Logs', 'user_logs', ['reg_userlog']]]]]],
 	'system' => ['System', [
-		['Infrastructure', [['Streaming Servers', 'servers', ['servers']], ['Process Monitor', 'process_monitor', ['process_monitor']], ['RTMP Management', 'rtmp_monitor', ['rtmp_monitor']], ['Statistics', 'stream_rank', ['streams']]]],
+		['Infrastructure', [['RTMP Management', 'rtmp_monitor', ['rtmp_monitor']], ['Statistics', 'stream_rank', ['streams']]]],
 		['Administration', [['Settings', 'settings', ['settings']], ['Cache / Redis', 'cache', ['cache']], ['Modules', 'modules', ['modules']], ['Backups', 'backups', ['backups']], ['Security plug-ins', 'theft_detection', ['theft_detection']]]],
 	]],
 ];

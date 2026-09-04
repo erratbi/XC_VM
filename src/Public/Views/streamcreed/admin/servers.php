@@ -34,6 +34,7 @@ $streamcreedStatus = static function (array $server): array {
 			<?php if ($streamcreedCanOrderServers): ?>
 				<a class="sc-button sc-button-secondary" href="server_order"><i class="fe-list" aria-hidden="true"></i> Server order</a>
 			<?php endif; ?>
+			<a class="sc-button sc-button-secondary" href="server_install?proxy"><i class="fe-shield" aria-hidden="true"></i> Install proxy</a>
 			<a class="sc-button sc-button-primary" href="server_install"><i class="fe-plus" aria-hidden="true"></i> Install server</a>
 		</div>
 	</div>
