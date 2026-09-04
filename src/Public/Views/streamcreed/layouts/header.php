@@ -22,7 +22,7 @@ $streamcreedPrimaryNav = [
 	['Streaming Lines', '#', 'fe-menu', ['users'], ['lines', 'line', 'line_mass'], 'lines'],
 	['Users', '#', 'fe-users', ['mng_regusers', 'mass_edit_reguser', 'mng_packages', 'mng_groups'], ['users', 'user', 'user_mass', 'packages', 'package', 'groups', 'group'], 'users'],
 	['Devices', '#', 'fe-monitor', ['manage_mag', 'manage_e2', 'add_hmac'], ['mags', 'mag', 'enigmas', 'enigma', 'hmacs', 'hmac'], 'devices'],
-	['Content', '#', 'fe-play', ['streams', 'movies', 'radio', 'categories', 'bouquets'], ['streams', 'stream', 'movies', 'movie', 'series', 'serie', 'radios', 'radio', 'stream_categories', 'stream_category', 'bouquets', 'bouquet', 'bouquet_order', 'bouquet_sort'], 'content'],
+	['Content', '#', 'fe-play', ['streams', 'movies', 'series', 'radio', 'categories', 'bouquets'], ['streams', 'stream', 'movies', 'movie', 'series', 'serie', 'series_mass', 'episodes', 'episode', 'episodes_mass', 'radios', 'radio', 'stream_categories', 'stream_category', 'bouquets', 'bouquet', 'bouquet_order', 'bouquet_sort'], 'content'],
 	['Logs', '#', 'fe-clock', ['panel_logs', 'client_request_log', 'login_logs'], ['panel_logs', 'client_logs', 'login_logs', 'user_logs', 'stream_errors'], 'logs'],
 	['System', '#', 'fe-settings', ['settings', 'servers'], ['settings', 'modules', 'backups', 'cache', 'process_monitor', 'servers', 'server', 'server_view', 'server_install'], 'system'],
 	['Tickets Support', 'tickets', 'fe-help-circle', ['tickets'], ['tickets', 'ticket', 'ticket_view'], null],
@@ -40,7 +40,7 @@ $streamcreedDrillNav = [
 		['HMAC Devices', [['Manage HMAC Devices', 'hmacs', ['add_hmac']]]],
 	]],
 	'content' => ['Content', [
-		['', [['Live Streams', 'streams', ['streams']], ['VOD Movies', 'movies', ['movies']], ['Radio', 'radios', ['radio']], ['Streaming Categories', 'stream_categories', ['categories']], ['Bouquets', 'bouquets', ['bouquets']]]],
+		['', [['Live Streams', 'streams', ['streams']], ['VOD Movies', 'movies', ['movies']], ['TV Series', 'series', ['series']], ['Radio', 'radios', ['radio']], ['Streaming Categories', 'stream_categories', ['categories']], ['Bouquets', 'bouquets', ['bouquets']]]],
 	]],
 	'logs' => ['Logs', [['', [['Panel Logs', 'panel_logs', ['panel_logs']], ['Client Logs', 'client_logs', ['client_request_log']], ['Login Logs', 'login_logs', ['login_logs']], ['User Logs', 'user_logs', ['reg_userlog']]]]]],
 	'system' => ['System', [

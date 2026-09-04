@@ -22,11 +22,14 @@
 
 	if (!lookup) return;
 
-	var query = lookup.querySelector('[data-sc-tmdb-query]');
+	var query = root.querySelector('[data-sc-tmdb-query]');
 	var language = lookup.getAttribute('data-sc-tmdb-language') || '';
 	var results = lookup.querySelector('[data-sc-tmdb-results]');
+	var toggle = lookup.querySelector('[data-sc-tmdb-toggle]');
+	var count = lookup.querySelector('[data-sc-tmdb-count]');
 	var timer = null;
 	var request = 0;
+	var matches = [];
 
 	function input(name) {
 		return form.elements[name];
@@ -34,6 +37,11 @@
 
 	function text(value) {
 		return value === undefined || value === null ? '' : String(value);
+	}
+
+	function rating(value) {
+		var number = Number(text(value).replace(',', '.'));
+		return Number.isFinite(number) ? (Math.round(number * 10) / 10).toFixed(1) : '';
 	}
 
 	function imageUrl(path, preset) {
@@ -68,9 +76,8 @@
 		}, 3));
 		setValue('genre', names(data.genres, null, 3));
 		setValue('country', data.production_countries && data.production_countries[0] ? data.production_countries[0].name : '');
-		setValue('rating', data.vote_average);
+		setValue('rating', rating(data.vote_average));
 		results.hidden = true;
-		results.replaceChildren();
 	}
 
 	function selectMovie(id) {
@@ -91,10 +98,11 @@
 	}
 
 	function render(items) {
+		matches = items;
 		results.replaceChildren();
 		if (!items.length) {
-			results.textContent = 'No TMDB matches found.';
-			results.hidden = false;
+			if (toggle) toggle.hidden = true;
+			results.hidden = true;
 			return;
 		}
 		items.forEach(function (item) {
@@ -109,19 +117,23 @@
 			button.addEventListener('click', function () { selectMovie(item.id); });
 			results.appendChild(button);
 		});
-		results.hidden = false;
+		if (count) count.textContent = items.length + (items.length === 1 ? ' result' : ' results');
+		if (toggle) toggle.hidden = false;
+		results.hidden = true;
 	}
 
 	function search() {
+		var sequence = ++request;
 		var term = query.value.trim();
 		if (!term) {
+			matches = [];
 			results.hidden = true;
 			results.replaceChildren();
+			if (toggle) toggle.hidden = true;
 			return;
 		}
-		var sequence = ++request;
-		results.hidden = false;
-		results.textContent = 'Searching TMDB…';
+		if (toggle) toggle.hidden = true;
+		results.hidden = true;
 		fetch('./api?action=tmdb_search&type=movie&term=' + encodeURIComponent(term) + '&language=' + encodeURIComponent(language), {
 			credentials: 'same-origin',
 			headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
@@ -140,5 +152,12 @@
 	query.addEventListener('input', function () {
 		clearTimeout(timer);
 		timer = window.setTimeout(search, 280);
+	});
+	if (toggle) toggle.addEventListener('click', function () {
+		if (!matches.length) return;
+		results.hidden = !results.hidden;
+	});
+	document.addEventListener('click', function (event) {
+		if (!lookup.contains(event.target)) results.hidden = true;
 	});
 }());

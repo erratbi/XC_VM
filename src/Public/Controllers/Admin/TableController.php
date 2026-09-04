@@ -2058,6 +2058,7 @@ class TableController extends BaseAdminController {
 			exit;
 		}
 		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
+		$rStreamcreedVODStatusLabels = [-1 => "No server selected", 0 => "Not encoded", 1 => "Encoded", 2 => "Encoding", 3 => "Direct source", 4 => "Down", 5 => "Direct stream"];
 		$rCategories = CategoryService::getAllByType("movie");
 		$rOrder = ["`streams`.`id`", false, "`streams`.`stream_display_name`", "`server_name`", "`clients`", "`streams_servers`.`stream_started`", false, false, false, "`streams_servers`.`bitrate`"];
 		if (isset(RequestManager::getAll()["order"]) && 0 < strlen(RequestManager::getAll()["order"][0]["column"] ?? '')) {
@@ -2446,9 +2447,9 @@ class TableController extends BaseAdminController {
 								"server" => trim(strip_tags((string) ($rRow["server_name"] ?: "No Server Selected"))),
 								"connections" => (int) ($rRow["clients"] ?? 0),
 								"status" => (int) $rActualStatus,
-								"statusLabel" => trim(strip_tags((string) ($rVODStatusArray[$rActualStatus] ?? "Unknown"))),
+								"statusLabel" => $rStreamcreedVODStatusLabels[$rActualStatus] ?? "Unknown",
 								"encode_action" => $rMovieAction,
-								"can_play" => in_array((int) $rActualStatus, [1, 3], true),
+								"can_play" => (int) ($rRow["direct_source"] ?? 0) !== 1 && in_array((int) $rActualStatus, [1, 3], true),
 								"target_container" => (string) ($rRow["target_container"] ?? ""),
 								"bitrate" => is_numeric($rRow["bitrate"] ?? null) ? (int) $rRow["bitrate"] : 0,
 								"width" => (string) ($rMovieInfo["codecs"]["video"]["width"] ?? ""),
@@ -4556,6 +4557,7 @@ class TableController extends BaseAdminController {
 			exit;
 		}
 		$rCategories = CategoryService::getAllByType("series");
+		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
 		$rOrder = ["`streams_series`.`id`", "`streams_series`.`cover`", "`streams_series`.`title`", "`streams_series`.`category_id`", "`latest_season`", "`episode_count`", false, "`streams_series`.`release_date`", "`streams_series`.`last_modified`", false];
 		$rOrderColumn = RequestManager::getAll()["order"][0]["column"] ?? '';
 		$rOrderRow = (0 < strlen((string) $rOrderColumn)) ? (int) $rOrderColumn : 0;
@@ -4599,6 +4601,8 @@ class TableController extends BaseAdminController {
 			$db->query($rQuery, ...$rWhereV);
 			if (0 < $db->num_rows()) {
 				foreach ($db->get_rows() as $rRow) {
+					$rSeriesReleaseDate = (string) ($rRow["release_date"] ?? "");
+					$rSeriesLastModified = (int) ($rRow["last_modified"] ?? 0);
 					if ($rIsAPI) {
 						$rReturn["data"][] = self::filterRow($rRow, RequestManager::getAll()["show_columns"] ?? '', RequestManager::getAll()["hide_columns"] ?? '');
 					} else {
@@ -4698,7 +4702,31 @@ class TableController extends BaseAdminController {
 						}
 						$rYear = $rRow["year"] ? "<strong>" . $rRow["year"] . "</strong> &nbsp;" : "";
 						$rTitle .= "<br><span style='font-size:11px;'>" . $rYear . $rRatingText . "</span></a>";
-						$rReturn["data"][] = [$rID, $rImage, $rTitle, $rCategory, $rRow["latest_season"], $rRow["episode_count"], $rTMDB, $rRow["release_date"], $rRow["last_modified"], $rButtons];
+						if ($rStreamcreed) {
+							$rCategoryIDs = json_decode((string) ($rRow["category_id"] ?? "[]"), true);
+							if (!is_array($rCategoryIDs)) {
+								$rCategoryIDs = [];
+							}
+							$rFirstCategory = $rCategories[(int) ($rCategoryIDs[0] ?? 0)]["category_name"] ?? "No Category";
+							if (1 < count($rCategoryIDs)) {
+								$rFirstCategory .= " (+" . (count($rCategoryIDs) - 1) . " others)";
+							}
+							$rReturn["data"][] = [
+								"id" => (int) $rRow["id"],
+								"title" => trim(strip_tags((string) $rRow["title"])),
+								"year" => (string) ($rRow["year"] ?? ""),
+								"rating" => is_numeric($rRow["rating"] ?? null) ? (float) $rRow["rating"] : null,
+								"cover" => (string) ($rRow["cover"] ?? ""),
+								"category" => $rFirstCategory,
+								"latest_season" => (int) ($rRow["latest_season"] ?? 0),
+								"episode_count" => (int) ($rRow["episode_count"] ?? 0),
+								"has_tmdb" => 0 < (int) ($rRow["tmdb_id"] ?? 0),
+								"release_date" => $rSeriesReleaseDate,
+								"last_modified" => $rSeriesLastModified
+							];
+						} else {
+							$rReturn["data"][] = [$rID, $rImage, $rTitle, $rCategory, $rRow["latest_season"], $rRow["episode_count"], $rTMDB, $rRow["release_date"], $rRow["last_modified"], $rButtons];
+						}
 					}
 				}
 			}
@@ -4713,6 +4741,8 @@ class TableController extends BaseAdminController {
 		if (!Authorization::check("adv", "episodes") && !Authorization::check("adv", "mass_sedits")) {
 			exit;
 		}
+		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
+		$rStreamcreedVODStatusLabels = [-1 => "No server selected", 0 => "Not encoded", 1 => "Encoded", 2 => "Encoding", 3 => "Direct source", 4 => "Down", 5 => "Direct stream"];
 		$rOrder = ["`streams`.`id`", false, "`streams`.`stream_display_name`", "`server_name`", "`clients`", "`streams_servers`.`stream_started`", false, false, "`streams_servers`.`bitrate`"];
 		if (isset(RequestManager::getAll()["order"]) && 0 < strlen(RequestManager::getAll()["order"][0]["column"] ?? '')) {
 			$rOrderRow = (int) (RequestManager::getAll()["order"][0]["column"] ?? 0);
@@ -5045,7 +5075,38 @@ class TableController extends BaseAdminController {
 							$rDurationText = sprintf("%02d:%02d:%02d", intdiv($rDurationSecs, 3600), intdiv($rDurationSecs % 3600, 60), $rDurationSecs % 60);
 						}
 						$rDurationCell = "<table style='font-size: 11px;' class='table-data nowrap' align='center'><tbody><tr><td class='text-success'><i class='mdi mdi-clock-outline'></i> <strong>" . ($rDurationText ?? "--:--:--") . "</strong></td></tr><tr><td><span style='font-size: 10px;' class='text-muted'>" . $rModded . "</span></td></tr></tbody></table>";
-						$rReturn["data"][] = ["<a href='stream_view?id=" . (int) $rRow["id"] . "'>" . $rID . "</a>", $rImage, "<a href='stream_view?id=" . (int) $rRow["id"] . "'>" . $rStreamName . "</a>", $rServerName, $rClients, $rVODStatusArray[$rActualStatus], $rButtons, $rPlayer, $rDurationCell, $rStreamInfoText];
+						if ($rStreamcreed) {
+							$rEpisodeInfo = json_decode((string) ($rRow["stream_info"] ?? ""), true);
+							if (!is_array($rEpisodeInfo)) {
+								$rEpisodeInfo = [];
+							}
+							$rEpisodeVideoCodec = strtoupper((string) ($rEpisodeInfo["codecs"]["video"]["codec_name"] ?? ""));
+							$rCanPlayEpisode = (int) ($rRow["direct_source"] ?? 0) !== 1 && in_array((int) $rActualStatus, [1, 3], true) && ($rEpisodeVideoCodec === "" || in_array($rEpisodeVideoCodec, ["H264", "N/A", "HEVC", "H265"], true));
+							$rReturn["data"][] = [
+								"id" => (int) $rRow["id"],
+								"serverId" => (int) ($rRow["server_id"] ?? 0),
+								"seriesId" => (int) ($rRow["sid"] ?? 0),
+								"series" => trim(strip_tags((string) ($rRow["title"] ?? ""))),
+								"name" => trim(strip_tags((string) ($rRow["stream_display_name"] ?? ""))),
+								"season" => (int) ($rRow["season_num"] ?? 0),
+								"server" => trim(strip_tags((string) ($rRow["server_name"] ?? "No Server Selected"))),
+								"connections" => (int) ($rRow["clients"] ?? 0),
+								"status" => (int) $rActualStatus,
+								"statusLabel" => $rStreamcreedVODStatusLabels[$rActualStatus] ?? "Unknown",
+								"image" => (string) ($rProperties["movie_image"] ?? ""),
+								"target_container" => (string) ($rRow["target_container"] ?? ""),
+								"bitrate" => is_numeric($rRow["bitrate"] ?? null) ? (int) $rRow["bitrate"] : 0,
+								"duration" => (string) ($rDurationText ?? ""),
+								"width" => (string) ($rEpisodeInfo["codecs"]["video"]["width"] ?? ""),
+								"height" => (string) ($rEpisodeInfo["codecs"]["video"]["height"] ?? ""),
+								"video_codec" => (string) ($rEpisodeInfo["codecs"]["video"]["codec_name"] ?? ""),
+								"audio_codec" => (string) ($rEpisodeInfo["codecs"]["audio"]["codec_name"] ?? ""),
+								"can_play" => $rCanPlayEpisode,
+								"encode_action" => (int) $rActualStatus === 2 ? "stop" : ((int) $rActualStatus === 3 ? "" : "start")
+							];
+						} else {
+							$rReturn["data"][] = ["<a href='stream_view?id=" . (int) $rRow["id"] . "'>" . $rID . "</a>", $rImage, "<a href='stream_view?id=" . (int) $rRow["id"] . "'>" . $rStreamName . "</a>", $rServerName, $rClients, $rVODStatusArray[$rActualStatus], $rButtons, $rPlayer, $rDurationCell, $rStreamInfoText];
+						}
 					}
 				}
 			}

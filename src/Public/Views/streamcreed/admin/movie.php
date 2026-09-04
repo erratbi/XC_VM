@@ -85,7 +85,14 @@ $streamcreedHasTmdb = !$streamcreedMovieImporting && !empty($rSettings['tmdb_api
             </div></section>
         <?php else: ?>
             <section class="sc-form-section"><h2>Movie details</h2><div class="sc-form-grid">
-                <label>Movie name<input type="text" id="stream_display_name" name="stream_display_name" required value="<?php echo $streamcreedMovieValue('stream_display_name', (string) (RequestManager::getAll()['title'] ?? '')); ?>"></label>
+                <?php if ($streamcreedHasTmdb): ?>
+                    <div class="sc-tmdb-autocomplete" data-sc-tmdb data-sc-tmdb-language="<?php echo htmlspecialchars((string) ($rSettings['tmdb_language'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
+                        <label>Movie name<span class="sc-tmdb-input-wrap"><input type="text" id="stream_display_name" name="stream_display_name" required autocomplete="off" data-sc-tmdb-query value="<?php echo $streamcreedMovieValue('stream_display_name', (string) (RequestManager::getAll()['title'] ?? '')); ?>"><button class="sc-tmdb-result-count" type="button" data-sc-tmdb-toggle hidden><span data-sc-tmdb-count></span><i class="fe-chevron-down" aria-hidden="true"></i></button></span></label>
+                        <div class="sc-tmdb-results" data-sc-tmdb-results hidden></div>
+                    </div>
+                <?php else: ?>
+                    <label>Movie name<input type="text" id="stream_display_name" name="stream_display_name" required value="<?php echo $streamcreedMovieValue('stream_display_name', (string) (RequestManager::getAll()['title'] ?? '')); ?>"></label>
+                <?php endif; ?>
                 <label>Year<input type="text" id="year" name="year" inputmode="numeric" value="<?php echo $streamcreedMovieValue('year'); ?>"></label>
                 <label class="sc-form-span">Movie path or URL<span class="sc-input-action"><input type="text" id="stream_source" name="stream_source" required value="<?php echo htmlspecialchars($streamcreedMovieSource ?: (string) (RequestManager::getAll()['path'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" placeholder="https://example.com/movie.mkv or /mnt/movies/movie.mkv"><button class="sc-button sc-button-secondary" type="button" data-sc-file-browser-open data-sc-file-target="stream_source" data-sc-file-filter="video"><i class="fe-folder" aria-hidden="true"></i> Browse</button></span></label>
                 <?php $streamcreedMovieRenderPicker('Categories', 'category_id[]', 'category_create_list', $streamcreedMovieCategoryOptions, $streamcreedMovieCategories); ?>
@@ -93,14 +100,7 @@ $streamcreedHasTmdb = !$streamcreedMovieImporting && !empty($rSettings['tmdb_api
             </div></section>
 
             <section class="sc-form-section"><h2>Metadata</h2>
-                <?php if ($streamcreedHasTmdb): ?>
-                    <div class="sc-tmdb-lookup" data-sc-tmdb data-sc-tmdb-language="<?php echo htmlspecialchars((string) ($rSettings['tmdb_language'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
-                        <div class="sc-section-heading"><div><h2>Search TMDB</h2><p class="sc-section-copy">Uses the default TMDB language configured in Settings.</p></div></div>
-                        <label>Movie title<input type="search" data-sc-tmdb-query placeholder="Search by movie title" autocomplete="off"></label>
-                        <div class="sc-tmdb-results" data-sc-tmdb-results hidden></div>
-                    </div>
-                <?php endif; ?>
-                <div class="sc-form-grid" style="margin-top: 24px;">
+                <div class="sc-form-grid">
                 <label>Poster URL<input type="url" name="movie_image" value="<?php echo $streamcreedMovieProperty('movie_image'); ?>"></label>
                 <label>Backdrop URL<input type="url" name="backdrop_path" value="<?php echo htmlspecialchars((string) ($streamcreedMovieProperties['backdrop_path'][0] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></label>
                 <label class="sc-form-span">Plot<textarea name="plot" rows="5"><?php echo $streamcreedMovieProperty('plot'); ?></textarea></label>

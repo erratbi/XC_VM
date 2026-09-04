@@ -113,6 +113,12 @@ class SeriesService {
 				}
 			}
 			$rArray['category_id'] = '[' . implode(',', array_map('intval', $rCategories)) . ']';
+			// The edit path merges submitted values directly into the existing row.
+			// MariaDB in strict mode rejects an empty string for this integer column,
+			// whereas the create path receives its database default of 0.
+			if (($rArray['episode_run_time'] ?? null) === '') {
+				$rArray['episode_run_time'] = 0;
+			}
 			$rPrepare = QueryHelper::prepareArray($rArray);
 			$rQuery = 'REPLACE INTO `streams_series`(' . $rPrepare['columns'] . ') VALUES(' . $rPrepare['placeholder'] . ');';
 

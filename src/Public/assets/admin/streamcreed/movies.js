@@ -113,7 +113,7 @@
 		if (action === 'stop' && !window.confirm('Stop encoding "' + name + '"?')) return;
 
 		actionBusy = true;
-		fetch('./api?action=movie&sub=' + encodeURIComponent(action) + '&stream_id=' + encodeURIComponent(item.id) + '&server_id=' + encodeURIComponent(item.serverId), {
+		fetch('./api?action=movie&sub=' + encodeURIComponent(action) + '&ids=' + encodeURIComponent(JSON.stringify([String(item.id) + '-' + String(item.serverId || 0)])), {
 			credentials: 'same-origin',
 			headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
 		}).then(function (response) {
