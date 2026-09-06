@@ -1,6 +1,6 @@
 # Caching and Redis Strategy
 
-XC_VM uses a dual-layer caching strategy:
+XtreamPi uses a dual-layer caching strategy:
 
 - **File-based cache (igbinary)** — primary layer, used by both streaming and admin paths
 - **Redis/KeyDB** — optional high-performance layer for connection state and advanced operations

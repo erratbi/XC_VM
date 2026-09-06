@@ -31,7 +31,7 @@ class StatusCommand implements CommandInterface {
 	}
 
 	public function getDescription(): string {
-		return 'XC_VM status, DB migrations, system configuration';
+		return 'XtreamPi status, DB migrations, system configuration';
 	}
 
 	public function execute(array $rArgs): int {
@@ -53,9 +53,9 @@ class StatusCommand implements CommandInterface {
 		if (!$rFirstRun) {
 			echo "\nStatus\n------------------------------\n";
 			if ($this->isRunning()) {
-				echo "XC_VM is running.\n\n";
+				echo "XtreamPi is running.\n\n";
 			} else {
-				echo "XC_VM is not running.\n\n";
+				echo "XtreamPi is not running.\n\n";
 			}
 		} else {
 			echo "\n";
@@ -323,8 +323,8 @@ class StatusCommand implements CommandInterface {
 		$db->query('UPDATE `servers` SET `is_main` = 1 WHERE `id` = ?;', SERVER_ID);
 		$db->query('UPDATE `settings` SET `status_uuid` = ?;', md5(XC_VM_VERSION));
 
-		if (stripos($rSettings['server_name'], 'xtream') !== false || stripos($rSettings['server_name'], 'zapx') !== false || stripos($rSettings['server_name'], 'streamcreed') !== false) {
-			$db->query("UPDATE `settings` SET `server_name` = 'XC_VM';");
+		if (stripos($rSettings['server_name'], 'xtream') !== false || stripos($rSettings['server_name'], 'zapx') !== false || stripos($rSettings['server_name'], 'xtreampi') !== false) {
+			$db->query("UPDATE `settings` SET `server_name` = 'XtreamPi';");
 		}
 
 		$db->query('SELECT * FROM `access_codes` WHERE `enabled` = 1 AND `type` = 0;');

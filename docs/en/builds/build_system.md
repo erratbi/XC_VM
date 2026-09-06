@@ -1,12 +1,12 @@
-# XC_VM Build System (MAIN vs LB)
+# XtreamPi Build System (MAIN vs LB)
 
-How XC_VM produces two build variants from a single codebase: a full MAIN server and a lightweight Load Balancer (LB) server.
+How XtreamPi produces two build variants from a single codebase: a full MAIN server and a lightweight Load Balancer (LB) server.
 
 ---
 
 ## Build Variants
 
-XC_VM supports two deployment roles from a single source tree:
+XtreamPi supports two deployment roles from a single source tree:
 
 | Variant | Archive | Purpose |
 | --- | --- | --- |

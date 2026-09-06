@@ -1,6 +1,6 @@
 # Input Validation and Sanitization
 
-XC_VM uses a two-layer defense for incoming request data. First, a **global sanitization** pass strips dangerous content from all PHP superglobals during bootstrap, before any application code runs. Second, an **action-level validation** layer checks that required fields are present before business logic executes.
+XtreamPi uses a two-layer defense for incoming request data. First, a **global sanitization** pass strips dangerous content from all PHP superglobals during bootstrap, before any application code runs. Second, an **action-level validation** layer checks that required fields are present before business logic executes.
 
 Both layers are implemented in `src/Core/Validation/InputValidator.php`.
 

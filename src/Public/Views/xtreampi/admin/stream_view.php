@@ -1,0 +1,25 @@
+<?php
+
+use XcVm\Core\Auth\Authorization;
+
+require_once __DIR__ . '/_migration_helpers.php';
+
+$xtreampiPageScripts = ['assets/xtreampi/stream-view.js'];
+$xtreampiStream = is_array($rStream ?? null) ? $rStream : [];
+$xtreampiType = (int) ($xtreampiStream['type'] ?? 1);
+$xtreampiSources = json_decode((string) ($xtreampiStream['stream_source'] ?? '[]'), true);
+$xtreampiSources = is_array($xtreampiSources) ? $xtreampiSources : [];
+$xtreampiStats = is_array($rStreamStats ?? null) ? $rStreamStats : [];
+$xtreampiPermission = $xtreampiType === 2 ? 'edit_movie' : ($xtreampiType === 4 ? 'edit_radio' : ($xtreampiType === 5 ? 'edit_episode' : 'edit_stream'));
+$xtreampiCanEdit = Authorization::check('adv', $xtreampiPermission);
+$xtreampiEditPage = $xtreampiType === 2 ? 'movie' : ($xtreampiType === 3 ? 'created_channel' : ($xtreampiType === 4 ? 'radio' : ($xtreampiType === 5 ? 'episode' : 'stream')));
+?>
+<section class="sc-stream-view" data-sc-stream-view data-stream-id="<?php echo (int) ($xtreampiStream['id'] ?? 0); ?>" data-stream-type="<?php echo $xtreampiType; ?>" data-can-edit="<?php echo $xtreampiCanEdit ? '1' : '0'; ?>">
+    <div class="sc-page-heading"><div><p class="sc-eyebrow">Stream details</p><h1><?php echo sc_m_escape($xtreampiStream['stream_display_name'] ?? 'Stream'); ?></h1><p class="sc-section-copy"><?php echo sc_m_escape($rTypeString ?? 'Stream'); ?> #<?php echo (int) ($xtreampiStream['id'] ?? 0); ?></p></div><div class="sc-page-actions"><a class="sc-button sc-button-secondary" href="streams">Back to streams</a><?php if ($xtreampiCanEdit): ?><a class="sc-button sc-button-secondary" href="<?php echo $xtreampiEditPage; ?>?id=<?php echo (int) ($xtreampiStream['id'] ?? 0); ?>">Edit</a><?php endif; ?><button type="button" class="sc-button sc-button-secondary" data-sc-stream-play>Play</button></div></div>
+    <?php if (!empty($rImage)): ?><img class="sc-stream-poster" src="<?php echo sc_m_escape($rImage); ?>" alt="" loading="lazy"><?php endif; ?>
+    <div class="sc-stat-grid"><?php foreach (['today' => 'Today', 'week' => 'This week', 'month' => 'This month', 'all' => 'All time'] as $period => $label): $stat = is_array($xtreampiStats[$period] ?? null) ? $xtreampiStats[$period] : []; ?><article class="sc-stat-card"><h2><?php echo $label; ?></h2><strong><?php echo (int) ($stat['connections'] ?? 0); ?></strong><span>streams · <?php echo (int) ($stat['users'] ?? 0); ?> users</span><small><?php echo sc_m_escape($stat['time'] ?? ''); ?></small></article><?php endforeach; ?></div>
+    <section class="sc-data-panel"><div class="sc-section-heading"><div><h2>Active servers</h2><p class="sc-section-copy">Live status is refreshed every five seconds.</p></div><span data-sc-stream-poll-status>Loading…</span></div><div class="sc-table-scroll"><table class="sc-data-table"><thead><tr><th>Server</th><th>Clients</th><th>Status</th><th>Uptime</th><th>Bitrate</th><th>Video</th><th>Audio</th><th>Actions</th></tr></thead><tbody data-sc-stream-servers><tr><td class="sc-table-state" colspan="8">Loading…</td></tr></tbody></table></div></section>
+    <?php if ($xtreampiType === 1 && $xtreampiSources): ?><section class="sc-data-panel"><div class="sc-section-heading"><div><h2>Stream sources</h2><p class="sc-section-copy">Override or probe a source through the existing stream APIs.</p></div><button type="button" class="sc-button sc-button-secondary" data-sc-stream-scan-all>Probe sources</button></div><div class="sc-table-scroll"><table class="sc-data-table"><thead><tr><th>Order</th><th>Source</th><th>Probe result</th><th>Action</th></tr></thead><tbody><?php foreach ($xtreampiSources as $xtreampiIndex => $xtreampiSource): ?><tr data-sc-source-row data-source-index="<?php echo (int) $xtreampiIndex; ?>"><td><?php echo (int) $xtreampiIndex + 1; ?></td><td><?php echo sc_m_escape($xtreampiSource); ?></td><td data-sc-source-result>Not scanned</td><td><button type="button" class="sc-row-action" data-sc-source-override>Use source</button><button type="button" class="sc-row-action" data-sc-source-probe>Probe</button></td></tr><?php endforeach; ?></tbody></table></div></section><?php endif; ?>
+    <?php if (!empty($rEPGData) && is_array($rEPGData)): ?><section class="sc-data-panel"><div class="sc-section-heading"><h2>Programme guide</h2></div><div class="sc-table-scroll"><table class="sc-data-table"><thead><tr><th>Start</th><th>End</th><th>Title</th><th>Action</th></tr></thead><tbody><?php foreach ($rEPGData as $xtreampiProgramme): ?><tr><td><?php echo sc_m_escape($xtreampiProgramme['start'] ?? ''); ?></td><td><?php echo sc_m_escape($xtreampiProgramme['end'] ?? ''); ?></td><td><?php echo sc_m_escape($xtreampiProgramme['title'] ?? ''); ?></td><td><?php if (isset($xtreampiProgramme['id'])): ?><a class="sc-row-action" href="record?id=<?php echo (int) ($xtreampiStream['id'] ?? 0); ?>&amp;programme=<?php echo rawurlencode((string) $xtreampiProgramme['id']); ?>">Record</a><?php endif; ?></td></tr><?php endforeach; ?></tbody></table></div></section><?php endif; ?>
+    <div class="sc-form-error" data-sc-stream-error hidden></div>
+</section>

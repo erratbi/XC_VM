@@ -30,7 +30,7 @@ ProcessManager::isRunning(1234, PHP_BIN);     // это PHP?
 ```php
 ProcessManager::isNamedProcessRunning(
     int $pid,
-    string $processName,  // 'XC_VM', 'Thumbnail', 'TVArchive'
+    string $processName,  // 'XtreamPi', 'Thumbnail', 'TVArchive'
     int|string $identifier, // stream ID
     ?string $exe = null   // ожидаемый исполняемый (по умолч.: PHP_BIN)
 ): bool
@@ -38,7 +38,7 @@ ProcessManager::isNamedProcessRunning(
 
 ```php
 // Проверить, запущен ли PHP-процесс "XC_VM[42]" с PID 5678
-ProcessManager::isNamedProcessRunning(5678, 'XC_VM', 42);
+ProcessManager::isNamedProcessRunning(5678, 'XtreamPi', 42);
 ```
 
 Читает `/proc/{pid}/cmdline` и сравнивает с `"NAME[ID]"`.
@@ -120,14 +120,14 @@ ProcessManager::acquireCronLock('/tmp/xc_vm/cron_streams.pid', 1800);
 
 ```php
 clearstatcache(true);
-ProcessManager::isNamedProcessRunning($pid, 'XC_VM', $streamId);
+ProcessManager::isNamedProcessRunning($pid, 'XtreamPi', $streamId);
 ```
 
 ---
 
 ## Именование процессов
 
-XC_VM использует соглашение `NAME[ID]` для именования PHP-процессов:
+XtreamPi использует соглашение `NAME[ID]` для именования PHP-процессов:
 
 | Имя процесса       | Описание                    |
 | ------------------ | --------------------------- |

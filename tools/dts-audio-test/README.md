@@ -3,7 +3,7 @@
 Tools to investigate the legacy DTS audio path — specifically what XUI.one's
 custom **`-fix_dts`** ffmpeg flag does, and whether stock ffmpeg's `-copyts`
 reproduces it. Needed when moving off the bundled XUI `4.0` binary to a rebuilt
-one (see `XC_VM_FFMPEG`).
+one (see the compatibility repository `XC_VM_FFMPEG`).
 
 ## Background
 

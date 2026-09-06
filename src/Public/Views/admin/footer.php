@@ -70,8 +70,8 @@ if (!isset($rModal) || !$rModal): ?>
 <?php if (!isset($_SETUP)): ?>
 	<?php include 'post.php'; ?>
 	<script>
-		window.XC_VM = window.XC_VM || {};
-		window.XC_VM.Config = {
+		window.XtreamPi = window.XtreamPi || {};
+		window.XtreamPi.Config = {
 			jsNavigate: <?php echo !empty($rSettings['js_navigate']) ? 'true' : 'false'; ?>,
 			i18n: {
 				error_occured: <?php echo json_encode($language::get('error_occured')); ?>,

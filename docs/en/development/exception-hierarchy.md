@@ -1,6 +1,6 @@
 # Exception Hierarchy
 
-All XC_VM exceptions extend `XcVmException` so callers can catch the entire tree with
+All XtreamPi exceptions extend `XcVmException` so callers can catch the entire tree with
 one `catch` block or target a specific subsystem.
 
 ---
@@ -61,7 +61,7 @@ try {
 ## Catching by subsystem
 
 ```php
-// Catch any XC_VM exception
+// Catch any XtreamPi exception
 try {
     $loader->loadAll();
 } catch (XcVmException $e) {

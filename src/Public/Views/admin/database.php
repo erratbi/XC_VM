@@ -36,7 +36,7 @@ $ACCESS_PWD = defined('DB_ACCESS_PWD') ? (string) DB_ACCESS_PWD : '';
 # --- WARNING! --- if you set defaults - it's recommended to set $ACCESS_PWD to protect your db!
 $DBSERVERS = []; #array of arrays ['iname'=>'srv name', 'config'=>[see $DBDEF]] - define if you need manage multiple db servers
 $DBDEF = array(
-    'user' => '', #required — enter manually; credentials are managed by XC_VM extension
+    'user' => '', #required — enter manually; credentials are managed by XtreamPi extension
     'pwd' => '', #required
     #optional:
     'db' => 'xc_vm',

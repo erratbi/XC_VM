@@ -97,7 +97,7 @@ if __name__ == "__main__":
         rFilename = sys.argv[1]
         rMD5 = sys.argv[2]
     except:
-        print("Please run the update from the XC_VM Admin Interface.")
+        print("Please run the update from the XtreamPi Admin Interface.")
         sys.exit(1)
 
     log_msg("INFO", "Verifying archive MD5...")

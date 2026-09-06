@@ -1,6 +1,6 @@
 # Error Handling Model
 
-XC_VM error handling has three layers:
+XtreamPi error handling has three layers:
 
 - **Error codes** -- what failed (centralized registry of named error strings)
 - **Error handlers** -- how the client HTTP response is produced (`generateError()`, `generate404()`)

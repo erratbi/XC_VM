@@ -230,15 +230,15 @@ if (!$rMobile) { ?>
 
                                         if (isset($A134afcd6d59abf6[basename(explode(' ', trim(explode('#', $rProcess['command'])[0]))[0], '.php')])) {
                                             $rProcess['command'] = $A134afcd6d59abf6[basename(explode(' ', trim(explode('#', $rProcess['command'])[0]))[0], '.php')];
-                                            $rType = 'XC_VM CLI';
+                                            $rType = 'XtreamPi CLI';
                                         } else {
                                             if (isset($A134afcd6d59abf6[basename(trim(explode('#', $rProcess['command'])[0]), '.php')])) {
                                                 $rProcess['command'] = $A134afcd6d59abf6[basename(trim(explode('#', $rProcess['command'])[0]), '.php')];
-                                                $rType = 'XC_VM CLI';
+                                                $rType = 'XtreamPi CLI';
                                             } else {
                                                 if (isset($rCrons[basename(explode(' ', trim(explode('#', $rProcess['command'])[0]))[0], '.php')])) {
                                                     $rProcess['command'] = $rCrons[basename(explode(' ', trim(explode('#', $rProcess['command'])[0]))[0], '.php')];
-                                                    $rType = 'XC_VM Cron';
+                                                    $rType = 'XtreamPi Cron';
                                                 } else {
                                                     if (stripos($rProcess['command'], 'nginx: master process') !== false) {
                                                         $rProcess['command'] = 'NGINX Master Process';

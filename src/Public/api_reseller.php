@@ -5,7 +5,7 @@ declare(strict_types=1);
 use XcVm\Public\Controllers\Reseller\ResellerJsonApiController;
 
 /**
- * api_reseller.php — Standalone Native JSON REST API Bridge for Xtream UI / XC_VM Reseller Portal.
+ * api_reseller.php — Standalone Native JSON REST API Bridge for the XtreamPi reseller portal.
  *
  * Exposes clean, structured JSON REST endpoints for Next.js and external integrations.
  */

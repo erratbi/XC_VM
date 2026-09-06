@@ -1,6 +1,6 @@
 # FAQ - Frequently Asked Questions
 
-Here you will find answers to the most common questions and issues when working with XC_VM.
+Here you will find answers to the most common questions and issues when working with XtreamPi.
 
 ---
 
@@ -97,7 +97,7 @@ If this causes issues for legitimate users (e.g., mobile networks frequently rot
 
 ---
 
-XC_VM's brute-force guard blocks IPs after too many failed login attempts. This is controlled by:
+XtreamPi's brute-force guard blocks IPs after too many failed login attempts. This is controlled by:
 
 - `bruteforce_mac_attempts` — attempts per MAC per time window
 - `bruteforce_username_attempts` — attempts per username per time window
@@ -244,7 +244,7 @@ sudo rm -f /home/xc_vm/bin/certbot/*/.certbot.lock
 
 ---
 
-XC_VM runs **two** nginx instances:
+XtreamPi runs **two** nginx instances:
 
 1. **nginx** (`bin/nginx/`) — HTTP(S) traffic
 2. **nginx_rtmp** (`bin/nginx_rtmp/`) — RTMP streaming

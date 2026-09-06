@@ -9,12 +9,12 @@ DB_USER="${DB_USER:-root}"
 DB_PASS="${DB_PASS:-}"
 REDIS_HOST="${REDIS_HOST:-redis}"
 REDIS_PORT="${REDIS_PORT:-6379}"
-ADMIN_CODE="${XCVM_ADMIN_CODE:-admin}"
-ADMIN_USER="${XCVM_ADMIN_USER:-admin}"
-ADMIN_PASS="${XCVM_ADMIN_PASS:-admin1234}"
-ADMIN_EMAIL="${XCVM_ADMIN_EMAIL:-admin@example.com}"
+ADMIN_CODE="${XTREAMPI_ADMIN_CODE:-admin}"
+ADMIN_USER="${XTREAMPI_ADMIN_USER:-admin}"
+ADMIN_PASS="${XTREAMPI_ADMIN_PASS:-admin1234}"
+ADMIN_EMAIL="${XTREAMPI_ADMIN_EMAIL:-admin@example.com}"
 
-echo "==> [XC_VM Dev] Booting development container..."
+echo "==> [XtreamPi Dev] Booting development container..."
 
 # 1. Setup multiarch library links if on ARM64
 if [ -d /usr/x86_64-linux-gnu/lib ]; then
@@ -27,23 +27,23 @@ if [ -d /home/xc_vm/bin/ffmpeg_bin/lib ]; then
     mkdir -p /usr/local/lib
     cp -d /home/xc_vm/bin/ffmpeg_bin/lib/* /usr/local/lib/ 2>/dev/null || true
     cp -d /home/xc_vm/bin/ffmpeg_bin/lib/* /usr/lib/x86_64-linux-gnu/ 2>/dev/null || true
-    echo "/usr/local/lib" > /etc/ld.so.conf.d/xcvm-ffmpeg.conf
+    echo "/usr/local/lib" > /etc/ld.so.conf.d/xtreampi-ffmpeg.conf
     ldconfig 2>/dev/null || true
 fi
 
 # 2. Wait for MariaDB to be ready
-echo "==> [XC_VM Dev] Waiting for MariaDB (${DB_HOST}:${DB_PORT})..."
+echo "==> [XtreamPi Dev] Waiting for MariaDB (${DB_HOST}:${DB_PORT})..."
 until mariadb-admin ping -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" --password="${DB_PASS}" --silent >/dev/null 2>&1; do
     sleep 1
 done
-echo "==> [XC_VM Dev] MariaDB is reachable!"
+echo "==> [XtreamPi Dev] MariaDB is reachable!"
 
 # 3. Wait for Redis to be ready
-echo "==> [XC_VM Dev] Waiting for Redis (${REDIS_HOST}:${REDIS_PORT})..."
+echo "==> [XtreamPi Dev] Waiting for Redis (${REDIS_HOST}:${REDIS_PORT})..."
 until (echo PING | nc -w 1 "${REDIS_HOST}" "${REDIS_PORT}" | grep -q PONG) 2>/dev/null; do
     sleep 1
 done
-echo "==> [XC_VM Dev] Redis is reachable!"
+echo "==> [XtreamPi Dev] Redis is reachable!"
 
 # 4. Create required runtime directories and set permissions
 mkdir -p /home/xc_vm/content/streams /home/xc_vm/tmp /home/xc_vm/storage /home/xc_vm/config /home/xc_vm/bin/nginx/sbin /home/xc_vm/bin/nginx/conf/codes /home/xc_vm/bin/nginx/logs /home/xc_vm/bin/php/sockets /home/xc_vm/bin/php/sessions /var/lib/nginx/body /var/lib/nginx/fastcgi /var/lib/nginx/proxy /var/lib/nginx/uwsgi /var/lib/nginx/scgi
@@ -54,28 +54,28 @@ touch /var/log/php-fpm.log && chmod 666 /var/log/php-fpm.log
 
 # 4.1. Fallback: Download distribution PHP binaries if missing
 if [ ! -f /home/xc_vm/bin/php/sbin/php-fpm ]; then
-    echo "==> [XC_VM Dev] Installing distribution PHP binaries..."
+    echo "==> [XtreamPi Dev] Installing distribution PHP binaries..."
     BIN_TAG=$(curl -s https://api.github.com/repos/Vateron-Media/XC_VM_Binaries/releases/latest | grep '"tag_name":' | head -n 1 | cut -d '"' -f 4)
     BIN_TAG="${BIN_TAG:-29062026}"
-    mkdir -p /tmp/xcvm_extract /home/xc_vm/bin
+    mkdir -p /tmp/xtreampi_extract /home/xc_vm/bin
     curl -sL "https://github.com/Vateron-Media/XC_VM_Binaries/releases/download/${BIN_TAG}/ubuntu_24.tar.gz" -o /tmp/ubuntu_24.tar.gz
-    tar -xzf /tmp/ubuntu_24.tar.gz -C /tmp/xcvm_extract/
-    if [ -d /tmp/xcvm_extract/bin/php ]; then
-        cp -r /tmp/xcvm_extract/bin/php /home/xc_vm/bin/
-    elif [ -d /tmp/xcvm_extract/ubuntu_24/bin/php ]; then
-        cp -r /tmp/xcvm_extract/ubuntu_24/bin/php /home/xc_vm/bin/
+    tar -xzf /tmp/ubuntu_24.tar.gz -C /tmp/xtreampi_extract/
+    if [ -d /tmp/xtreampi_extract/bin/php ]; then
+        cp -r /tmp/xtreampi_extract/bin/php /home/xc_vm/bin/
+    elif [ -d /tmp/xtreampi_extract/ubuntu_24/bin/php ]; then
+        cp -r /tmp/xtreampi_extract/ubuntu_24/bin/php /home/xc_vm/bin/
     fi
     chmod -R 755 /home/xc_vm/bin/php 2>/dev/null || true
     chmod +x /home/xc_vm/bin/php/bin/* /home/xc_vm/bin/php/sbin/* 2>/dev/null || true
     chown -R xc_vm:xc_vm /home/xc_vm/bin/php 2>/dev/null || true
-    rm -rf /tmp/ubuntu_24.tar.gz /tmp/xcvm_extract
+    rm -rf /tmp/ubuntu_24.tar.gz /tmp/xtreampi_extract
 fi
 
 # 5. Write config.ini if config.enc does not exist
 if [ ! -f /home/xc_vm/config/config.enc ]; then
-    echo "==> [XC_VM Dev] Initializing database credentials in config.ini..."
+    echo "==> [XtreamPi Dev] Initializing database credentials in config.ini..."
     cat << EOF > /home/xc_vm/config/config.ini
-; XC_VM Configuration
+; XtreamPi Configuration
 ; -----------------
 [XC_VM]
 hostname    =   "${DB_HOST}"
@@ -111,7 +111,7 @@ else
 fi
 
 # 8. Generate Admin Code configuration for Nginx
-echo "==> [XC_VM Dev] Configuring Admin Route code: /${ADMIN_CODE}..."
+echo "==> [XtreamPi Dev] Configuring Admin Route code: /${ADMIN_CODE}..."
 cat << EOF > "/home/xc_vm/bin/nginx/conf/codes/${ADMIN_CODE}.conf"
 location ^~ /${ADMIN_CODE}/assets/ {
     alias /home/xc_vm/Public/assets/admin/;
@@ -174,15 +174,15 @@ EOF
 chown -R xc_vm:xc_vm "/home/xc_vm/bin/nginx/conf/codes" 2>/dev/null || true
 
 # 9. Start Cron Scheduler
-echo "==> [XC_VM Dev] Starting cron scheduler..."
+echo "==> [XtreamPi Dev] Starting cron scheduler..."
 service cron start 2>/dev/null || cron || true
 
 # 10. Start PHP-FPM pools
-echo "==> [XC_VM Dev] Starting PHP-FPM pools..."
+echo "==> [XtreamPi Dev] Starting PHP-FPM pools..."
 sudo -u xc_vm /home/xc_vm/bin/daemons.sh 2>/dev/null || true
 
 # 11. Run console startup, crontab setup, and database migrations automatically
-echo "==> [XC_VM Dev] Running automatic database migrations and status checks..."
+echo "==> [XtreamPi Dev] Running automatic database migrations and status checks..."
 sudo /home/xc_vm/bin/php/bin/php /home/xc_vm/console.php status 1 >/dev/null 2>&1 || true
 sudo /home/xc_vm/bin/php/bin/php /home/xc_vm/console.php status >/dev/null 2>&1 || true
 sudo /home/xc_vm/bin/php/bin/php /home/xc_vm/console.php startup >/dev/null 2>&1 || true
@@ -191,13 +191,13 @@ sudo /home/xc_vm/bin/php/bin/php /home/xc_vm/console.php startup >/dev/null 2>&1
 # container starts. The normal weekly cron maintains it afterwards. Failure is
 # non-fatal so offline development still starts, with GeoIP safely unavailable.
 if [ ! -s /home/xc_vm/bin/maxmind/GeoLite2-Country.mmdb ]; then
-    echo "==> [XC_VM Dev] Downloading the GeoLite2 Country database..."
+    echo "==> [XtreamPi Dev] Downloading the GeoLite2 Country database..."
     sudo /home/xc_vm/bin/php/bin/php /home/xc_vm/console.php cron:maxmind >/dev/null 2>&1 \
-        || echo "==> [XC_VM Dev] GeoLite2 download unavailable; continuing without GeoIP data."
+        || echo "==> [XtreamPi Dev] GeoLite2 download unavailable; continuing without GeoIP data."
 fi
 
 # 12. Auto-seed default Administrator if database is fresh
-echo "==> [XC_VM Dev] Checking administrator account..."
+echo "==> [XtreamPi Dev] Checking administrator account..."
 sudo /home/xc_vm/bin/php/bin/php -r "
 require_once '/home/xc_vm/bootstrap.php';
 \XC_Bootstrap::boot(\XcVm\Core\Enum\BootContext::Cli, ['process' => 'AdminInit']);
@@ -212,13 +212,13 @@ if (\$db) {
         \$db->query('INSERT INTO \`users\` (\`username\`, \`password\`, \`email\`, \`member_group_id\`, \`date_registered\`, \`last_login\`, \`ip\`, \`status\`) VALUES (?, ?, ?, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), \"127.0.0.1\", 1)', \$user, \$hash, \$email);
         \$db->query('UPDATE \`servers\` SET \`server_ip\` = \"127.0.0.1\" WHERE \`is_main\` = 1 LIMIT 1');
         \$db->query('UPDATE \`settings\` SET \`ffmpeg_cpu\` = \"8.0\", \`ffmpeg_gpu\` = \"8.0\" WHERE \`id\` = 1');
-        echo '==> [XC_VM Dev] Fresh installation initialized! Default admin created: ' . \$user . PHP_EOL;
+        echo '==> [XtreamPi Dev] Fresh installation initialized! Default admin created: ' . \$user . PHP_EOL;
     }
 }
 " 2>/dev/null || true
 
 # 13. Run initial root signals update to populate system status
-echo "==> [XC_VM Dev] Running initial root signals cycle..."
+echo "==> [XtreamPi Dev] Running initial root signals cycle..."
 sudo /home/xc_vm/bin/php/bin/php /home/xc_vm/console.php cron:root_signals >/dev/null 2>&1 || true
 chmod 666 /home/xc_vm/config/signals.last 2>/dev/null || true
 
@@ -229,10 +229,10 @@ sudo -u xc_vm /home/xc_vm/bin/php/bin/php /home/xc_vm/console.php queue >/dev/nu
 sudo -u xc_vm /home/xc_vm/bin/php/bin/php /home/xc_vm/console.php cache_handler >/dev/null 2>&1 &
 
 # 15. Launch Nginx Web Server
-echo "==> [XC_VM Dev] Launching Nginx Web Server..."
+echo "==> [XtreamPi Dev] Launching Nginx Web Server..."
 sudo -u xc_vm /home/xc_vm/bin/nginx/sbin/nginx 2>/dev/null || true
 
-echo "==> [XC_VM Dev] Everything is ready! Panel: http://localhost:8880/${ADMIN_CODE}"
+echo "==> [XtreamPi Dev] Everything is ready! Panel: http://localhost:8880/${ADMIN_CODE}"
 
 # Keep container running in foreground
 exec sleep infinity

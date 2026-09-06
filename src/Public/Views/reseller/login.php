@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <title data-id="login">XC_VM | <?= $language::get('login') ?></title>
+        <title data-id="login">XtreamPi | <?= $language::get('login') ?></title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <link rel="shortcut icon" href="assets/images/favicon.ico">
@@ -36,7 +36,7 @@
                     <div class="row justify-content-center">
                         <div class="col-md-8 col-lg-6 col-xl-5">
                             <div class="text-center w-75 m-auto">
-                                <span><img src="assets/images/logo.png" height="80px" alt=""></span>
+                                <span><img src="assets/images/<?= isset($_COOKIE['theme']) && $_COOKIE['theme'] == 1 ? 'logo.png' : 'logo-on-light.svg' ?>" height="80" width="80" alt="XtreamPi"></span>
                                 <p class="text-muted mb-4 mt-3"></p>
                             </div>
                             <?php if (isset($_STATUS) && $_STATUS == STATUS_FAILURE): ?>

@@ -98,7 +98,7 @@ if (DiagnosticsService::checkCompatibility($ffprobeData)) {
         ],
         // ...
     ],
-    'version' => string,  // текущая версия XC_VM
+    'version' => string,  // текущая версия XtreamPi
 ]
 ```
 

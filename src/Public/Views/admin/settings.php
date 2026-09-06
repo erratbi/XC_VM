@@ -781,7 +781,7 @@ $isAjaxRequest = (
 
 												<div class="form-group row mb-4">
 													<label class="col-md-4 col-form-label" for="restream_deny_unauthorised">
-														XC_VM Detect - Deny
+														XtreamPi Detect - Deny
 														<i title="<?= $language::get('deny_connections_from_nonrestreamers_who_tooltip') ?>" class="tooltip text-secondary far fa-circle"></i>
 													</label>
 
@@ -790,7 +790,7 @@ $isAjaxRequest = (
 													</div>
 
 													<label class="col-md-4 col-form-label" for="detect_restream_block_user">
-														XC_VM Detect - Ban Lines
+														XtreamPi Detect - Ban Lines
 														<i title="<?= $language::get('ban_lines_of_nonrestreamers_who_tooltip') ?>" class="tooltip text-secondary far fa-circle"></i>
 													</label>
 
@@ -1174,7 +1174,7 @@ $isAjaxRequest = (
 												<div class="form-group row mb-4">
 													<label class="col-md-4 col-form-label" for="platform_api_key">
 														Modules API Key
-														<i title="Shared XC_VM platform API key for this account. Used by MAIN and all load balancers to download store modules. Get it from your account on the platform website." class="tooltip text-secondary far fa-circle"></i>
+														<i title="Shared XtreamPi platform API key for this account. Used by MAIN and all load balancers to download store modules. Get it from your account on the platform website." class="tooltip text-secondary far fa-circle"></i>
 													</label>
 
 													<div class="col-md-8">
@@ -1291,7 +1291,7 @@ $isAjaxRequest = (
 												</div>
 
 												<div class="form-group row mb-4">
-													<div class="col-md-12 text-muted"><small><i class="mdi mdi-information-outline mr-1"></i>When MaxMind credentials are configured, <code>binaries</code> and <code>cron:maxmind</code> (every Tuesday) download selected databases from the MaxMind API. If credentials are empty, XC_VM falls back to GitHub GeoLite2 files. GeoLite2 editions are free with a MaxMind account; GeoIP2 editions require an active paid subscription.</small></div>
+													<div class="col-md-12 text-muted"><small><i class="mdi mdi-information-outline mr-1"></i>When MaxMind credentials are configured, <code>binaries</code> and <code>cron:maxmind</code> (every Tuesday) download selected databases from the MaxMind API. If credentials are empty, XtreamPi falls back to GitHub GeoLite2 files. GeoLite2 editions are free with a MaxMind account; GeoIP2 editions require an active paid subscription.</small></div>
 												</div>
 
 												<h5 class="card-title mb-4">Encryption</h5>

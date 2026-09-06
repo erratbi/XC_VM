@@ -1,6 +1,6 @@
 # Authentication and Sessions
 
-XC_VM supports three authentication contexts -- admin, reseller, and player -- each with isolated session keys, distinct login flows, and independent validation logic. This document covers the full authentication lifecycle from login through session validation and security enforcement.
+XtreamPi supports three authentication contexts -- admin, reseller, and player -- each with isolated session keys, distinct login flows, and independent validation logic. This document covers the full authentication lifecycle from login through session validation and security enforcement.
 
 ---
 

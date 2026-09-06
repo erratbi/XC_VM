@@ -63,7 +63,7 @@ class ServersCronJob implements CommandInterface {
         SettingsManager::set(SettingsRepository::getAll(true));
 
         if (!ProcessManager::isNginxRunning()) {
-            echo 'XC_VM not running...' . "\n";
+            echo 'XtreamPi not running...' . "\n";
             return;
         }
 

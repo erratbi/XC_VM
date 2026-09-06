@@ -1,6 +1,6 @@
 # Updating a Server
 
-Step-by-step guide to updating an XC_VM server. For the internals of the update process, see [Update Mechanism](en-us/administration/update-system.md).
+Step-by-step guide to updating an XtreamPi server. For the internals of the update process, see [Update Mechanism](en-us/administration/update-system.md).
 
 > 💾 Before updating, it is recommended to create a [backup](en-us/administration/backup-strategy.md).
 

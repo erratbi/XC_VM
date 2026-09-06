@@ -1,6 +1,6 @@
 # GeoIP and Device Detection
 
-XC_VM uses MaxMind GeoIP2/GeoLite2 databases for geolocation and ISP detection, and the Mobile_Detect library for user agent parsing.
+XtreamPi uses MaxMind GeoIP2/GeoLite2 databases for geolocation and ISP detection, and the Mobile_Detect library for user agent parsing.
 These systems are integrated into streaming authentication for access control, geographic routing, and activity logging.
 
 ---

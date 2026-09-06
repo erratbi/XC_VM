@@ -242,7 +242,7 @@ class TableController extends BaseAdminController {
 		if (!Authorization::check("adv", "users") && !Authorization::check("adv", "mass_edit_users")) {
 			exit;
 		}
-		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
+		$rXtreampi = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "xtreampi";
 		$rOrderDirection = strtolower(RequestManager::getAll()["order"][0]["dir"]) === "desc" ? "desc" : "asc";
 		$rOrder = ["`lines`.`id`", "`lines`.`username`", "`lines`.`password`", "`lines`.`member_id`", "`lines`.`enabled` - `lines`.`admin_enabled`", "`active_connections` > 0", "`lines`.`is_trial`", "`lines`.`is_restreamer`", "`active_connections`", "`lines`.`max_connections`", "`lines`.`exp_date`", "`active_connections` " . $rOrderDirection . ", `last_activity`", false];
 		if (isset(RequestManager::getAll()["order"]) && 0 < strlen(RequestManager::getAll()["order"][0]["column"] ?? '')) {
@@ -377,7 +377,7 @@ class TableController extends BaseAdminController {
 					if (SettingsManager::getAll()["redis_handler"]) {
 						$rRow["active_connections"] = isset($rConnectionCount[$rRow["id"]]) ? $rConnectionCount[$rRow["id"]] : 0;
 					}
-					if ($rStreamcreed) {
+					if ($rXtreampi) {
 						if (!$rRow["admin_enabled"]) {
 							$rStatusKey = "banned";
 							$rStatusLabel = "Banned";
@@ -574,7 +574,7 @@ class TableController extends BaseAdminController {
 		if (!Authorization::check("adv", "manage_mag")) {
 			exit;
 		}
-		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
+		$rXtreampi = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "xtreampi";
 		$rOrderDirection = strtolower(RequestManager::getAll()["order"][0]["dir"]) === "desc" ? "desc" : "asc";
 		$rOrder = ["`lines`.`id`", "`lines`.`username`", "`mag_devices`.`mac`", "`mag_devices`.`stb_type`", "`lines`.`member_id`", "`lines`.`enabled`", "`active_connections` > 0", "`lines`.`is_trial`", "`lines`.`exp_date`", "`active_connections` " . $rOrderDirection . ", `last_activity`", false];
 		$rOrderColumn = RequestManager::getAll()["order"][0]["column"] ?? '';
@@ -699,7 +699,7 @@ class TableController extends BaseAdminController {
 					if (SettingsManager::getAll()["redis_handler"]) {
 						$rRow["active_connections"] = isset($rConnectionCount[$rRow["id"]]) ? $rConnectionCount[$rRow["id"]] : 0;
 					}
-					if ($rStreamcreed) {
+					if ($rXtreampi) {
 						if (!$rRow["id"]) { $rStatus = ["damaged", "Line missing"]; }
 						elseif (!$rRow["admin_enabled"]) { $rStatus = ["banned", "Banned"]; }
 						elseif (!$rRow["enabled"]) { $rStatus = ["disabled", "Disabled"]; }
@@ -851,7 +851,7 @@ class TableController extends BaseAdminController {
 		if (!Authorization::check("adv", "manage_e2")) {
 			exit;
 		}
-		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
+		$rXtreampi = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "xtreampi";
 		$rOrderDirection = strtolower(RequestManager::getAll()["order"][0]["dir"]) === "desc" ? "desc" : "asc";
 		$rOrder = ["`lines`.`id`", "`lines`.`username`", "`enigma2_devices`.`mac`", "`enigma2_devices`.`public_ip`", "`lines`.`member_id`", "`lines`.`enabled`", "`active_connections` > 0", "`lines`.`is_trial`", "`lines`.`exp_date`", "`active_connections` " . $rOrderDirection . ", `last_activity`", false];
 		$rOrderColumn = RequestManager::getAll()["order"][0]["column"] ?? '';
@@ -976,7 +976,7 @@ class TableController extends BaseAdminController {
 					if (SettingsManager::getAll()["redis_handler"]) {
 						$rRow["active_connections"] = isset($rConnectionCount[$rRow["id"]]) ? $rConnectionCount[$rRow["id"]] : 0;
 					}
-					if ($rStreamcreed) {
+					if ($rXtreampi) {
 						if (!$rRow["id"]) { $rStatus = ["damaged", "Line missing"]; } elseif (!$rRow["admin_enabled"]) { $rStatus = ["banned", "Banned"]; } elseif (!$rRow["enabled"]) { $rStatus = ["disabled", "Disabled"]; } elseif ($rRow["exp_date"] && $rRow["exp_date"] < time()) { $rStatus = ["expired", "Expired"]; } else { $rStatus = ["active", "Active"]; }
 						$rReturn["data"][] = ["id"=>(int)$rRow["id"],"deviceId"=>(int)$rRow["device_id"],"username"=>(string)($rRow["username"]??""),"mac"=>(string)($rRow["mac"]??""),"publicIp"=>(string)($rRow["public_ip"]??""),"owner"=>(string)($rRow["owner_name"]??""),"status"=>$rStatus[0],"statusLabel"=>$rStatus[1],"enabled"=>!empty($rRow["enabled"]),"adminEnabled"=>!empty($rRow["admin_enabled"]),"connections"=>(int)$rRow["active_connections"],"online"=>(int)$rRow["active_connections"]>0,"trial"=>!empty($rRow["is_trial"]),"expires"=>$rRow["exp_date"]?date($rSettings["date_format"]." H:i",$rRow["exp_date"]):"Never","lastActive"=>!empty($rRow["last_active"])?date($rSettings["date_format"]." H:i",$rRow["last_active"]):"Never"];
 					} elseif ($rIsAPI) {
@@ -1118,7 +1118,7 @@ class TableController extends BaseAdminController {
 		if (!Authorization::check("adv", "streams") && !Authorization::check("adv", "mass_edit_streams")) {
 			exit;
 		}
-		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
+		$rXtreampi = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "xtreampi";
 		$rCategories = CategoryService::getAllByType("live");
 		$rOrder = ["`streams`.`id`", "`streams`.`stream_icon`", "`streams`.`stream_display_name`", "`streams_servers`.`current_source`", "`clients`", "`streams_servers`.`stream_started`", false, false, false, "`streams_servers`.`bitrate`"];
 		if (isset(RequestManager::getAll()["order"]) && 0 < strlen(RequestManager::getAll()["order"][0]["column"] ?? '')) {
@@ -1695,7 +1695,7 @@ class TableController extends BaseAdminController {
 						if (!$rSettings["streams_grouped"] && 1 < $rStreamServerCount) {
 							$rID .= "-" . $rRow["server_id"];
 						}
-						if ($rStreamcreed) {
+						if ($rXtreampi) {
 							$rReturn["data"][] = [
 								"id" => (int) $rRow["id"],
 								"display_id" => (string) $rID,
@@ -1745,8 +1745,8 @@ class TableController extends BaseAdminController {
 		if (!Authorization::check("adv", "radio") && !Authorization::check("adv", "mass_edit_radio")) {
 			exit;
 		}
-		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
-		$rStreamcreedStatusLabels = [-1 => "No server", 0 => "Stopped", 1 => "Online", 2 => "Starting", 3 => "Down", 4 => "On demand", 5 => "Direct source"];
+		$rXtreampi = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "xtreampi";
+		$rXtreampiStatusLabels = [-1 => "No server", 0 => "Stopped", 1 => "Online", 2 => "Starting", 3 => "Down", 4 => "On demand", 5 => "Direct source"];
 		$rCategories = CategoryService::getAllByType("radio");
 		$rOrder = ["`streams`.`id`", "`streams`.`stream_icon`", "`streams`.`stream_display_name`", "`server_name`", "`clients`", "`streams_servers`.`stream_started`", false, "`streams_servers`.`bitrate`"];
 		if (isset(RequestManager::getAll()["order"]) && 0 < strlen(RequestManager::getAll()["order"][0]["column"] ?? '')) {
@@ -1932,7 +1932,7 @@ class TableController extends BaseAdminController {
 						if ($rSettings["streams_grouped"] == 1) {
 							$rRow["server_id"] = -1;
 						}
-						if ($rStreamcreed) {
+						if ($rXtreampi) {
 							$rRadioInfo = json_decode((string) ($rRow["stream_info"] ?? ""), true);
 							if (!is_array($rRadioInfo)) {
 								$rRadioInfo = [];
@@ -1951,7 +1951,7 @@ class TableController extends BaseAdminController {
 								"name" => trim(strip_tags((string) ($rRow["stream_display_name"] ?? ""))), "category" => trim(strip_tags((string) $rRadioCategory)),
 								"image" => (string) ($rRow["stream_icon"] ?? ""), "server" => trim(strip_tags((string) ($rRow["server_name"] ?? "No server selected"))),
 								"connections" => (int) ($rRow["clients"] ?? 0), "status" => (int) $rActualStatus,
-								"statusLabel" => $rStreamcreedStatusLabels[(int) $rActualStatus] ?? "Unknown", "can_stop" => $rRadioCanStop,
+								"statusLabel" => $rXtreampiStatusLabels[(int) $rActualStatus] ?? "Unknown", "can_stop" => $rRadioCanStop,
 								"bitrate" => is_numeric($rRow["bitrate"] ?? null) ? (int) $rRow["bitrate"] : 0,
 								"audio_codec" => (string) ($rRadioInfo["codecs"]["audio"]["codec_name"] ?? ""), "notes" => trim(strip_tags((string) ($rRow["notes"] ?? "")))
 							];
@@ -2084,8 +2084,8 @@ class TableController extends BaseAdminController {
 		if (!Authorization::check("adv", "movies") && !Authorization::check("adv", "mass_sedits_vod")) {
 			exit;
 		}
-		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
-		$rStreamcreedVODStatusLabels = [-1 => "No server selected", 0 => "Not encoded", 1 => "Encoded", 2 => "Encoding", 3 => "Direct source", 4 => "Down", 5 => "Direct stream"];
+		$rXtreampi = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "xtreampi";
+		$rXtreampiVODStatusLabels = [-1 => "No server selected", 0 => "Not encoded", 1 => "Encoded", 2 => "Encoding", 3 => "Direct source", 4 => "Down", 5 => "Direct stream"];
 		$rCategories = CategoryService::getAllByType("movie");
 		$rOrder = ["`streams`.`id`", false, "`streams`.`stream_display_name`", "`server_name`", "`clients`", "`streams_servers`.`stream_started`", false, false, false, "`streams_servers`.`bitrate`"];
 		if (isset(RequestManager::getAll()["order"]) && 0 < strlen(RequestManager::getAll()["order"][0]["column"] ?? '')) {
@@ -2445,7 +2445,7 @@ class TableController extends BaseAdminController {
 						if (!$rSettings["streams_grouped"] && 1 < $rServerCount[$rRow["id"]]) {
 							$rID .= "-" . $rRow["server_id"];
 						}
-						if ($rStreamcreed) {
+						if ($rXtreampi) {
 							$rMovieDisplayName = trim(strip_tags((string) $rRow["stream_display_name"]));
 							if ($rMovieDisplayName === "") {
 								$rMovieDisplayName = "Movie #" . (int) $rRow["id"];
@@ -2474,7 +2474,7 @@ class TableController extends BaseAdminController {
 								"server" => trim(strip_tags((string) ($rRow["server_name"] ?: "No Server Selected"))),
 								"connections" => (int) ($rRow["clients"] ?? 0),
 								"status" => (int) $rActualStatus,
-								"statusLabel" => $rStreamcreedVODStatusLabels[$rActualStatus] ?? "Unknown",
+								"statusLabel" => $rXtreampiVODStatusLabels[$rActualStatus] ?? "Unknown",
 								"encode_action" => $rMovieAction,
 								"can_play" => (int) ($rRow["direct_source"] ?? 0) !== 1 && in_array((int) $rActualStatus, [1, 3], true),
 								"target_container" => (string) ($rRow["target_container"] ?? ""),
@@ -2824,7 +2824,7 @@ class TableController extends BaseAdminController {
 		if (!Authorization::check("adv", "live_connections")) {
 			exit;
 		}
-		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
+		$rXtreampi = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "xtreampi";
 		$rRows = [];
 		if (SettingsManager::getAll()["redis_handler"]) {
 			$rRedis = RedisManager::instance();
@@ -3037,7 +3037,7 @@ class TableController extends BaseAdminController {
 		}
 		if (0 < count($rRows)) {
 			foreach ($rRows as $rRow) {
-				if ($rStreamcreed) {
+				if ($rXtreampi) {
 					$rUserKind = !empty($rRow["hmac_id"]) ? "HMAC" : (!empty($rRow["is_mag"]) ? "MAG" : (!empty($rRow["is_e2"]) ? "Enigma2" : "Line"));
 					$rProxyID = (int) ($rRow["proxy_id"] ?? 0);
 					$rProxyName = $rProxyID > 0 && isset($rProxyServers[$rProxyID]) ? (string) $rProxyServers[$rProxyID]["server_name"] : "";
@@ -4304,7 +4304,7 @@ class TableController extends BaseAdminController {
 		if (!Authorization::check("adv", "mng_regusers")) {
 			exit;
 		}
-		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
+		$rXtreampi = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "xtreampi";
 		$rOrder = ["`users`.`id`", "`users`.`username`", "`users`.`owner_id`", "`users`.`ip`", "`users`.`status`", "`users`.`member_group_id`", "`users`.`credits`", false, false, false, false, "`users`.`last_login`", false];
 		$rOrderColumn = RequestManager::getAll()["order"][0]["column"] ?? '';
 		$rOrderRow = (0 < strlen((string) $rOrderColumn)) ? (int) $rOrderColumn : 0;
@@ -4392,7 +4392,7 @@ class TableController extends BaseAdminController {
 						$rRow["owner_username"] = "";
 					}
 					$rRow = array_merge($rRow, $rUserInfo[$rRow["id"]]);
-					if ($rStreamcreed) {
+					if ($rXtreampi) {
 						$rReturn["data"][] = [
 							"id" => (int) $rRow["id"],
 							"username" => (string) $rRow["username"],
@@ -4584,7 +4584,7 @@ class TableController extends BaseAdminController {
 			exit;
 		}
 		$rCategories = CategoryService::getAllByType("series");
-		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
+		$rXtreampi = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "xtreampi";
 		$rOrder = ["`streams_series`.`id`", "`streams_series`.`cover`", "`streams_series`.`title`", "`streams_series`.`category_id`", "`latest_season`", "`episode_count`", false, "`streams_series`.`release_date`", "`streams_series`.`last_modified`", false];
 		$rOrderColumn = RequestManager::getAll()["order"][0]["column"] ?? '';
 		$rOrderRow = (0 < strlen((string) $rOrderColumn)) ? (int) $rOrderColumn : 0;
@@ -4729,7 +4729,7 @@ class TableController extends BaseAdminController {
 						}
 						$rYear = $rRow["year"] ? "<strong>" . $rRow["year"] . "</strong> &nbsp;" : "";
 						$rTitle .= "<br><span style='font-size:11px;'>" . $rYear . $rRatingText . "</span></a>";
-						if ($rStreamcreed) {
+						if ($rXtreampi) {
 							$rCategoryIDs = json_decode((string) ($rRow["category_id"] ?? "[]"), true);
 							if (!is_array($rCategoryIDs)) {
 								$rCategoryIDs = [];
@@ -4768,8 +4768,8 @@ class TableController extends BaseAdminController {
 		if (!Authorization::check("adv", "episodes") && !Authorization::check("adv", "mass_sedits")) {
 			exit;
 		}
-		$rStreamcreed = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "streamcreed";
-		$rStreamcreedVODStatusLabels = [-1 => "No server selected", 0 => "Not encoded", 1 => "Encoded", 2 => "Encoding", 3 => "Direct source", 4 => "Down", 5 => "Direct stream"];
+		$rXtreampi = !$rIsAPI && (RequestManager::getAll()["view"] ?? "") === "xtreampi";
+		$rXtreampiVODStatusLabels = [-1 => "No server selected", 0 => "Not encoded", 1 => "Encoded", 2 => "Encoding", 3 => "Direct source", 4 => "Down", 5 => "Direct stream"];
 		$rOrder = ["`streams`.`id`", false, "`streams`.`stream_display_name`", "`server_name`", "`clients`", "`streams_servers`.`stream_started`", false, false, "`streams_servers`.`bitrate`"];
 		if (isset(RequestManager::getAll()["order"]) && 0 < strlen(RequestManager::getAll()["order"][0]["column"] ?? '')) {
 			$rOrderRow = (int) (RequestManager::getAll()["order"][0]["column"] ?? 0);
@@ -5102,7 +5102,7 @@ class TableController extends BaseAdminController {
 							$rDurationText = sprintf("%02d:%02d:%02d", intdiv($rDurationSecs, 3600), intdiv($rDurationSecs % 3600, 60), $rDurationSecs % 60);
 						}
 						$rDurationCell = "<table style='font-size: 11px;' class='table-data nowrap' align='center'><tbody><tr><td class='text-success'><i class='mdi mdi-clock-outline'></i> <strong>" . ($rDurationText ?? "--:--:--") . "</strong></td></tr><tr><td><span style='font-size: 10px;' class='text-muted'>" . $rModded . "</span></td></tr></tbody></table>";
-						if ($rStreamcreed) {
+						if ($rXtreampi) {
 							$rEpisodeInfo = json_decode((string) ($rRow["stream_info"] ?? ""), true);
 							if (!is_array($rEpisodeInfo)) {
 								$rEpisodeInfo = [];
@@ -5119,7 +5119,7 @@ class TableController extends BaseAdminController {
 								"server" => trim(strip_tags((string) ($rRow["server_name"] ?? "No Server Selected"))),
 								"connections" => (int) ($rRow["clients"] ?? 0),
 								"status" => (int) $rActualStatus,
-								"statusLabel" => $rStreamcreedVODStatusLabels[$rActualStatus] ?? "Unknown",
+								"statusLabel" => $rXtreampiVODStatusLabels[$rActualStatus] ?? "Unknown",
 								"image" => (string) ($rProperties["movie_image"] ?? ""),
 								"target_container" => (string) ($rRow["target_container"] ?? ""),
 								"bitrate" => is_numeric($rRow["bitrate"] ?? null) ? (int) $rRow["bitrate"] : 0,

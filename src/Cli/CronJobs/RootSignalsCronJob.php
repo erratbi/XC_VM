@@ -261,7 +261,7 @@ class RootSignalsCronJob implements CommandInterface {
         $rXC_VMList = trim(implode("\n", array_unique($rXC_VMList)));
         $rCurrentList = (trim(file_get_contents(BIN_PATH . 'nginx/conf/realip_xc_vm.conf')) ?: '');
         if ($rXC_VMList != $rCurrentList) {
-            echo 'Updating \XC_VM IP List...' . "\n";
+            echo 'Updating XtreamPi IP List...' . "\n";
             file_put_contents(BIN_PATH . 'nginx/conf/realip_xc_vm.conf', $rXC_VMList);
             $rReload = true;
         }
@@ -482,13 +482,13 @@ class RootSignalsCronJob implements CommandInterface {
                             break;
                         case 'restart_services':
                             echo 'Restarting services...' . "\n";
-                            $db->query("INSERT INTO `mysql_syslog`(`server_id`, `type`, `error`, `username`, `ip`, `database`, `date`) VALUES(?, 'RESTART', 'XC_VM services restarted on request.', 'root', 'localhost', NULL, ?);", SERVER_ID, time());
+                            $db->query("INSERT INTO `mysql_syslog`(`server_id`, `type`, `error`, `username`, `ip`, `database`, `date`) VALUES(?, 'RESTART', 'XtreamPi services restarted on request.', 'root', 'localhost', NULL, ?);", SERVER_ID, time());
                             shell_exec('sudo systemctl stop xc_vm');
                             shell_exec('sudo systemctl start xc_vm');
                             break;
                         case 'stop_services':
                             echo 'Stopping services...' . "\n";
-                            $db->query("INSERT INTO `mysql_syslog`(`server_id`, `type`, `error`, `username`, `ip`, `database`, `date`) VALUES(?, 'STOP', 'XC_VM services stopped on request.', 'root', 'localhost', NULL, ?);", SERVER_ID, time());
+                            $db->query("INSERT INTO `mysql_syslog`(`server_id`, `type`, `error`, `username`, `ip`, `database`, `date`) VALUES(?, 'STOP', 'XtreamPi services stopped on request.', 'root', 'localhost', NULL, ?);", SERVER_ID, time());
                             shell_exec('sudo systemctl stop xc_vm');
                             break;
                         case 'reload_nginx':
@@ -532,7 +532,7 @@ class RootSignalsCronJob implements CommandInterface {
                             break;
                         case 'update_binaries':
                             echo 'Updating binaries...' . "\n";
-                            $db->query("INSERT INTO `mysql_syslog`(`server_id`, `type`, `error`, `username`, `ip`, `database`, `date`) VALUES(?, 'BINARIES', 'Updating \XC_VM binaries from \XC_VM server...', 'root', 'localhost', NULL, ?);", SERVER_ID, time());
+                            $db->query("INSERT INTO `mysql_syslog`(`server_id`, `type`, `error`, `username`, `ip`, `database`, `date`) VALUES(?, 'BINARIES', 'Updating XtreamPi binaries from the XtreamPi server...', 'root', 'localhost', NULL, ?);", SERVER_ID, time());
                             shell_exec('sudo ' . PHP_BIN . ' ' . MAIN_HOME . 'console.php binaries 2>&1 &');
                             break;
                         case 'install_module':
@@ -547,7 +547,7 @@ class RootSignalsCronJob implements CommandInterface {
                             break;
                         case 'update':
                             echo 'Updating...' . "\n";
-                            $db->query("INSERT INTO `mysql_syslog`(`server_id`, `type`, `error`, `username`, `ip`, `database`, `date`) VALUES(?, 'UPDATE', 'Updating \XC_VM...', 'root', 'localhost', NULL, ?);", SERVER_ID, time());
+                            $db->query("INSERT INTO `mysql_syslog`(`server_id`, `type`, `error`, `username`, `ip`, `database`, `date`) VALUES(?, 'UPDATE', 'Updating XtreamPi...', 'root', 'localhost', NULL, ?);", SERVER_ID, time());
                             shell_exec('sudo ' . PHP_BIN . ' ' . MAIN_HOME . 'console.php update update 2>&1 &');
                             break;
                         case 'set_services':

@@ -363,7 +363,7 @@ class CacheEngineCronJob implements CommandInterface {
                 exit();
             }
         } else {
-            echo 'XC_VM not running...' . "\n";
+            echo 'XtreamPi not running...' . "\n";
             exit();
         }
     }

@@ -1,6 +1,6 @@
 # Permissions and RBAC
 
-XC_VM access control combines:
+XtreamPi access control combines:
 
 - **Group permissions** -- allowed capabilities assigned to an admin group
 - **Object-level authorization** -- ownership checks for specific entities (users, lines)

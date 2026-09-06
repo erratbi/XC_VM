@@ -33,7 +33,7 @@ class ProxyArchiveCronJob implements CommandInterface {
 	}
 
 	public function getDescription(): string {
-		return 'Cron: refresh the proxy node archive from XC_VM_Proxy releases';
+		return 'Cron: refresh the XtreamPi proxy node archive';
 	}
 
 	public function execute(array $rArgs): int {

@@ -1,4 +1,4 @@
-# XC_VM IPTV Panel
+# XtreamPi IPTV Panel
 
 ![Vateron Media Logo](https://avatars.githubusercontent.com/u/149707645?s=400&v=4)
 
@@ -8,9 +8,9 @@
 
 ## Что это такое
 
-**XC_VM** — это современная IPTV-панель, работающая на PHP, Nginx, FFmpeg и MariaDB.
+**XtreamPi** — это современная IPTV-панель, работающая на PHP, Nginx, FFmpeg и MariaDB.
 
-XC_VM помогает разворачивать полноценную IPTV-инфраструктуру:
+XtreamPi помогает разворачивать полноценную IPTV-инфраструктуру:
 
 - Управление Live, Movies и Series  
 - Поддержка реселлеров и пользователей  
@@ -45,13 +45,13 @@ XC_VM помогает разворачивать полноценную IPTV-и
 - **FFmpeg 8.0** — transcoding  
 - **yt-dlp** — media acquiring  
 
-XC_VM официально поддерживает Ubuntu 22.04 и тестируется на 24.04.
+XtreamPi официально поддерживает Ubuntu 22.04 и тестируется на 24.04.
 
 ---
 
 ## Сообщество
 
-XC_VM — полностью управляемый сообществом проект.
+XtreamPi — полностью управляемый сообществом проект.
 
 - 💬 [Issues](https://github.com/Vateron-Media/XC_VM/issues)  
 - ⭐ GitHub Stars: поддержите проект звездой  

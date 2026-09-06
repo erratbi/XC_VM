@@ -6,14 +6,14 @@ use PHPUnit\Framework\TestCase;
 use XcVm\Core\Ui\AdminUiTheme;
 
 final class AdminUiThemeTest extends TestCase {
-	public function testLegacyIsTheSafeDefault(): void {
-		self::assertSame(AdminUiTheme::LEGACY, AdminUiTheme::resolve([], []));
+	public function testXtreampiIsTheDefault(): void {
+		self::assertSame(AdminUiTheme::XTREAMPI, AdminUiTheme::resolve([], []));
 	}
 
-	public function testCookieEnablesStreamcreed(): void {
+	public function testCookieEnablesXtreampi(): void {
 		self::assertSame(
-			AdminUiTheme::STREAMCREED,
-			AdminUiTheme::resolve([], [AdminUiTheme::COOKIE_NAME => AdminUiTheme::STREAMCREED])
+			AdminUiTheme::XTREAMPI,
+			AdminUiTheme::resolve([], [AdminUiTheme::COOKIE_NAME => AdminUiTheme::XTREAMPI])
 		);
 	}
 
@@ -22,18 +22,25 @@ final class AdminUiThemeTest extends TestCase {
 			AdminUiTheme::LEGACY,
 			AdminUiTheme::resolve(
 				[AdminUiTheme::QUERY_PARAMETER => AdminUiTheme::LEGACY],
-				[AdminUiTheme::COOKIE_NAME => AdminUiTheme::STREAMCREED]
+				[AdminUiTheme::COOKIE_NAME => AdminUiTheme::XTREAMPI]
 			)
 		);
 	}
 
-	public function testUnknownSelectionsAreIgnored(): void {
+	public function testUnknownSelectionsFallBackToXtreampi(): void {
 		self::assertSame(
-			AdminUiTheme::LEGACY,
+			AdminUiTheme::XTREAMPI,
 			AdminUiTheme::resolve(
 				[AdminUiTheme::QUERY_PARAMETER => 'unknown'],
 				[AdminUiTheme::COOKIE_NAME => 'unknown']
 			)
+		);
+	}
+
+	public function testLegacyCookieRemainsAvailableAsRollback(): void {
+		self::assertSame(
+			AdminUiTheme::LEGACY,
+			AdminUiTheme::resolve([], [AdminUiTheme::COOKIE_NAME => AdminUiTheme::LEGACY])
 		);
 	}
 }

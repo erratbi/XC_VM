@@ -27,7 +27,7 @@ class ServiceCommand implements CommandInterface {
 	}
 
 	public function getDescription(): string {
-		return 'Manage \XC_VM service: start, stop, restart, reload';
+		return 'Manage XtreamPi service: start, stop, restart, reload';
 	}
 
 	public function execute(array $rArgs): int {
@@ -56,11 +56,11 @@ class ServiceCommand implements CommandInterface {
 	private function start(): int {
 		$rPids = intval(trim(shell_exec('pgrep -u xc_vm nginx | wc -l')));
 		if ($rPids > 0) {
-			echo "XC_VM is already running\n";
+			echo "XtreamPi is already running\n";
 			return 1;
 		}
 
-		echo "Starting \XC_VM...\n";
+		echo "Starting XtreamPi...\n";
 
 		exec('sudo chown -R xc_vm:xc_vm /sys/class/net');
 		exec('sudo chown -R xc_vm:xc_vm ' . MAIN_HOME . 'content/streams');
@@ -89,11 +89,11 @@ class ServiceCommand implements CommandInterface {
 	private function stop(): int {
 		$rPids = intval(trim(shell_exec('pgrep -u xc_vm nginx | wc -l')));
 		if ($rPids === 0) {
-			echo "XC_VM is not running\n";
+			echo "XtreamPi is not running\n";
 			return 1;
 		}
 
-		echo "Stopping \XC_VM...\n";
+		echo "Stopping XtreamPi...\n";
 		exec('sudo killall -u xc_vm');
 		sleep(1);
 		exec('sudo killall -u xc_vm');

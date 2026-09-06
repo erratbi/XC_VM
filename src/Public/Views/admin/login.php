@@ -76,7 +76,7 @@ if (!isset($_SESSION['hash'])) {
 
     <head>
         <meta charset="utf-8">
-        <title data-id="login">XC_VM | <?= $language::get('login') ?></title>
+        <title data-id="login">XtreamPi | <?= $language::get('login') ?></title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <link rel="shortcut icon" href="assets/images/favicon.ico">
@@ -305,7 +305,7 @@ if (!isset($_SESSION['hash'])) {
                 <div class="login-content">
                     <div class="login-form-wrapper">
                         <div class="logo-section">
-                            <img src="assets/images/logo.png" alt="XC_VM Logo">
+                            <img src="assets/images/<?= isset($_COOKIE['theme']) && $_COOKIE['theme'] == 1 ? 'logo.png' : 'logo-on-light.svg' ?>" alt="XtreamPi Logo">
                             <div class="login-title">Welcome Back</div>
                             <div class="login-subtitle">Sign in to your account</div>
                         </div>
@@ -394,7 +394,7 @@ if (!isset($_SESSION['hash'])) {
                     </div>
                 </div>
                 <div class="login-footer">
-                    <div>&copy; <?= date('Y') ?> XC_VM Admin Panel. All rights reserved.</div>
+                    <div>&copy; <?= date('Y') ?> XtreamPi Admin Panel. All rights reserved.</div>
                 </div>
             </div>
         </div>

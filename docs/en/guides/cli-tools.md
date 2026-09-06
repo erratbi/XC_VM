@@ -1,6 +1,6 @@
 # CLI Tools & Database Updates
 
-Reference for XC_VM command-line interface, system tools, and the database update process after version upgrades. Covers daily operations, emergency access, and creating new DB update steps.
+Reference for XtreamPi command-line interface, system tools, and the database update process after version upgrades. Covers daily operations, emergency access, and creating new DB update steps.
 
 ---
 
@@ -38,7 +38,7 @@ To see all available commands:
 | --- | --- | --- | --- |
 | `status` | `StatusCommand` | System status, DB updates, configuration check | root |
 | `update` | `UpdateCommand` | System update (update / post-update) | xc_vm |
-| `service` | `ServiceCommand` | Manage XC_VM service: start, stop, restart, reload | root |
+| `service` | `ServiceCommand` | Manage XtreamPi service: start, stop, restart, reload | root |
 | `tools` | `ToolsCommand` | Maintenance utilities (see Tools Command section) | root/xc_vm |
 | `certbot` | `CertbotCommand` | Generate SSL certificate via certbot | root |
 | `binaries` | `BinariesCommand` | Update binaries and GeoLite DB from GitHub | xc_vm |
@@ -233,7 +233,7 @@ The `tools` command provides system maintenance utilities.
 | `migration` | Clear the staging database (`xc_vm_migrate`) and optionally restore a `.sql` backup into it. |
 | `user` | Create a rescue admin user with random credentials. Prints username and password. **Delete this user after use!** |
 | `mysql` | Reauthorise MySQL privileges for all load balancer servers. |
-| `database` | Restore a blank XC_VM database from `database.sql`. **Erases ALL data!** Requires `--confirm` flag. |
+| `database` | Restore a blank XtreamPi database from `database.sql`. **Erases ALL data!** Requires `--confirm` flag. |
 | `flush` | Flush all blocked IPs — clears iptables rules, removes block files, and truncates the `blocked_ips` table. |
 
 ### Subcommands (run as `xc_vm`)
@@ -296,7 +296,7 @@ su - xc_vm -c '/home/xc_vm/console.php tools bouquets'
 
 ## Database Updates After Version Upgrade
 
-XC_VM uses a file-based DB update system to manage schema changes between versions. DB updates are executed automatically during updates and system status checks.
+XtreamPi uses a file-based DB update system to manage schema changes between versions. DB updates are executed automatically during updates and system status checks.
 
 ### How It Works
 
@@ -444,7 +444,7 @@ If a statement fails, the step will still be recorded but show `[WARN]` — revi
 sudo /home/xc_vm/console.php status
 ```
 
-Checks if XC_VM is running, connects to the database, runs pending DB update steps, fixes permissions, and validates nginx configuration. Required after installation or recovery.
+Checks if XtreamPi is running, connects to the database, runs pending DB update steps, fixes permissions, and validates nginx configuration. Required after installation or recovery.
 
 With `first-run` argument, skips the running check — used for initial setup:
 

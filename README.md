@@ -1,8 +1,11 @@
 <p align="center">
-  <img src="https://avatars.githubusercontent.com/u/149707645?s=400&v=4" width="220" alt="Vateron Media Logo"/>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/_media/logo.svg">
+    <img src="docs/_media/logo-on-light.svg" width="220" height="220" alt="XtreamPi logo">
+  </picture>
 </p>
 
-<h1 align="center">XC_VM IPTV Panel</h1>
+<h1 align="center">XtreamPi IPTV Panel</h1>
 <p align="center">
   <b>Open-source, community-driven Xtream Codes panel</b><br>
   Built for modern IPTV workflows – powerful, scalable, and free.
@@ -43,7 +46,7 @@
 
 ## 🚀 Overview
 
-**XC_VM** is an open-source IPTV platform based on Xtream Codes.
+**XtreamPi** is an open-source IPTV platform based on Xtream Codes.
 It enables:
 
 * 📺 Live & VOD streaming
@@ -96,7 +99,7 @@ Migrating from Xtream Codes / XUI.one? Follow the step-by-step migration guide:
 
 ## 🐧 Supported Operating Systems
 
-XC_VM supports multiple Linux distributions. Distribution-specific binaries (PHP, Nginx) are downloaded automatically from [XC_VM_Binaries](https://github.com/Vateron-Media/XC_VM_Binaries) during installation.
+XtreamPi supports multiple Linux distributions. Distribution-specific binaries (PHP, Nginx) are downloaded automatically from the [binary release repository](https://github.com/Vateron-Media/XC_VM_Binaries) during installation.
 
 ### Ubuntu
 
@@ -300,9 +303,9 @@ We welcome community help!
 
 ### ⚠️ Legal & Project Independence Notice
 
-**XC_VM** is an independent software project and is **not affiliated with or endorsed by XUI.one**.
+**XtreamPi** is an independent software project and is **not affiliated with or endorsed by XUI.one**.
 
-All backend systems, core logic, and infrastructure of XC_VM have been **independently developed** without using source code from XUI.one or related projects.
+All backend systems, core logic, and infrastructure of XtreamPi have been **independently developed** without using source code from XUI.one or related projects.
 
 The administrative interface (UI/UX) is **inspired by general industry practices and partially by XUI.one in terms of usability concepts only**.
 No proprietary source code or protected assets have been intentionally reused.
@@ -311,13 +314,13 @@ No proprietary source code or protected assets have been intentionally reused.
 
 ### 📜 License Enforcement (AGPL-3.0)
 
-XC_VM is distributed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
+XtreamPi is distributed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
 
 Under this license:
 
 * Redistribution or modification is permitted **only under the same license (AGPL-3.0)**
 * Any modified version **must remain open-source**
-* Providing XC_VM as a service **requires making the source code available**
+* Providing XtreamPi as a service **requires making the source code available**
 * **Copyright and attribution must be preserved**
 
 Any attempt to redistribute this software under a different license, remove attribution, or obscure the origin of the project constitutes a violation of the license terms.

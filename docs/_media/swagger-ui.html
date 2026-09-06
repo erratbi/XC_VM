@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XC_VM Admin API Documentation</title>
+    <title>XtreamPi Admin API Documentation</title>
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css">
     <link rel="stylesheet" type="text/css" href="./theme-tokens.css">
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/swagger-api/swagger-ui/master/dist/favicon-32x32.png">
@@ -935,7 +935,7 @@
     <div class="header">
         <div class="header-top">
             <div class="header-title">
-                <h1 id="api-title">XC_VM Admin API</h1>
+                <h1 id="api-title">XtreamPi Admin API</h1>
                 <div class="version-badges">
                     <span class="badge badge-version">v1.5.13</span>
                     <span class="badge badge-oas">OAS 3.0</span>
@@ -1073,8 +1073,8 @@
         // -----------------------------------------------------------------
         const API_DOCS = {
             admin: `
-                <h2 class="docs-title">XC_VM Admin API</h2>
-                <p class="docs-subtitle">Administration API for the XC_VM IPTV panel &mdash; 104 endpoints</p>
+                <h2 class="docs-title">XtreamPi Admin API</h2>
+                <p class="docs-subtitle">Administration API for the XtreamPi IPTV panel &mdash; 104 endpoints</p>
                 <div class="section"><h3 class="section-title"><span class="section-icon">🎯</span>Overview</h3>
                     <div class="section-content"><p>Programmatic administration of your IPTV platform:</p>
                         <ul class="list-styled">
@@ -1103,7 +1103,7 @@
                     </ul></div></div>`,
 
             system: `
-                <h2 class="docs-title">XC_VM System API</h2>
+                <h2 class="docs-title">XtreamPi System API</h2>
                 <p class="docs-subtitle">Internal system control &mdash; /api.php (31 actions)</p>
                 <div class="section"><h3 class="section-title"><span class="section-icon">🎯</span>Overview</h3>
                     <div class="section-content"><p>Stream and VOD control, system statistics, directory browsing, log viewing, process management and EPG/nginx reloading.</p>
@@ -1131,7 +1131,7 @@
                     </ul><p>Default response for an unrecognized action: <code class="code-inline">{ "result": false }</code></p></div></div>`,
 
             player: `
-                <h2 class="docs-title">XC_VM Player API</h2>
+                <h2 class="docs-title">XtreamPi Player API</h2>
                 <p class="docs-subtitle">XtreamCodes-compatible player &mdash; Live TV, VOD, Series, EPG</p>
                 <div class="section"><h3 class="section-title"><span class="section-icon">🎯</span>Overview</h3>
                     <div class="section-content"><p>Access to Live TV &amp; Radio, VOD (movies), Series and EPG for XtreamCodes-compatible applications.</p>
@@ -1153,7 +1153,7 @@
                         <p>Output formats: <code class="code-inline">m3u8</code>, <code class="code-inline">ts</code>, <code class="code-inline">rtmp</code>. The first request redirects to <code class="code-inline">/auth/...</code> before content is served.</p></div></div>`,
 
             playlist: `
-                <h2 class="docs-title">XC_VM Playlist API</h2>
+                <h2 class="docs-title">XtreamPi Playlist API</h2>
                 <p class="docs-subtitle">Authentication and playlist generation &mdash; /playlist</p>
                 <div class="section"><h3 class="section-title"><span class="section-icon">🎯</span>Overview</h3>
                     <div class="section-content"><p>Clients authenticate with a username/password pair or a token, after which a personalized playlist is generated.</p>
@@ -1207,7 +1207,7 @@
         function applyApi(key) {
             const spec = resolveSpec(key);
             const title = document.getElementById('api-title');
-            if (title) title.textContent = 'XC_VM ' + spec.name;
+            if (title) title.textContent = 'XtreamPi ' + spec.name;
             document.querySelectorAll('#api-tabs .api-tab').forEach(b => {
                 b.classList.toggle('active', b.dataset.key === spec.key);
             });

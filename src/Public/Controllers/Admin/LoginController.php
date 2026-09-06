@@ -2,6 +2,8 @@
 
 namespace XcVm\Public\Controllers\Admin;
 
+use XcVm\Core\Ui\AdminUiTheme;
+
 /**
  * LoginController — Страница авторизации admin-панели.
  *
@@ -20,7 +22,39 @@ namespace XcVm\Public\Controllers\Admin;
 
 class LoginController extends BaseAdminController {
 	public function index() {
+		$adminUi = AdminUiTheme::resolve($_GET, $_COOKIE);
+		$requestedAdminUi = AdminUiTheme::requested($_GET);
+		if ($requestedAdminUi !== null) {
+			$this->persistAdminUiTheme($requestedAdminUi);
+		}
+
 		@chdir(MAIN_HOME . 'Public/Views/admin/');
+		if ($adminUi !== AdminUiTheme::XTREAMPI) {
+			require MAIN_HOME . 'Public/Views/admin/login.php';
+			return;
+		}
+
+		ob_start();
 		require MAIN_HOME . 'Public/Views/admin/login.php';
+		if (!is_string(ob_get_clean())) {
+			return;
+		}
+
+		require MAIN_HOME . 'Public/Views/xtreampi/admin/login.php';
+	}
+
+	private function persistAdminUiTheme(string $theme): void {
+		if (headers_sent()) {
+			return;
+		}
+
+		setcookie(AdminUiTheme::COOKIE_NAME, $theme, [
+			'expires' => time() + 31536000,
+			'path' => '/',
+			'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+			'httponly' => true,
+			'samesite' => 'Lax',
+		]);
+		$_COOKIE[AdminUiTheme::COOKIE_NAME] = $theme;
 	}
 }

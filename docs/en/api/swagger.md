@@ -1,6 +1,6 @@
 # Interactive API Reference (Swagger)
 
-Interactive, always-in-sync Swagger UI for every XC_VM API, generated from OpenAPI 3.0 specifications. Use the **API tabs** at the top of the page to switch between APIs, or open one directly via the links below.
+Interactive, always-in-sync Swagger UI for every XtreamPi API, generated from OpenAPI 3.0 specifications. Use the **API tabs** at the top of the page to switch between APIs, or open one directly via the links below.
 
 | API | Description | Auth | Open |
 | --- | --- | --- | --- |

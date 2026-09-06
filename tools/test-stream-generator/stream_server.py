@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-XC_VM test stream generator.
+XtreamPi test stream generator.
 
 Turns a single MP4 file into looping, HTTP-served streams that can be pasted
 straight into the panel as a live stream source:
@@ -144,7 +144,7 @@ class HlsWriter:
 # --------------------------------------------------------------------------- #
 class Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
-    server_version = "XC_VM-TestStream/1.0"
+    server_version = "XtreamPi-TestStream/1.0"
 
     # ---- helpers ---------------------------------------------------------- #
     def _base_url(self):
@@ -186,11 +186,11 @@ class Handler(BaseHTTPRequestHandler):
         base = self._base_url()
         lines = [
             "#EXTM3U",
-            '#EXTINF:-1 tvg-id="xcvm.test.ts" tvg-name="XC_VM Test TS (LLOD)" '
-            'group-title="XC_VM Test",XC_VM Test TS (LLOD)',
+            '#EXTINF:-1 tvg-id="xtreampi.test.ts" tvg-name="XtreamPi Test TS (LLOD)" '
+            'group-title="XtreamPi Test",XtreamPi Test TS (LLOD)',
             "%s/stream.ts" % base,
-            '#EXTINF:-1 tvg-id="xcvm.test.hls" tvg-name="XC_VM Test HLS" '
-            'group-title="XC_VM Test",XC_VM Test HLS',
+            '#EXTINF:-1 tvg-id="xtreampi.test.hls" tvg-name="XtreamPi Test HLS" '
+            'group-title="XtreamPi Test",XtreamPi Test HLS',
             "%s/stream.m3u8" % base,
             "",
         ]
@@ -227,11 +227,11 @@ class Handler(BaseHTTPRequestHandler):
     def _index(self):
         base = self._base_url()
         html = """<!doctype html>
-<html><head><meta charset="utf-8"><title>XC_VM test stream generator</title>
+<html><head><meta charset="utf-8"><title>XtreamPi test stream generator</title>
 <style>body{{font-family:system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 16px}}
 code{{background:#f3f3f3;padding:2px 6px;border-radius:4px}}
 li{{margin:8px 0}}</style></head><body>
-<h1>XC_VM test stream generator</h1>
+<h1>XtreamPi test stream generator</h1>
 <p>Source file: <code>{input}</code> &mdash; encode mode: <code>{encode}</code></p>
 <h2>Stream URLs</h2>
 <ul>
@@ -279,7 +279,7 @@ li{{margin:8px 0}}</style></head><body>
 # --------------------------------------------------------------------------- #
 def parse_args():
     p = argparse.ArgumentParser(
-        description="Serve a looping MP4 as TS/HLS/M3U streams for XC_VM testing."
+        description="Serve a looping MP4 as TS/HLS/M3U streams for XtreamPi testing."
     )
     p.add_argument("-i", "--input", required=True, help="path to the source .mp4 file")
     p.add_argument("--host", default="0.0.0.0", help="bind address (default 0.0.0.0)")
@@ -353,7 +353,7 @@ def main():
     httpd = QuietThreadingHTTPServer((args.host, args.port), Handler)
 
     base = "http://%s:%d" % (CONFIG["advertise_host"], args.port)
-    print("XC_VM test stream generator")
+    print("XtreamPi test stream generator")
     print("  input : %s" % CONFIG["input"])
     print("  encode: %s" % CONFIG["encode"])
     print("  bind  : %s:%d" % (args.host, args.port))

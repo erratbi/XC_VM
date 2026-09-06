@@ -4,16 +4,16 @@ declare(strict_types=1);
 namespace XcVm\Core\Ui;
 
 /**
- * Resolves the opt-in admin UI without coupling it to database state.
+ * Resolves the admin UI without coupling it to database state.
  *
  * The query parameter is intentionally allowed to override the cookie so an
  * administrator always has a direct recovery path back to the legacy UI.
  */
 final class AdminUiTheme {
 	public const LEGACY = 'legacy';
-	public const STREAMCREED = 'streamcreed';
+	public const XTREAMPI = 'xtreampi';
 	public const QUERY_PARAMETER = 'admin_ui';
-	public const COOKIE_NAME = 'xc_vm_admin_ui';
+	public const COOKIE_NAME = 'xtreampi_admin_ui';
 
 	/**
 	 * Resolve the requested UI, preferring an explicit query-string choice.
@@ -28,7 +28,7 @@ final class AdminUiTheme {
 		}
 
 		$cookie = $cookies[self::COOKIE_NAME] ?? null;
-		return self::isSupported($cookie) ? $cookie : self::LEGACY;
+		return self::isSupported($cookie) ? $cookie : self::XTREAMPI;
 	}
 
 	/**
@@ -42,6 +42,6 @@ final class AdminUiTheme {
 	}
 
 	private static function isSupported(mixed $theme): bool {
-		return is_string($theme) && in_array($theme, [self::LEGACY, self::STREAMCREED], true);
+		return is_string($theme) && in_array($theme, [self::LEGACY, self::XTREAMPI], true);
 	}
 }

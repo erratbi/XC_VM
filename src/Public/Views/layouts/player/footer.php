@@ -32,14 +32,14 @@ if ($_PAGE == 'profile') {
 	if ($_PAGE == 'live') {
 		if (0 >= count($rStreamIDs)) {
 		} else {
-			echo '    window.updateTimer = null;' . "\r\n" . '    window.XC_VM = window.XC_VM || {};' . "\r\n" . '    window.XC_VM.Listings = window.XC_VM.Listings || {};' . "\r\n" . '    window.XC_VM.Listings.DefaultChannels = "';
+			echo '    window.updateTimer = null;' . "\r\n" . '    window.XtreamPi = window.XtreamPi || {};' . "\r\n" . '    window.XtreamPi.Listings = window.XtreamPi.Listings || {};' . "\r\n" . '    window.XtreamPi.Listings.DefaultChannels = "';
 			echo implode(',', $rStreamIDs);
 			echo '";' . "\r\n" . '    ';
 
 			if ($rFilterBy == 'epg') {
-				echo '    window.XC_VM.Listings.HideEmpty = 1;' . "\r\n" . '    ';
+				echo '    window.XtreamPi.Listings.HideEmpty = 1;' . "\r\n" . '    ';
 			} else {
-				echo '    window.XC_VM.Listings.HideEmpty = 0;' . "\r\n" . '    ';
+				echo '    window.XtreamPi.Listings.HideEmpty = 0;' . "\r\n" . '    ';
 			}
 		}
 

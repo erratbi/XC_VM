@@ -1,0 +1,27 @@
+{
+	"name": "XtreamPi",
+	"short_name": "XtreamPi",
+	"display": "standalone",
+	"background_color": "#f2f3f3",
+	"theme_color": "#d62f49",
+	"icons": [
+		{
+			"src": "brand/logo-on-light.svg",
+			"sizes": "any",
+			"type": "image/svg+xml",
+			"purpose": "any"
+		},
+		{
+			"src": "brand/icon-192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "brand/icon-512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any"
+		}
+	]
+}

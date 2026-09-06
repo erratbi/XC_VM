@@ -1,6 +1,6 @@
 # Event System
 
-XC_VM uses a PSR-14-style typed event dispatcher. All events are plain PHP classes
+XtreamPi uses a PSR-14-style typed event dispatcher. All events are plain PHP classes
 dispatched and received by name. The dispatcher is instance-based and stored in the
 DI container under the key `events`.
 

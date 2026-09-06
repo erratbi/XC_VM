@@ -54,7 +54,7 @@ class UpdateCommand implements CommandInterface {
 				UpdateLogger::reset();
 				$rIsMain = ServerRepository::getAll()[SERVER_ID]['is_main'];
 				$rServerType = $rIsMain ? 'MAIN' : 'LB';
-				echo "Checking for updates (server={$rServerType}, version=" . XC_VM_VERSION . ")...\n";
+				echo "Checking XtreamPi for updates (server={$rServerType}, version=" . XC_VM_VERSION . ")...\n";
 				UpdateLogger::info('Update started; server=' . $rServerType . ', current version=' . XC_VM_VERSION);
 
 				$rLatest = $gitRelease->getLatestVersion(

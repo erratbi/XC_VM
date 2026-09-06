@@ -38,7 +38,7 @@ DTS-декод. nv-codec-headers пинятся per-version (`4.0→n11.1.5.3`,
 `7.1/8.1→n12.2.72.0`); `libfribidi/libharfbuzz` версионно-гейчены (опции ffmpeg
 только с 6.1 → для 4.x не включаются, libass тянет их внутри себя).
 
-**Panel-сторона (XC_VM) — как сейчас:**
+**Panel-сторона (XtreamPi) — как сейчас:**
 
 - FFmpeg лежит в **Git LFS**: `.gitattributes` →
   `src/bin/ffmpeg_bin/** filter=lfs`; каталоги `src/bin/ffmpeg_bin/{4.0,7.1,8.0}/`.

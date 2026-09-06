@@ -1,6 +1,6 @@
-# Generating SSL Certificate for Nginx in XC_VM
+# Generating SSL Certificate for Nginx in XtreamPi
 
-This guide explains how to create a self-signed SSL certificate to enable secure HTTPS connections for the built-in Nginx server in the XC_VM project.
+This guide explains how to create a self-signed SSL certificate to enable secure HTTPS connections for the built-in Nginx server in the XtreamPi project.
 
 > **Note:** A fresh install already generates a **unique** self-signed certificate
 > automatically (the installer runs `openssl` and writes `server.key`/`server.crt`
@@ -13,7 +13,7 @@ This guide explains how to create a self-signed SSL certificate to enable secure
 ## Overview
 
 **SSL (Secure Sockets Layer)** encrypts the connection between client and server, ensuring data confidentiality and user trust.  
-This tutorial shows how to create a **self-signed SSL certificate** for the embedded **Nginx** server in the **XC_VM** project.
+This tutorial shows how to create a **self-signed SSL certificate** for the embedded **Nginx** server in the **XtreamPi** project.
 
 ---
 
@@ -61,9 +61,9 @@ prompt = no
 C = RU
 ST = Moscow
 L = Moscow
-O = XC_VM
-OU = XC_VM
-CN = XC_VM
+O = XtreamPi
+OU = XtreamPi
+CN = XtreamPi
 
 [v3_req]
 keyUsage = keyEncipherment, dataEncipherment
@@ -71,7 +71,7 @@ extendedKeyUsage = serverAuth
 subjectAltName = @alt_names
 
 [alt_names]
-DNS.1 = XC_VM
+DNS.1 = XtreamPi
 EOF
 ```
 
@@ -82,12 +82,12 @@ EOF
 | `C` | RU | Country |
 | `ST` | Moscow | State/Province |
 | `L` | Moscow | City/Locality |
-| `O` | XC_VM | Organization |
-| `OU` | XC_VM | Organizational Unit |
-| `CN` | XC_VM | Common Name (primary hostname) |
-| `DNS.1` | XC_VM | Subject Alternative Name (SAN) |
+| `O` | XtreamPi | Organization |
+| `OU` | XtreamPi | Organizational Unit |
+| `CN` | XtreamPi | Common Name (primary hostname) |
+| `DNS.1` | XtreamPi | Subject Alternative Name (SAN) |
 
-> **Tip:** For real domain names, replace `DNS.1 = XC_VM` with your actual domain (e.g., `DNS.1 = panel.example.com`) to avoid browser warnings.
+> **Tip:** For real domain names, replace `DNS.1 = XtreamPi` with your actual domain (e.g., `DNS.1 = panel.example.com`) to avoid browser warnings.
 
 ---
 
@@ -122,7 +122,7 @@ After completing all steps, the following files should be present in `/home/xc_v
 
 ## Result
 
-Your **XC_VM Nginx server** is now accessible via **HTTPS** using the newly created self-signed certificate.  
+Your **XtreamPi Nginx server** is now accessible via **HTTPS** using the newly created self-signed certificate.
 Browsers will display a “not trusted” warning — this is expected behavior for self-signed certificates.
 
 ---

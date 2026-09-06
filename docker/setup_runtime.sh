@@ -94,17 +94,17 @@ if [ ! -f /home/xc_vm/bin/php/sbin/php-fpm ]; then
     echo "==> Installing distribution PHP binaries..."
     BIN_TAG=$(curl -s https://api.github.com/repos/Vateron-Media/XC_VM_Binaries/releases/latest | grep '"tag_name":' | head -n 1 | cut -d '"' -f 4)
     BIN_TAG="${BIN_TAG:-29062026}"
-    mkdir -p /tmp/xcvm_extract /home/xc_vm/bin
+    mkdir -p /tmp/xtreampi_extract /home/xc_vm/bin
     curl -sL "https://github.com/Vateron-Media/XC_VM_Binaries/releases/download/${BIN_TAG}/ubuntu_24.tar.gz" -o /tmp/ubuntu_24.tar.gz
-    tar -xzf /tmp/ubuntu_24.tar.gz -C /tmp/xcvm_extract/
-    if [ -d /tmp/xcvm_extract/bin/php ]; then
-        cp -r /tmp/xcvm_extract/bin/php /home/xc_vm/bin/
-    elif [ -d /tmp/xcvm_extract/ubuntu_24/bin/php ]; then
-        cp -r /tmp/xcvm_extract/ubuntu_24/bin/php /home/xc_vm/bin/
+    tar -xzf /tmp/ubuntu_24.tar.gz -C /tmp/xtreampi_extract/
+    if [ -d /tmp/xtreampi_extract/bin/php ]; then
+        cp -r /tmp/xtreampi_extract/bin/php /home/xc_vm/bin/
+    elif [ -d /tmp/xtreampi_extract/ubuntu_24/bin/php ]; then
+        cp -r /tmp/xtreampi_extract/ubuntu_24/bin/php /home/xc_vm/bin/
     fi
     chmod -R 755 /home/xc_vm/bin/php 2>/dev/null || true
     chmod +x /home/xc_vm/bin/php/bin/* /home/xc_vm/bin/php/sbin/* 2>/dev/null || true
-    rm -rf /tmp/ubuntu_24.tar.gz /tmp/xcvm_extract
+    rm -rf /tmp/ubuntu_24.tar.gz /tmp/xtreampi_extract
 fi
 
 apt-get clean

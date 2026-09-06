@@ -1,6 +1,6 @@
 # Автозагрузка (PSR-4)
 
-XC_VM загружает классы стандартным автозагрузчиком **Composer PSR-4**; namespace кодирует путь к файлу, поэтому разрешение — это прямой `file_exists` без сканирования и без кэша.
+XtreamPi загружает классы стандартным автозагрузчиком **Composer PSR-4**; namespace кодирует путь к файлу, поэтому разрешение — это прямой `file_exists` без сканирования и без кэша.
 
 ---
 
@@ -75,7 +75,7 @@ namespace больше не конфликтуют — `XcVm\Public\Controllers\
 - процедурные точки входа, view и bootstrap-склейка (`Public/index.php`,
   `Public/Views/**`, `Infrastructure/Bootstrap/*.php`);
 - глобальные константы и функции (`Core/Config/*`, обработчик ошибок);
-- ioncube-класс `XC_VM` и встроенный `Infrastructure/Tmdb/lib/*`.
+- ioncube-класс `XtreamPi` и встроенный `Infrastructure/Tmdb/lib/*`.
 
 Вендорные пакеты `M3uParser` и `Chrisyue\PhpM3u8` имеют собственные PSR-4-префиксы
 (выше) и автозагружаются штатно.

@@ -18,7 +18,7 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
 		<div class="row">
 			<div class="col-xl-12">
 				<div class="alert alert-info" role="alert">
-					Use this tool to generate a key you can use to generate HMAC tokens that can access a stream or movie. Visit the XC_VM documentation for more information on how to use it.<br /><br /><strong>Write down the HMAC key as you will not see it again, it will also be encrypted in the database so cannot be extracted.</strong>
+					Use this tool to generate a key you can use to generate HMAC tokens that can access a stream or movie. Visit the XtreamPi documentation for more information on how to use it.<br /><br /><strong>Write down the HMAC key as you will not see it again, it will also be encrypted in the database so cannot be extracted.</strong>
 				</div>
 				<div class="card">
 					<div class="card-body">

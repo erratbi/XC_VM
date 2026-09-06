@@ -527,9 +527,9 @@ class CoreNavbarProvider implements NavbarProviderInterface {
             ->parent('profile')->url('modules')
             ->label('', 'Modules')->permissions(['settings'])->order(50));
 
-        NavbarRegistry::add((new NavbarItem('profile.streamcreed'))
-            ->parent('profile')->url('dashboard?admin_ui=streamcreed')
-            ->label('', 'StreamCreed UI')->order(60));
+        NavbarRegistry::add((new NavbarItem('profile.xtreampi'))
+            ->parent('profile')->url('dashboard?admin_ui=xtreampi')
+            ->label('', 'XtreamPi UI')->order(60));
 
         // Reserved slot 100–980 for module-provided profile links.
 

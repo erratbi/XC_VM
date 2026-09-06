@@ -52,7 +52,7 @@ class StreamsCronJob implements CommandInterface {
         global $db;
 
         if (!ProcessManager::isNginxRunning()) {
-            echo 'XC_VM not running...' . "\n";
+            echo 'XtreamPi not running...' . "\n";
         }
 
         if (SettingsManager::getAll()['redis_handler']) {

@@ -4,7 +4,7 @@ This feature supports **UCS integration** by giving each client a unique load-ba
 
 ## Overview
 
-When a load-balancer (LB) server uses a wildcard domain and **Serve Random IP / Domain** is enabled, XC_VM replaces the `wildcard.` prefix with the authenticated line ID before redirecting the client.
+When a load-balancer (LB) server uses a wildcard domain and **Serve Random IP / Domain** is enabled, XtreamPi replaces the `wildcard.` prefix with the authenticated line ID before redirecting the client.
 
 | Line ID | LB domain (configured) | Redirect domain |
 |--------:|------------------------|-----------------|
@@ -28,7 +28,7 @@ Each line gets a stable subdomain. UCS (or upstream DNS/proxy) can route `*.exam
 4. Save the server.
 5. Ensure DNS resolves `{line_id}.example.com` for any line ID you issue (wildcard DNS or UCS automation).
 
-When a client authenticates via `auth.php`, XC_VM reads the line ID from `$rUserInfo['id']` and passes it into the redirect URL builder.
+When a client authenticates via `auth.php`, XtreamPi reads the line ID from `$rUserInfo['id']` and passes it into the redirect URL builder.
 
 ## When It Applies
 

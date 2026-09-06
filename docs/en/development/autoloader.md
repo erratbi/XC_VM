@@ -1,6 +1,6 @@
 # Autoloading (PSR-4)
 
-XC_VM autoloads classes with a standard **Composer PSR-4** autoloader; the namespace encodes the file path, so resolution is a direct `file_exists` with no scan and no cache.
+XtreamPi autoloads classes with a standard **Composer PSR-4** autoloader; the namespace encodes the file path, so resolution is a direct `file_exists` with no scan and no cache.
 
 ---
 
@@ -76,7 +76,7 @@ Some files are intentionally **not** namespaced and are loaded by explicit
 - procedural entry points, views and bootstrap glue (e.g. `Public/index.php`,
   `Public/Views/**`, `Infrastructure/Bootstrap/*.php`);
 - global constants and functions (`Core/Config/*`, error handler);
-- the ioncube `XC_VM` class and bundled `Infrastructure/Tmdb/lib/*`.
+- the ioncube `XtreamPi` class and bundled `Infrastructure/Tmdb/lib/*`.
 
 The vendored `M3uParser` and `Chrisyue\PhpM3u8` packages have their own PSR-4
 prefixes (above) and autoload normally.

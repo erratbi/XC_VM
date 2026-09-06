@@ -153,14 +153,14 @@ class BaseAdminController {
         extract($data, EXTR_SKIP);
 
         $__viewsDir = MAIN_HOME . 'Public/Views/' . $this->scope . '/';
-        $__streamcreedView = MAIN_HOME . 'Public/Views/streamcreed/' . $this->scope . '/' . $view . '.php';
+        $__xtreampiView = MAIN_HOME . 'Public/Views/xtreampi/' . $this->scope . '/' . $view . '.php';
 
-        // StreamCreed is opt-in and page-by-page. If a matching migrated view is
+        // XtreamPi is opt-in and page-by-page. If a matching migrated view is
         // absent, the request falls through to the untouched legacy renderer.
-        if ($this->scope === 'admin' && $adminUi === AdminUiTheme::STREAMCREED && is_file($__streamcreedView)) {
-            require MAIN_HOME . 'Public/Views/streamcreed/layouts/header.php';
-            require $__streamcreedView;
-            require MAIN_HOME . 'Public/Views/streamcreed/layouts/footer.php';
+        if ($this->scope === 'admin' && $adminUi === AdminUiTheme::XTREAMPI && is_file($__xtreampiView)) {
+            require MAIN_HOME . 'Public/Views/xtreampi/layouts/header.php';
+            require $__xtreampiView;
+            require MAIN_HOME . 'Public/Views/xtreampi/layouts/footer.php';
             return;
         }
 

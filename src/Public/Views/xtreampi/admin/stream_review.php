@@ -1,0 +1,32 @@
+<?php
+
+use XcVm\Domain\Stream\CategoryService;
+
+require_once __DIR__ . '/_migration_helpers.php';
+
+$xtreampiPageScripts = ['assets/xtreampi/stream-review.js'];
+$xtreampiImport = is_array($rImport ?? null) ? $rImport : [];
+$xtreampiOptions = is_array($rOptions ?? null) ? $rOptions : [];
+$xtreampiCategories = is_array($rCategories ?? null) ? $rCategories : CategoryService::getAllByType('live');
+?>
+<section class="sc-stream-review" data-sc-stream-review>
+    <div class="sc-page-heading"><div><p class="sc-eyebrow">Specialist tools</p><h1>Review streams</h1><p class="sc-section-copy">Only rows marked modified are sent to StreamReviewController. Category, bouquet and EPG switches preserve the controller’s save flags.</p></div><a class="sc-button sc-button-secondary" href="streams">Back to streams</a></div>
+    <?php if (!$xtreampiImport): ?>
+        <form class="sc-form" action="stream_review" method="post" data-sc-review-selection>
+            <input type="hidden" name="streams" value="[]" data-sc-review-selected>
+            <section class="sc-form-section"><h2>Select streams to review</h2><div class="sc-toolbar"><label class="sc-search-field"><span class="sc-visually-hidden">Search streams</span><input type="search" data-sc-review-search placeholder="Search streams"></label><label class="sc-filter-field"><span>Category</span><select data-sc-review-category><option value="">All categories</option><?php foreach ($xtreampiCategories as $xtreampiCategory): ?><option value="<?php echo (int) ($xtreampiCategory['id'] ?? 0); ?>"><?php echo sc_m_escape($xtreampiCategory['category_name'] ?? ''); ?></option><?php endforeach; ?></select></label><button type="button" class="sc-button sc-button-secondary" data-sc-review-load>Load streams</button><span data-sc-review-count>0 selected</span></div><div class="sc-table-scroll"><table class="sc-data-table"><thead><tr><th>Select</th><th>ID</th><th>Name</th><th>Category</th><th>Server</th><th>Status</th></tr></thead><tbody data-sc-review-selection-body><tr><td class="sc-table-state" colspan="6">Press Load streams.</td></tr></tbody></table></div></section>
+            <section class="sc-form-section"><h2>Fields to review</h2><div class="sc-form-grid"><label><input type="checkbox" name="edit_categories" value="1" checked> Edit categories</label><label><input type="checkbox" name="edit_bouquets" value="1" checked> Edit bouquets</label><label><input type="checkbox" name="edit_epg" value="1" checked> Edit EPG</label></div></section>
+            <div class="sc-form-error" data-sc-review-selection-error hidden></div><div class="sc-form-actions"><button type="submit" class="sc-button sc-button-primary">Review selected streams</button></div>
+        </form>
+    <?php else: ?>
+        <form class="sc-form" action="stream_review" method="post" data-sc-stream-review-form>
+            <input type="hidden" name="save_changes" value="1"><input type="hidden" name="save_categories" value="<?php echo !empty($xtreampiOptions['categories']) ? '1' : '0'; ?>"><input type="hidden" name="save_bouquets" value="<?php echo !empty($xtreampiOptions['bouquets']) ? '1' : '0'; ?>"><input type="hidden" name="save_epg" value="<?php echo !empty($xtreampiOptions['epg']) ? '1' : '0'; ?>">
+            <section class="sc-form-section"><div class="sc-table-scroll"><table class="sc-data-table"><thead><tr><th>Changed</th><th>ID</th><th>Name</th><th>Channel ID</th><th>EPG ID</th><th>Categories</th><th>Bouquets</th></tr></thead><tbody>
+                <?php foreach ($xtreampiImport as $xtreampiRow): $xtreampiId = (int) ($xtreampiRow['id'] ?? 0); $xtreampiCats = is_array($xtreampiRow['category'] ?? null) ? $xtreampiRow['category'] : []; $xtreampiBqs = is_array($xtreampiRow['bouquets'] ?? null) ? $xtreampiRow['bouquets'] : []; ?>
+                    <tr data-sc-review-row><td><input type="hidden" name="modified_<?php echo $xtreampiId; ?>" value="0" data-sc-review-modified><input type="checkbox" data-sc-review-toggle aria-label="Mark stream <?php echo $xtreampiId; ?> modified"></td><td><?php echo $xtreampiId; ?></td><td><input data-sc-review-change type="text" name="name_<?php echo $xtreampiId; ?>" value="<?php echo sc_m_escape($xtreampiRow['title'] ?? ''); ?>"><input type="hidden" name="channel_id_<?php echo $xtreampiId; ?>" value="<?php echo sc_m_escape($xtreampiRow['channel_id'] ?? ''); ?>" data-sc-review-channel><input type="hidden" name="epg_id_<?php echo $xtreampiId; ?>" value="<?php echo sc_m_escape($xtreampiRow['epg_id'] ?? ''); ?>" data-sc-review-epg></td><td><input data-sc-review-change type="text" value="<?php echo sc_m_escape($xtreampiRow['channel_id'] ?? ''); ?>" data-sc-review-channel-input></td><td><input data-sc-review-change type="text" value="<?php echo sc_m_escape($xtreampiRow['epg_id'] ?? ''); ?>" data-sc-review-epg-input></td><td><select multiple data-sc-review-change data-sc-review-categories><?php foreach ((array) $xtreampiCategories as $xtreampiCategory): $xtreampiCategoryId = (int) ($xtreampiCategory['id'] ?? 0); ?><option value="<?php echo $xtreampiCategoryId; ?>"<?php echo in_array($xtreampiCategoryId, array_map('intval', $xtreampiCats), true) ? ' selected' : ''; ?>><?php echo sc_m_escape($xtreampiCategory['category_name'] ?? ''); ?></option><?php endforeach; ?></select><input type="hidden" name="categories_<?php echo $xtreampiId; ?>" value="<?php echo sc_m_escape(json_encode(array_values($xtreampiCats))); ?>" data-sc-review-categories-payload></td><td><select multiple data-sc-review-change data-sc-review-bouquets><?php foreach ((array) ($rBouquets ?? []) as $xtreampiBouquet): $xtreampiBouquetId = (int) ($xtreampiBouquet['id'] ?? 0); ?><option value="<?php echo $xtreampiBouquetId; ?>"<?php echo in_array($xtreampiBouquetId, array_map('intval', $xtreampiBqs), true) ? ' selected' : ''; ?>><?php echo sc_m_escape($xtreampiBouquet['bouquet_name'] ?? ''); ?></option><?php endforeach; ?></select><input type="hidden" name="bouquets_<?php echo $xtreampiId; ?>" value="<?php echo sc_m_escape(json_encode(array_values($xtreampiBqs))); ?>" data-sc-review-bouquets-payload></td></tr>
+                <?php endforeach; ?>
+            </tbody></table></div></section>
+            <div class="sc-form-error" data-sc-review-error hidden></div><div class="sc-form-actions"><button type="submit" class="sc-button sc-button-primary">Save selected changes</button><a class="sc-button sc-button-secondary" href="streams">Cancel</a></div>
+        </form>
+    <?php endif; ?>
+</section>

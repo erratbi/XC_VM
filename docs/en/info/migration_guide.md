@@ -1,6 +1,6 @@
-# XC_VM Migration Guide
+# XtreamPi Migration Guide
 
-Safely migrate from compatible IPTV systems using the built-in XC_VM migration tools.
+Safely migrate from compatible IPTV systems using the built-in XtreamPi migration tools.
 
 ---
 
@@ -8,7 +8,7 @@ Safely migrate from compatible IPTV systems using the built-in XC_VM migration t
 
 > **Read this before starting the migration.**
 
-XC_VM migration transfers **data only**.
+XtreamPi migration transfers **data only**.
 **All configuration is intentionally excluded from migration.**
 
 This includes (but is not limited to):
@@ -29,7 +29,7 @@ Skipping reconfiguration will **break metadata fetching, stream title updates, a
 ## Before You Start
 
 > 💡 **Recommendation:**
-> Perform migration on a **fresh XC_VM installation**.
+> Perform migration on a **fresh XtreamPi installation**.
 >
 > ⚠️ **Important:**
 > System and panel settings are **NOT migrated**.
@@ -37,7 +37,7 @@ Skipping reconfiguration will **break metadata fetching, stream title updates, a
 
 If you choose to migrate into an **existing installation**, be aware:
 
-- XC_VM will **delete all tables** in the main database that match data from the migration database.
+- XtreamPi will **delete all tables** in the main database that match data from the migration database.
 - **Backups are mandatory.** No automatic rollback is provided.
 
 ---
@@ -46,7 +46,7 @@ If you choose to migrate into an **existing installation**, be aware:
 
 ### 1. Upload Backup
 
-Upload your existing database backup to the XC_VM server using **SFTP**.
+Upload your existing database backup to the XtreamPi server using **SFTP**.
 
 Example location:
 

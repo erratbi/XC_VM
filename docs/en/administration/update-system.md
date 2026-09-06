@@ -1,6 +1,6 @@
-# Update Mechanism in XC_VM
+# Update Mechanism in XtreamPi
 
-The XC_VM update system is implemented as a multi-layered process, from the web interface to system-level scripts. This approach ensures reliability, automation, and data integrity during panel updates.
+The XtreamPi update system is implemented as a multi-layered process, from the web interface to system-level scripts. This approach ensures reliability, automation, and data integrity during panel updates.
 
 > 📋 For a step-by-step guide with screenshots, see [Updating a Server](en-us/administration/server-update.md).
 

@@ -46,7 +46,7 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
 									<tr id="code-<?= $rCode['id']; ?>">
 										<td class="text-center"><?= $rCode['id']; ?></td>
 										<td><?= $rCode['code']; ?></td>
-										<td class="text-center"><?= array('Admin', 'Reseller', 'Ministra', 'Admin API', 'Reseller API', 'Ministra XC_VM - Disbanded', 'Web Player')[$rCode['type']]; ?></td>
+										<td class="text-center"><?= array('Admin', 'Reseller', 'Ministra', 'Admin API', 'Reseller API', 'Ministra XtreamPi - Disbanded', 'Web Player')[$rCode['type']]; ?></td>
 										<td class="text-center">
 											<?php if ($rCode['enabled']): ?>
 												<i class="text-success fas fa-square"></i>

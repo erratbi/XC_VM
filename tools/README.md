@@ -1,6 +1,6 @@
 # `tools/` — development, CI & panel-test utilities
 
-Support tooling for the XC_VM panel. Nothing here ships to production — these are
+Support tooling for the XtreamPi panel. Nothing here ships to production — these are
 CI gates, static-analysis helpers, and manual test/QA utilities written to
 exercise the panel. Some are wired into the `Makefile` / CI; others are run by
 hand during testing. Each is listed below with its purpose and how to run it.
@@ -39,7 +39,7 @@ Written to test the running panel end-to-end; run by hand as needed.
 | `stream_queue_check.py` | Inspects a running stream's packet queue (MPEG-TS `/ts` and HLS) to diagnose buffering/queue behaviour. See `docs/*/development/streaming-subsystem.md`. |
 | `test-stream-generator/` | Turns a single `sample.mp4` into a looping, HTTP-served "live" stream you can paste into the panel as a source — end-to-end streaming-pipeline testing, incl. **LLOD** (`src/Cli/Commands/LlodCommand.php`). See its `README.md`. |
 | `dts-audio-test/` | Investigates the legacy DTS/AC3 audio path (XUI's `-fix_dts` flag vs stock ffmpeg's `-copyts`) when moving off the bundled ffmpeg `4.0` binary. See its `README.md`. |
-| `test-install/` | Docker-based end-to-end install test of the built release archive — unpacks `XC_VM.zip`, runs the installer with scripted answers, and checks the key installed files. See its `README.md`. Referenced from `docs/*/builds/updates_checklist.md`. |
+| `test-install/` | Docker-based end-to-end install test of the built release archive — unpacks the compatibility release archive (`XC_VM.zip`), runs the installer with scripted answers, and checks the key installed files. See its `README.md`. Referenced from `docs/*/builds/updates_checklist.md`. |
 
 ## Repo maintenance
 

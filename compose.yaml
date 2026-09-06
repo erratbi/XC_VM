@@ -1,8 +1,10 @@
+name: xtreampi
+
 services:
   # ─── 1. MariaDB Database Service ──────────────────────────────
   mariadb:
     image: mariadb:11.4
-    container_name: xcvm-mariadb
+    container_name: xtreampi-mariadb
     restart: unless-stopped
     environment:
       MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: "yes"
@@ -21,7 +23,7 @@ services:
   # ─── 2. Redis In-Memory Cache Service ─────────────────────────
   redis:
     image: redis:7-alpine
-    container_name: xcvm-redis
+    container_name: xtreampi-redis
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
@@ -37,7 +39,7 @@ services:
   # ─── 3. phpMyAdmin Database Web GUI ───────────────────────────
   phpmyadmin:
     image: phpmyadmin:latest
-    container_name: xcvm-phpmyadmin
+    container_name: xtreampi-phpmyadmin
     restart: unless-stopped
     environment:
       PMA_HOST: "mariadb"
@@ -51,22 +53,22 @@ services:
       mariadb:
         condition: service_healthy
 
-  # ─── 4. XC_VM Application Container (PHP 8.1 + Nginx) ──────────
-  xcvm-app:
+  # ─── 4. XtreamPi Application Container (PHP 8.1 + Nginx) ───────
+  xtreampi-app:
     build:
       context: .
       dockerfile: docker/Dockerfile.app
-    image: xcvm-app:dev
-    container_name: xcvm-app
-    hostname: xcvm-dev
+    image: xtreampi-app:dev
+    container_name: xtreampi-app
+    hostname: xtreampi-dev
     restart: unless-stopped
     privileged: true
     init: true
     environment:
-      XCVM_ADMIN_CODE: "${XCVM_ADMIN_CODE:-admin}"
-      XCVM_ADMIN_USER: "${XCVM_ADMIN_USER:-admin}"
-      XCVM_ADMIN_PASS: "${XCVM_ADMIN_PASS:-admin1234}"
-      XCVM_ADMIN_EMAIL: "${XCVM_ADMIN_EMAIL:-admin@example.com}"
+      XTREAMPI_ADMIN_CODE: "${XTREAMPI_ADMIN_CODE:-admin}"
+      XTREAMPI_ADMIN_USER: "${XTREAMPI_ADMIN_USER:-admin}"
+      XTREAMPI_ADMIN_PASS: "${XTREAMPI_ADMIN_PASS:-admin1234}"
+      XTREAMPI_ADMIN_EMAIL: "${XTREAMPI_ADMIN_EMAIL:-admin@example.com}"
       DB_HOST: "mariadb"
       DB_PORT: "3306"
       DB_NAME: "xtream_iptvpro"
@@ -95,12 +97,12 @@ services:
       - ./src/api_reseller.php:/home/xc_vm/api_reseller.php
       - ./src/bin/nginx/conf/nginx.conf:/home/xc_vm/bin/nginx/conf/nginx.conf:ro
       # ── Persistent Storage & Cache Volumes ──
-      - xcvm_tmp:/home/xc_vm/tmp
-      - xcvm_streams:/home/xc_vm/content/streams
-      - xcvm_storage:/home/xc_vm/storage
+      - xtreampi_tmp:/home/xc_vm/tmp
+      - xtreampi_streams:/home/xc_vm/content/streams
+      - xtreampi_storage:/home/xc_vm/storage
     ports:
-      - "${XCVM_HTTP_PORT:-8880}:80"
-      - "${XCVM_HTTPS_PORT:-8443}:443"
+      - "${XTREAMPI_HTTP_PORT:-8880}:80"
+      - "${XTREAMPI_HTTPS_PORT:-8443}:443"
     depends_on:
       mariadb:
         condition: service_healthy
@@ -109,7 +111,12 @@ services:
 
 volumes:
   mariadb_data:
+    name: xtreampi_mariadb_data
   redis_data:
-  xcvm_tmp:
-  xcvm_streams:
-  xcvm_storage:
+    name: xtreampi_redis_data
+  xtreampi_tmp:
+    name: xtreampi_tmp
+  xtreampi_streams:
+    name: xtreampi_streams
+  xtreampi_storage:
+    name: xtreampi_storage

@@ -1,6 +1,6 @@
 # Development Feature Flags
 
-XC_VM uses constants and settings-driven flags to control environment behavior.
+XtreamPi uses constants and settings-driven flags to control environment behavior.
 
 Application constants are stored in `src/Core/Config/AppConfig.php`.
 
@@ -54,7 +54,7 @@ From `src/Core/Config/AppConfig.php`:
 define('DB_ACCESS_ENABLED', false);
 define('XC_VM_VERSION', '2.2.1');
 define('GIT_OWNER', 'Vateron-Media');
-define('GIT_REPO_MAIN', 'XC_VM');
+define('GIT_REPO_MAIN', 'XtreamPi');
 define('GIT_REPO_UPDATE', 'XC_VM_Update');
 define('GIT_REPO_BIN', 'XC_VM_Binaries');
 define('MONITOR_CALLS', 3);

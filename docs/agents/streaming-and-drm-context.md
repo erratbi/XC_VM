@@ -1,6 +1,6 @@
 # Streaming, DASH DRM, and Ingestion Context
 
-This document captures architecture, debugging history, edge cases, and design decisions regarding the XC_VM streaming engine, DASH Clearkey DRM, HTTP redirect handling, and process supervision.
+This document captures architecture, debugging history, edge cases, and design decisions regarding the XtreamPi streaming engine, DASH Clearkey DRM, HTTP redirect handling, and process supervision.
 
 ---
 

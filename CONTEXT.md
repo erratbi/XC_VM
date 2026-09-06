@@ -17,10 +17,10 @@ This document provides complete, high-density context for developers and AI agen
 ## 2. Absolute Architectural Rules & Invariants (CRITICAL)
 
 ### A. Theme Layer Isolation (Never Touch Core for Themes)
-* **Rule:** StreamCreed (`src/Public/Views/streamcreed/`, `src/Public/assets/admin/streamcreed/`) is an overlay theme.
+* **Rule:** XtreamPi (`src/Public/Views/xtreampi/`, `src/Public/assets/admin/xtreampi/`) is an overlay theme.
 * **Core files must remain 100% untouched:** Never edit core controllers (e.g. [`src/Public/Controllers/Admin/TableController.php`](file:///Users/amir/work/IPTV/project_manhattan/XC_VM/xtream_ui/src/Public/Controllers/Admin/TableController.php)), domain models, or legacy views in `src/Public/Views/admin/` to accommodate theme aesthetics, formatting, or data structures.
 * **Legacy Compatibility:** The original legacy theme must remain completely intact and functional at all times.
-* **Theme-Side Adaptation:** Any data normalization, HTML tag stripping, status badge rendering, or layout adaptation **must** be implemented inside the theme layer (client-side JS in `src/Public/assets/admin/streamcreed/` or theme views in `src/Public/Views/streamcreed/`).
+* **Theme-Side Adaptation:** Any data normalization, HTML tag stripping, status badge rendering, or layout adaptation **must** be implemented inside the theme layer (client-side JS in `src/Public/assets/admin/xtreampi/` or theme views in `src/Public/Views/xtreampi/`).
 
 ### B. Git Workflow Rules
 * Commit logically with atomic Conventional Commits (`feat(...)`, `fix(...)`, `ci(...)`).
@@ -71,25 +71,25 @@ This document provides complete, high-density context for developers and AI agen
 
 ---
 
-## 4. StreamCreed UI Architecture
+## 4. XtreamPi UI Architecture
 
-StreamCreed is the modern, responsive administrative interface providing a dark/light design system built on pure Vanilla CSS and modular JavaScript.
+XtreamPi is the modern, responsive administrative interface providing a dark/light design system built on pure Vanilla CSS and modular JavaScript.
 
-* **Views Location:** `src/Public/Views/streamcreed/admin/`
+* **Views Location:** `src/Public/Views/xtreampi/admin/`
   * `dashboard.php` — Server metrics, real-time load, connection sparklines.
   * `stream.php` — Stream editor, source probe, adaptive streaming, track mapping, failover.
   * `streams.php` — Live streams overview, search, category filter, connection counts, status badges.
   * `lines.php` — User subscriptions, line credentials, connection caps, expiration badges.
   * `mag.php`, `enigma.php`, `hmac.php` — Device management tables and activation handoffs.
   * `bouquet.php`, `stream_category.php` — Bouquet and category management.
-* **Assets Location:** `src/Public/assets/admin/streamcreed/`
-  * `streamcreed.css` — Modern design system tokens, OKLCH color palettes, smooth transitions, mobile responsiveness.
+* **Assets Location:** `src/Public/assets/admin/xtreampi/`
+  * `xtreampi.css` — Modern design system tokens, OKLCH color palettes, smooth transitions, mobile responsiveness.
   * `streams.js`, `lines.js`, `mag.js`, `enigma.js`, `stream-*.js` — Self-contained ES6/Vanilla JS modules with zero dependencies.
 * **Navigation:** Drill-in collapsible sidebar categorized by Content, User Management, Device Management, and Service Setup with user group permission checks.
 
 ### Visual Aesthetics & Code Consistency Standards
-* **Super User-Friendly & Visually Appealing:** StreamCreed interfaces must look visually stunning, modern, clean, and intuitive. Avoid generic colors, raw unstyled buttons, or clunky layouts. Use subtle micro-animations, consistent padding, badges with indicator dots, and crisp typography.
-* **Consistency Check Before Coding:** Whenever creating or updating a StreamCreed page, always inspect existing reference pages (`lines.php`, `streams.php`, `mag.php`, `stream.php`, `bouquet.php`) to preserve identical visual styling, layout rhythm, class conventions, and JavaScript architecture:
+* **Super User-Friendly & Visually Appealing:** XtreamPi interfaces must look visually stunning, modern, clean, and intuitive. Avoid generic colors, raw unstyled buttons, or clunky layouts. Use subtle micro-animations, consistent padding, badges with indicator dots, and crisp typography.
+* **Consistency Check Before Coding:** Whenever creating or updating a XtreamPi page, always inspect existing reference pages (`lines.php`, `streams.php`, `mag.php`, `stream.php`, `bouquet.php`) to preserve identical visual styling, layout rhythm, class conventions, and JavaScript architecture:
   * **Standard DOM Architecture:**
     - Container: `<section data-sc-<feature>>`
     - Header: `<div class="sc-page-heading"><div><p class="sc-eyebrow">Category</p><h1>Page Title</h1></div><div class="sc-page-actions">...</div></div>`

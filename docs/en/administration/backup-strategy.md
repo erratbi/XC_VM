@@ -1,6 +1,6 @@
 # Backup Strategy
 
-XC_VM supports automated and manual database backups with local storage and optional Dropbox upload.
+XtreamPi supports automated and manual database backups with local storage and optional Dropbox upload.
 Backups are managed through the admin panel, CLI commands, and a cron job.
 
 ---

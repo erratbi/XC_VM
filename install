@@ -317,7 +317,7 @@ PACKAGES = {
 
 rRemove = ["mysql-server"]
 rMySQLCnfTemplate = """\
-# XC_VM
+# XtreamPi
 [client]
 port                            = 3306
 
@@ -399,10 +399,10 @@ max_allowed_packet              = 16M
 [isamchk]
 key_buffer_size                 = 8M"""
 rConfig = """\
-; XC_VM Configuration
+; XtreamPi Configuration
 ; -----------------
 ; To change your username or password, modify BOTH
-; below and XC_VM will read and re-encrypt them.
+; below and XtreamPi will read and re-encrypt them.
 
 [XC_VM]
 hostname    =   "127.0.0.1"
@@ -415,7 +415,7 @@ username    =   "%s"
 password    =   "%s"
 """
 rSysCtl = """\
-# XC_VM
+# XtreamPi
 
 net.ipv4.tcp_congestion_control = bbr
 net.core.default_qdisc = fq
@@ -450,7 +450,7 @@ net.ipv6.route.flush = 1"""
 rSystemd = """\
 [Unit]
 SourcePath=/home/xc_vm/service
-Description=XC_VM Service
+Description=XtreamPi Service
 After=network.target
 StartLimitIntervalSec=0
 
@@ -572,7 +572,7 @@ def download_release_hash(repo, release_tag, file_name):
     hash_url = f"https://github.com/Vateron-Media/{repo}/releases/download/{release_tag}/hashes.md5"
     try:
         req = urllib.request.Request(hash_url)
-        req.add_header("User-Agent", "XC_VM-Installer/1.0")
+        req.add_header("User-Agent", "XtreamPi-Installer/1.0")
         with urllib.request.urlopen(req, timeout=15) as response:
             content = response.read().decode().strip()
             for line in content.split("\n"):
@@ -588,13 +588,13 @@ def download_release_hash(repo, release_tag, file_name):
 
 
 def get_latest_binaries_tag():
-    """Get the latest release tag from XC_VM_Binaries GitHub repo"""
+    """Get the latest release tag from the binary release repository."""
     api_url = (
         "https://api.github.com/repos/Vateron-Media/XC_VM_Binaries/releases/latest"
     )
     try:
         req = urllib.request.Request(api_url)
-        req.add_header("User-Agent", "XC_VM-Installer/1.0")
+        req.add_header("User-Agent", "XtreamPi-Installer/1.0")
         with urllib.request.urlopen(req, timeout=15) as response:
             data = json.loads(response.read().decode())
             return data["tag_name"]
@@ -1048,8 +1048,8 @@ def is_valid_tar(file_path):
 
 
 def download_xc_vm():
-    """Download XC_VM from GitHub releases"""
-    printc("Checking for XC_VM installation files...", col.OKBLUE)
+    """Download XtreamPi from GitHub releases."""
+    printc("Checking for XtreamPi installation files...", col.OKBLUE)
 
     # Check if valid files already exist locally
     if os.path.exists("./xc_vm.tar.gz") and is_valid_tar("./xc_vm.tar.gz"):
@@ -1057,7 +1057,7 @@ def download_xc_vm():
         return True
 
     if os.path.exists("./XC_VM.zip") and is_valid_zip("./XC_VM.zip"):
-        printc("Valid XC_VM.zip found locally", col.OKGREEN)
+        printc("Valid XtreamPi compatibility archive found locally", col.OKGREEN)
         return True
 
     printc("Not found. Trying to download from GitHub...", col.OKBLUE)
@@ -1067,14 +1067,14 @@ def download_xc_vm():
         printc("Getting latest version from GitHub API...", col.OKBLUE)
         api_url = "https://api.github.com/repos/Vateron-Media/XC_VM/releases/latest"
         req = urllib.request.Request(api_url)
-        req.add_header("User-Agent", "XC_VM-Installer/1.0")
+        req.add_header("User-Agent", "XtreamPi-Installer/1.0")
 
         with urllib.request.urlopen(req, timeout=10) as response:
             data = json.loads(response.read().decode())
             latest_version = data["tag_name"]
             printc(f"Latest version: {latest_version}", col.OKGREEN)
 
-        # 2. Download XC_VM.zip directly from GitHub releases
+        # 2. Download the compatibility archive directly from GitHub releases
         download_url = f"https://github.com/Vateron-Media/XC_VM/releases/download/{latest_version}/XC_VM.zip"
         printc(f"Downloading: {download_url}", col.OKBLUE)
 
@@ -1084,19 +1084,19 @@ def download_xc_vm():
         # Verify download
         if os.path.exists("XC_VM.zip") and os.path.getsize("XC_VM.zip") > 0:
             file_size = os.path.getsize("XC_VM.zip")
-            printc(f"Download successful: XC_VM.zip ({file_size} bytes)", col.OKGREEN)
+            printc(f"XtreamPi download successful: XC_VM.zip ({file_size} bytes)", col.OKGREEN)
 
             # MD5 verification
             expected_hash = download_release_hash("XC_VM", latest_version, "XC_VM.zip")
             if expected_hash:
                 actual_hash = compute_md5("XC_VM.zip")
                 if actual_hash != expected_hash:
-                    printc(f"MD5 verification failed for XC_VM.zip: expected {expected_hash}, got {actual_hash}", col.FAIL)
+                    printc(f"MD5 verification failed for the XtreamPi archive: expected {expected_hash}, got {actual_hash}", col.FAIL)
                     os.remove("XC_VM.zip")
                     return False
-                printc("MD5 verification passed for XC_VM.zip", col.OKGREEN)
+                printc("MD5 verification passed for the XtreamPi archive", col.OKGREEN)
             else:
-                printc("Warning: Could not retrieve MD5 hash for XC_VM.zip, skipping verification", col.WARNING)
+                printc("Warning: Could not retrieve the XtreamPi archive MD5 hash, skipping verification", col.WARNING)
 
             # Validate ZIP file
             if is_valid_zip("XC_VM.zip"):
@@ -1798,7 +1798,7 @@ if __name__ == "__main__":
     # START                                          #
     ##################################################
 
-    printc("XC_VM Multi-Distribution Installer", col.OKGREEN, 2)
+    printc("XtreamPi Multi-Distribution Installer", col.OKGREEN, 2)
 
     # Check root
     check_root()
@@ -1823,7 +1823,7 @@ if __name__ == "__main__":
             sys.exit(1)
         printc("Continuing with installation...", col.WARNING)
 
-    # Try to download XC_VM if not present
+    # Try to download XtreamPi if not present
     has_valid_archive = False
     archive_path = None
 
@@ -1835,7 +1835,7 @@ if __name__ == "__main__":
     elif os.path.exists("./XC_VM.zip") and is_valid_zip("./XC_VM.zip"):
         has_valid_archive = True
         archive_path = "./XC_VM.zip"
-        printc("Found valid XC_VM.zip", col.OKGREEN)
+        printc("Found a valid XtreamPi compatibility archive", col.OKGREEN)
 
     # Download if needed
     if not has_valid_archive:
@@ -1850,7 +1850,7 @@ if __name__ == "__main__":
 
     if not has_valid_archive or not archive_path:
         printc(
-            "XC_VM package not found or invalid. Please download manually.", col.FAIL
+            "XtreamPi package not found or invalid. Please download it manually.", col.FAIL
         )
         printc(
             "You can download from: https://github.com/Vateron-Media/XC_VM/releases",
@@ -1899,7 +1899,7 @@ if __name__ == "__main__":
             printc("Using provided root password", col.OKGREEN)
 
     if os.path.exists("/home/xc_vm/"):
-        printc("XC_VM Directory Exists!", col.WARNING)
+        printc("XtreamPi directory already exists!", col.WARNING)
         while True:
             rAnswer = input("Continue and overwrite? (Y / N) : ").strip().upper()
             if rAnswer in ["Y", "N"]:
@@ -2044,10 +2044,10 @@ if __name__ == "__main__":
         run_command("chown xc_vm:xc_vm /home/xc_vm")
 
     ##################################################
-    # INSTALL XC_VM                                  #
+    # INSTALL XtreamPi                                  #
     ##################################################
 
-    printc("Installing XC_VM", col.OKBLUE)
+    printc("Installing XtreamPi", col.OKBLUE)
 
     # Extract the archive
     if not extract_archive(archive_path):
@@ -2059,7 +2059,7 @@ if __name__ == "__main__":
         printc("Extraction failed: /home/xc_vm/console.php not found", col.FAIL)
         sys.exit(1)
     else:
-        printc("XC_VM extracted successfully", col.OKGREEN)
+        printc("XtreamPi extracted successfully", col.OKGREEN)
 
     # Replace the shipped placeholder cert with a unique per-install one
     # (before nginx is started further below).
@@ -2168,7 +2168,7 @@ if __name__ == "__main__":
     else:
         printc(f"Database schema not found at {db_schema_path}", col.WARNING)
 
-    # Create XC_VM user with all privileges
+    # Create the XtreamPi database user with all privileges
     printc("Creating database user", col.OKBLUE)
 
     # Localhost grants
@@ -2195,8 +2195,8 @@ if __name__ == "__main__":
     for cmd in all_commands:
         run_command(f'mariadb -u root -p"{root_password}" -e "{cmd}"')
 
-    # Write XC_VM configuration
-    printc("Writing XC_VM configuration", col.OKBLUE)
+    # Write XtreamPi configuration
+    printc("Writing XtreamPi configuration", col.OKBLUE)
     os.makedirs(os.path.dirname(rConfigPath), exist_ok=True)
     rConfigData = rConfig % (rUsername, rPassword)
     with io.open(rConfigPath, "w", encoding="utf-8") as rFile:
@@ -2447,8 +2447,8 @@ if __name__ == "__main__":
         rFile.write("MariaDB Root \n")
         rFile.write("Username: root\n")
         rFile.write(f"Password: {root_password}\n\n")
-        rFile.write(f"XC_VM Username: {rUsername}\n")
-        rFile.write(f"XC_VM Password: {rPassword}\n")
+        rFile.write(f"XtreamPi Username: {rUsername}\n")
+        rFile.write(f"XtreamPi Password: {rPassword}\n")
         rFile.write(f"Database: {rDatabase}\n")
 
     # Also save to installer directory (like original install script)
@@ -2477,7 +2477,7 @@ if __name__ == "__main__":
     run_command("systemctl start xc_vm")
 
     # Post-install startup
-    printc("Starting XC_VM processes...", col.OKBLUE)
+    printc("Starting XtreamPi processes...", col.OKBLUE)
     time.sleep(10)
 
     # Run status command (root by design: root crontab, system limits, DB
@@ -2496,7 +2496,7 @@ if __name__ == "__main__":
         )
 
     # Download GeoLite2 GeoIP databases (City/Country/ASN). They are no longer
-    # bundled in the repo/release archive, so fetch them from the XC_VM_Update
+    # bundled in the repo/release archive, so fetch them from the update
     # release on install. This also refreshes bin/maxmind/version.json.
     # Non-fatal: run_command never raises, so a download failure won't abort.
     if os.path.exists(startup_cmd):
@@ -2506,7 +2506,7 @@ if __name__ == "__main__":
         )
 
     # Download the proxy-node archive (proxy.tar.gz). Like GeoLite2 it is no longer
-    # bundled in the release archive — fetch it from the XC_VM_Proxy release on
+    # bundled in the release archive — fetch it from the proxy release on
     # install so the first proxy-node install runs from a local copy, and write the
     # bin/install/proxy_version.json index. Runs as xc_vm (owner of bin/install/);
     # non-fatal — run_command never raises, so a download failure won't abort install.

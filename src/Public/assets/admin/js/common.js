@@ -1,6 +1,6 @@
 /**
- * XC_VM Common JS — base utilities for all admin pages.
- * Requires window.XC_VM.Config to be set before loading.
+ * XtreamPi Common JS — base utilities for all admin pages.
+ * Requires window.XtreamPi.Config to be set before loading.
  */
 (function () {
 	window.rRealURL = undefined;
@@ -12,10 +12,10 @@
 	window.rSearchTop = 0;
 	window.rShiftHeld = false;
 
-	window.XC_VM = window.XC_VM || {};
-	window.XC_VM.Listings = window.XC_VM.Listings || {};
+	window.XtreamPi = window.XtreamPi || {};
+	window.XtreamPi.Listings = window.XtreamPi.Listings || {};
 
-	var cfg = window.XC_VM.Config || {};
+	var cfg = window.XtreamPi.Config || {};
 	var i18n = cfg.i18n || {};
 
 	window.hideModal = function (rName, rDispose) {

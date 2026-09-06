@@ -199,7 +199,7 @@ if (Authorization::check('adv', 'index')): ?>
 												<i class="timeline-icon bg-danger"></i>
 												<div class="timeline-item-info">
 													<a href="javascript:void(0);" class="text-body font-weight-semibold mb-1 d-block bg"><strong>MariaDB Outdated!</strong></a>
-													<small>You're using an old version of MariaDB. Please update to at least v10.5 in order for XC_VM to work correctly.</small><br />
+													<small>You're using an old version of MariaDB. Please update to at least v10.5 in order for XtreamPi to work correctly.</small><br />
 													<p><br /></p>
 												</div>
 											</div>

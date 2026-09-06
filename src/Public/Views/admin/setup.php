@@ -227,10 +227,10 @@ if (!isset(RequestManager::getAll()['update'])):
                                         <div class="col-12">
                                             <div class="alert alert-secondary mb-4" role="alert">
                                                 In order to migrate your database from a previous installation of Xtream UI, XUI, ZapX
-                                                (original and NXT), StreamCreed or generic Xtream Codes v2 installation, you will
+                                                (original and NXT), XtreamPi or generic Xtream Codes v2 installation, you will
                                                 need to restore your migration database to the <strong>xc_vm_migrate</strong> database
-                                                as XC_VM will have access to it.<br /><br />The script will then loop through all of
-                                                your previously existing data and alter it to work with XC_VM. No logs will be
+                                                as XtreamPi will have access to it.<br /><br />The script will then loop through all of
+                                                your previously existing data and alter it to work with XtreamPi. No logs will be
                                                 migrated and some clean up may need to be done post-migration but this tool should
                                                 help significantly in carrying over your data to your new panel.<br /><br /><br />Once you're done, refresh the page.
                                             </div>

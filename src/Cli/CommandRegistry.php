@@ -77,7 +77,7 @@ class CommandRegistry {
 	}
 
 	private function printHelp(): void {
-		echo "XC_VM Console\n";
+		echo "XtreamPi Console\n";
 		echo "\n";
 		echo "Usage: /home/xc_vm/console.php <command> [arguments]\n";
 		echo "\n";

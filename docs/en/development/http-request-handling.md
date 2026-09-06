@@ -1,6 +1,6 @@
 # HTTP Request Handling
 
-This document describes how HTTP requests are processed in XC_VM, covering the full lifecycle from initial entry through routing and dispatch. There are multiple runtime paths depending on the request type.
+This document describes how HTTP requests are processed in XtreamPi, covering the full lifecycle from initial entry through routing and dispatch. There are multiple runtime paths depending on the request type.
 
 ---
 

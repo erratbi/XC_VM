@@ -1,6 +1,6 @@
 # Adding a Custom Language
 
-XC_VM uses a file-based translation system. Each language is a single `.ini` file in the `src/resources/langs/` directory. Adding a new language requires no code changes — just create a file and it will appear in the admin panel automatically.
+XtreamPi uses a file-based translation system. Each language is a single `.ini` file in the `src/resources/langs/` directory. Adding a new language requires no code changes — just create a file and it will appear in the admin panel automatically.
 
 ## Quick Start
 

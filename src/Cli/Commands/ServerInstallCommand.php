@@ -241,7 +241,7 @@ class ServerInstallCommand implements CommandInterface {
 	private function installSystemdService($rConn, callable $rRunSSH, callable $rSendFileSSH, int $rServerID): void {
 		echo "Installing service\n";
 		call_user_func($rRunSSH, $rConn, 'sudo rm /etc/systemd/system/xc_vm.service');
-		$rSystemd = '[Unit]' . "\n" . 'SourcePath=/home/xc_vm/service' . "\n" . 'Description=XC_VM Service' . "\n" . 'After=network.target' . "\n" . 'StartLimitIntervalSec=0' . "\n\n" . '[Service]' . "\n" . 'Type=simple' . "\n" . 'User=root' . "\n" . 'Restart=always' . "\n" . 'RestartSec=1' . "\n" . 'ExecStart=/bin/bash /home/xc_vm/service start' . "\n" . 'ExecRestart=/bin/bash /home/xc_vm/service restart' . "\n" . 'ExecStop=/bin/bash /home/xc_vm/service stop' . "\n\n" . '[Install]' . "\n" . 'WantedBy=multi-user.target';
+		$rSystemd = '[Unit]' . "\n" . 'SourcePath=/home/xc_vm/service' . "\n" . 'Description=XtreamPi Service' . "\n" . 'After=network.target' . "\n" . 'StartLimitIntervalSec=0' . "\n\n" . '[Service]' . "\n" . 'Type=simple' . "\n" . 'User=root' . "\n" . 'Restart=always' . "\n" . 'RestartSec=1' . "\n" . 'ExecStart=/bin/bash /home/xc_vm/service start' . "\n" . 'ExecRestart=/bin/bash /home/xc_vm/service restart' . "\n" . 'ExecStop=/bin/bash /home/xc_vm/service stop' . "\n\n" . '[Install]' . "\n" . 'WantedBy=multi-user.target';
 		file_put_contents(TMP_PATH . 'systemd_' . $rServerID, $rSystemd);
 		call_user_func($rSendFileSSH, $rConn, TMP_PATH . 'systemd_' . $rServerID, '/etc/systemd/system/xc_vm.service', false);
 		call_user_func($rRunSSH, $rConn, 'sudo chmod +x /etc/systemd/system/xc_vm.service');

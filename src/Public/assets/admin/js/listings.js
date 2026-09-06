@@ -1,4 +1,4 @@
-window.XC_VM = window.XC_VM || {},
+window.XtreamPi = window.XtreamPi || {},
     function (e, t) {
         "object" == typeof exports && "object" == typeof module ? module.exports = t() : "function" == typeof define && define.amd ? define(t) : "object" == typeof exports ? exports.Handlebars = t() : e.Handlebars = t()
     }(this, function () {
@@ -476,7 +476,7 @@ window.XC_VM = window.XC_VM || {},
         }
     }),
     function (e, t) {
-        "function" == typeof define && define.amd ? define(["jquery"], t) : (window.XC_VM = window.XC_VM || {}, window.XC_VM[e] = t())
+        "function" == typeof define && define.amd ? define(["jquery"], t) : (window.XtreamPi = window.XtreamPi || {}, window.XtreamPi[e] = t())
     }("utilities", function () {
         var e = !1,
             t = "JSON",
@@ -708,7 +708,7 @@ window.XC_VM = window.XC_VM || {},
         }
     }),
     function (e, t) {
-        "function" == typeof define && define.amd ? define(["jquery"], t) : (window.XC_VM = window.XC_VM || {}, window.XC_VM[e] = t())
+        "function" == typeof define && define.amd ? define(["jquery"], t) : (window.XtreamPi = window.XtreamPi || {}, window.XtreamPi[e] = t())
     }("EnvConfigHelper", function () {
         var e = function () {
             return ""
@@ -717,7 +717,7 @@ window.XC_VM = window.XC_VM || {},
                 return ""
             },
             n = function () {
-                return window.XC_VM && window.XC_VM.Listings && window.XC_VM.Listings.ListingsGridV2Enabled
+                return window.XtreamPi && window.XtreamPi.Listings && window.XtreamPi.Listings.ListingsGridV2Enabled
             };
         return {
             getServiceProviderUrl: function () {
@@ -732,7 +732,7 @@ window.XC_VM = window.XC_VM || {},
         }
     }),
     function (e, t) {
-        "function" == typeof define && define.amd ? define(e, ["utilities"], t) : (window.XC_VM = window.XC_VM || {}, window.XC_VM[e] = t())
+        "function" == typeof define && define.amd ? define(e, ["utilities"], t) : (window.XtreamPi = window.XtreamPi || {}, window.XtreamPi[e] = t())
     }("PubSub", function () {
         var e = {},
             t = "undefined" != typeof this.hasOwnProperty ? this.hasOwnProperty : Object.prototype.hasOwnProperty;
@@ -752,7 +752,7 @@ window.XC_VM = window.XC_VM || {},
                 })
             }
         }
-    }), window.XC_VM = window.XC_VM || {}, window.XC_VM.AmazonDirectMatchBuy = function () {
+    }), window.XtreamPi = window.XtreamPi || {}, window.XtreamPi.AmazonDirectMatchBuy = function () {
         var e = "3331",
             t = !1,
             n = function () {
@@ -772,7 +772,7 @@ window.XC_VM = window.XC_VM || {},
         }
     }(),
     function (e, t) {
-        "function" == typeof define && define.amd ? define(e, [], t) : (window.XC_VM = window.XC_VM || {}, window.XC_VM[e] = t())
+        "function" == typeof define && define.amd ? define(e, [], t) : (window.XtreamPi = window.XtreamPi || {}, window.XtreamPi[e] = t())
     }("UriService", function () {
         var e = function () {
             return {
@@ -836,7 +836,7 @@ window.XC_VM = window.XC_VM || {},
         }
     });
 
-window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
+window.XtreamPi = window.XtreamPi || {}, window.XtreamPi.Affixer = function () {
     var e, n, t, a, i, s, r, o, l, u, c, d = function () {
         return Math.max(document.body.scrollTop, document.documentElement.scrollTop) + a
     },
@@ -1719,7 +1719,7 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
             THREE: 3,
             ALL: y
         }
-    }), window.XC_VM = window.XC_VM || {},
+    }), window.XtreamPi = window.XtreamPi || {},
     function (e) {
         function n(e, n, t) {
             switch (arguments.length) {
@@ -3617,21 +3617,21 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
                 }).call(this, "undefined" != typeof global ? global : "undefined" != typeof self ? self : "undefined" != typeof window ? window : {})
             }, {}]
         }, {}, [2])(2)
-    }), window.XC_VM.Listings.CookieSettings = function (e) {
+    }), window.XtreamPi.Listings.CookieSettings = function (e) {
         var n = {};
         window.location.href;
         return e.cookie.raw = !0, n.specialisation = function () {
             return "tv"
         }, n.personalisation = function (n) {
             return {
-                channels: window.XC_VM.Listings.DefaultChannels
+                channels: window.XtreamPi.Listings.DefaultChannels
             };
         }, n.getUpdatedChannels = function (e) {
             var t = n.personalisation(e),
                 a = t.channels;
             return a
         }, n
-    }(jQuery), window.XC_VM = window.XC_VM || {}, window.XC_VM.Listings = window.XC_VM.Listings || {}, window.XC_VM = window.XC_VM || {}, window.XC_VM.Listings = window.XC_VM.Listings || {}, window.XC_VM.Listings.Settings = function (e, n) {
+    }(jQuery), window.XtreamPi = window.XtreamPi || {}, window.XtreamPi.Listings = window.XtreamPi.Listings || {}, window.XtreamPi = window.XtreamPi || {}, window.XtreamPi.Listings = window.XtreamPi.Listings || {}, window.XtreamPi.Listings.Settings = function (e, n) {
         var t, a, i, s, r, o, l, u, c, d, h, f, p, m, g, v, y, w, T, b, _, D = e(window),
             k = e("html, body"),
             S = e(".js-settings-btn"),
@@ -3643,8 +3643,8 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
             x = "tv",
             j = "TvChannels",
             E = "hideOrganiseChannelsMsg",
-            Y = !window.XC_VM.utilities.isTouch() && !e.cookie(E),
-            O = XC_VM.Listings.CookieSettings.personalisation(j),
+            Y = !window.XtreamPi.utilities.isTouch() && !e.cookie(E),
+            O = XtreamPi.Listings.CookieSettings.personalisation(j),
             P = false,
             N = "settings",
             H = "/im-broadcast-listings-api/setusertvchannels",
@@ -3894,7 +3894,7 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
                         return e.Id
                     });
                 if (G.resetChannelOrder) return n.join(",");
-                O = XC_VM.Listings.CookieSettings.personalisation(j);
+                O = XtreamPi.Listings.CookieSettings.personalisation(j);
                 var t = O.channels.split(",");
                 t = t.map(function (e) {
                     return parseInt(e, 10)
@@ -3934,8 +3934,8 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
                 })
             },
             Pe = function () {
-                var e = window.XC_VM.Listings.Grid.getStartDateTime();
-                window.XC_VM.Listings.Grid.refreshGrid(e, !0)
+                var e = window.XtreamPi.Listings.Grid.getStartDateTime();
+                window.XtreamPi.Listings.Grid.refreshGrid(e, !0)
             },
             Ne = function (e) {
                 k.scrollTop(e)
@@ -3950,7 +3950,7 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
                 Le(), $()
             }
         }
-    }(jQuery, window.XC_VM.EnvConfigHelper), window.XC_VM = window.XC_VM || {}, window.XC_VM.Listings = window.XC_VM.Listings || {}, window.XC_VM.Listings.TimeSelector = function (e) {
+    }(jQuery, window.XtreamPi.EnvConfigHelper), window.XtreamPi = window.XtreamPi || {}, window.XtreamPi.Listings = window.XtreamPi.Listings || {}, window.XtreamPi.Listings.TimeSelector = function (e) {
         var n = {},
             t = {
                 container: ".listings-time-selector",
@@ -3968,7 +3968,7 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
             },
             i = function () {
                 e(t.timeItem).on("click", function () {
-                    XC_VM.Listings.Nav.jumpToTime(e(this))
+                    XtreamPi.Listings.Nav.jumpToTime(e(this))
                 }), e(t.nav).on("click", function () {
                     e(t.scroller).animate({
                         scrollLeft: e(this).data("dir") + "=" + t.scrollDistance
@@ -3977,8 +3977,8 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
             },
             s = {};
         return s.init = function () {
-            var r = moment(XC_VM.Listings.Grid.getStartDateTime()),
-                o = XC_VM.Listings.Grid.getHours();
+            var r = moment(XtreamPi.Listings.Grid.getStartDateTime()),
+                o = XtreamPi.Listings.Grid.getHours();
             a(r, o);
             for (var l = moment().startOf("day"), u = [], c = 0; c < 24; c++) u.push({
                 displayHour: l.format("h"),
@@ -3993,8 +3993,8 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
             });
             e(t.container).empty().append(d), i(), s.updateScrollPosition()
         }, s.updateHighlighting = function () {
-            var i = moment(XC_VM.Listings.Grid.getStartDateTime()),
-                s = XC_VM.Listings.Grid.getHours();
+            var i = moment(XtreamPi.Listings.Grid.getStartDateTime()),
+                s = XtreamPi.Listings.Grid.getHours();
             a(i, s), e(t.timeItem).removeClass("selected first last");
             for (hour in n) e(t.timeItem + "-" + hour).addClass(n[hour])
         }, s.updateScrollPosition = function () {
@@ -4002,7 +4002,7 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
                 a = e(t.timeItem).width();
             e(t.scroller).scrollLeft(n * a)
         }, s
-    }(jQuery), window.XC_VM = window.XC_VM || {}, window.XC_VM.Listings = window.XC_VM.Listings || {}, window.XC_VM.Listings.Nav = function (e) {
+    }(jQuery), window.XtreamPi = window.XtreamPi || {}, window.XtreamPi.Listings = window.XtreamPi.Listings || {}, window.XtreamPi.Listings.Nav = function (e) {
         var n = {
             daysForward: 6,
             daysBack: -6,
@@ -4040,9 +4040,9 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
                 e(n.dayNavLink).on("click", function (t) {
                     if (t.preventDefault(), !e(this).parent().hasClass(n.activeClass)) {
                         var a = e(this).data("diff") || 0,
-                            i = XC_VM.Listings.Grid.getStartDateTime(),
+                            i = XtreamPi.Listings.Grid.getStartDateTime(),
                             s = moment().add(a, "d").hour(i.hour()).minute(i.minute());
-                        XC_VM.Listings.Grid.refreshGrid(s)
+                        XtreamPi.Listings.Grid.refreshGrid(s)
                     }
                 })
             },
@@ -4051,13 +4051,13 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
                     t.preventDefault();
                     var i = "next" == e(this).data("direction") ? "+" : "-";
                     a.animate({
-                        scrollLeft: "+=" + i + e(".js-day-nav-item").outerWidth() * (2 * XC_VM.Listings.Grid.getHours())
+                        scrollLeft: "+=" + i + e(".js-day-nav-item").outerWidth() * (2 * XtreamPi.Listings.Grid.getHours())
                     }, n.animationSpeed)
                 })
             },
             v = function () {
                 o.on("click", function (n) {
-                    n.preventDefault(), o.hide(), XC_VM.Listings.Grid.updateGridTime(e(this).data("direction"))
+                    n.preventDefault(), o.hide(), XtreamPi.Listings.Grid.updateGridTime(e(this).data("direction"))
                 })
             },
             y = function () {
@@ -4074,7 +4074,7 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
             },
             T = function () {
                 e(n.nowBtn).on("click", function (e) {
-                    e.preventDefault(), XC_VM.Listings.Grid.refreshGrid()
+                    e.preventDefault(), XtreamPi.Listings.Grid.refreshGrid()
                 })
             },
             b = function () {
@@ -4093,19 +4093,19 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
             _ = function () {
                 l.swipe({
                     swipeLeft: function () {
-                        XC_VM.Listings.Grid.updateGridTime("next")
+                        XtreamPi.Listings.Grid.updateGridTime("next")
                     },
                     swipeRight: function () {
-                        XC_VM.Listings.Grid.updateGridTime("prev")
+                        XtreamPi.Listings.Grid.updateGridTime("prev")
                     },
                     threshold: 80,
                     maxTimeThreshold: 500
                 }), s.swipe({
                     swipeLeft: function () {
-                        XC_VM.Listings.Grid.updateGridTime("next")
+                        XtreamPi.Listings.Grid.updateGridTime("next")
                     },
                     swipeRight: function () {
-                        XC_VM.Listings.Grid.updateGridTime("prev")
+                        XtreamPi.Listings.Grid.updateGridTime("prev")
                     },
                     threshold: 80,
                     maxTimeThreshold: 500
@@ -4188,7 +4188,7 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
         }, I.highlightDay = function (t) {
             e(".js-day-nav-item").removeClass(n.activeClass), e(".js-day-" + t.format("DDMMYYYY")).addClass(n.activeClass)
         }, I.buildTimeBar = function () {
-            var e = I.getTimes(XC_VM.Listings.Grid.getHours(), XC_VM.Listings.Grid.getStartDateTime(), n.requireHalfHour);
+            var e = I.getTimes(XtreamPi.Listings.Grid.getHours(), XtreamPi.Listings.Grid.getStartDateTime(), n.requireHalfHour);
             r.empty().append(Handlebars.templates.listingsTimeBar({
                 times: e
             })), I.updateCurrentTime()
@@ -4209,13 +4209,13 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
         }, I.jumpToTime = function (e) {
             var n = e.data("hour");
             if (void 0 !== n) {
-                var t = moment(XC_VM.Listings.Grid.getStartDateTime());
-                t.hour(n), XC_VM.Listings.Grid.refreshGrid(t, !1)
+                var t = moment(XtreamPi.Listings.Grid.getStartDateTime());
+                t.hour(n), XtreamPi.Listings.Grid.refreshGrid(t, !1)
             }
         }, I.init = function () {
-            p(), I.highlightDay(XC_VM.Listings.Grid.getStartDateTime()), I.updateDayNavScrollPosition(), m(), g(), _(), I.buildTimeBar(), v(), y(), D(), k(), T(), b()
+            p(), I.highlightDay(XtreamPi.Listings.Grid.getStartDateTime()), I.updateDayNavScrollPosition(), m(), g(), _(), I.buildTimeBar(), v(), y(), D(), k(), T(), b()
         }, I
-    }(jQuery, window.XC_VM.utilities), window.XC_VM = window.XC_VM || {}, window.XC_VM.Listings = window.XC_VM.Listings || {}, window.XC_VM.Listings.Grid = function (e, n) {
+    }(jQuery, window.XtreamPi.utilities), window.XtreamPi = window.XtreamPi || {}, window.XtreamPi.Listings = window.XtreamPi.Listings || {}, window.XtreamPi.Listings.Grid = function (e, n) {
         var t = {};
         t.channels = [];
         var a = "tv",
@@ -4269,14 +4269,14 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
             },
             v = function () {
                 for (; t.channels.length;) t.channels.pop();
-                var e = XC_VM.Listings.CookieSettings.getUpdatedChannels(i).split(",");
+                var e = XtreamPi.Listings.CookieSettings.getUpdatedChannels(i).split(",");
                 t.channels = e, y()
             },
             y = function () {
-                "undefined" != typeof XC_VM.Listings.promotedChannelId && XC_VM.Listings.promotedChannelId != -1 ? (s.hasPromoChannel = !0, s.groupSizes[0] = 9, t.channels.splice(s.promoChannelPos, 0, XC_VM.Listings.promotedChannelId)) : (s.hasPromoChannel = !1, s.groupSizes[0] = 8)
+                "undefined" != typeof XtreamPi.Listings.promotedChannelId && XtreamPi.Listings.promotedChannelId != -1 ? (s.hasPromoChannel = !0, s.groupSizes[0] = 9, t.channels.splice(s.promoChannelPos, 0, XtreamPi.Listings.promotedChannelId)) : (s.hasPromoChannel = !1, s.groupSizes[0] = 8)
             },
             w = function (e) {
-                return s.apiBaseUrl + "?action=get_epg&startdate=" + e.format("YYYY-MM-DD") + "%20" + e.format("HH:mm:ss") + (window.XC_VM.Listings.Category ? "&category=" + window.XC_VM.Listings.Category : "") + "&hours=" + s.hours + "&channels=" + t.channels.join() + "&timezone=" + Intl.DateTimeFormat().resolvedOptions().timeZone
+                return s.apiBaseUrl + "?action=get_epg&startdate=" + e.format("YYYY-MM-DD") + "%20" + e.format("HH:mm:ss") + (window.XtreamPi.Listings.Category ? "&category=" + window.XtreamPi.Listings.Category : "") + "&hours=" + s.hours + "&channels=" + t.channels.join() + "&timezone=" + Intl.DateTimeFormat().resolvedOptions().timeZone
             },
             T = function (n) {
                 if (C(n), s.listingsData[n.format("DDMMYYYYHHmm")]) _(s.listingsData[n.format("DDMMYYYYHHmm")]), D(n);
@@ -4290,7 +4290,7 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
                 }
             },
             b = function (e, n) {
-                for (var t = "tv" === a, i = XC_VM.Listings.CookieSettings.personalisation("TvChannels").platform, r = 0; r < n.Channels.length; r++) {
+                for (var t = "tv" === a, i = XtreamPi.Listings.CookieSettings.personalisation("TvChannels").platform, r = 0; r < n.Channels.length; r++) {
                     var o = n.Channels[r],
                         l = 0;
                     if (o.isTv = t, o.Image = o.Image.replace(/&amp;/g, "&"), i)
@@ -4334,7 +4334,7 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
                     Channels: t.Channels
                 };
                 o.append(Handlebars.templates.listingsGrid(r));
-                P(!1), N(), x(), XC_VM.Listings.Nav.showHideBackToTop(), u.show()
+                P(!1), N(), x(), XtreamPi.Listings.Nav.showHideBackToTop(), u.show()
             },
             D = function (e) {
                 var n = moment(e).subtract(s.hours, "h"),
@@ -4372,13 +4372,13 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
                     if (s.viewWidth != o.width() - s.sideWidth) {
                         h(), c.width(r.outerWidth());
                         var e = s.hours;
-                        m(), g(), x(), e != s.hours && (s.listingsData = {}, T(s.startDateTime), XC_VM.Listings.Nav.buildTimeBar())
+                        m(), g(), x(), e != s.hours && (s.listingsData = {}, T(s.startDateTime), XtreamPi.Listings.Nav.buildTimeBar())
                     }
                 }, s.viewCheckInterval)
             },
             L = function () {
                 setInterval(function () {
-                    x(), XC_VM.Listings.Nav.updateCurrentTime()
+                    x(), XtreamPi.Listings.Nav.updateCurrentTime()
                 }, s.timelineInterval)
             },
             x = function () {
@@ -4436,11 +4436,11 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
         }, t.updateGridTime = function (e) {
             var n = moment(s.startDateTime);
             "next" == e ? n.add(s.hours, "h") : "prev" == e && n.subtract(s.hours, "h");
-            var a = n.isBefore(XC_VM.Listings.Nav.minDay),
-                i = n.isAfter(XC_VM.Listings.Nav.maxDay);
+            var a = n.isBefore(XtreamPi.Listings.Nav.minDay),
+                i = n.isAfter(XtreamPi.Listings.Nav.maxDay);
             return a || i ? void u.show() : (p(n), void t.refreshGrid(s.startDateTime))
         }, t.refreshGrid = function (e, n) {
-            n && (v(), s.listingsData = {}), p(e), XC_VM.Listings.Nav.highlightDay(s.startDateTime), XC_VM.Listings.Nav.updateDayNavScrollPosition(), XC_VM.Listings.Nav.buildTimeBar(), XC_VM.Listings.TimeSelector.updateHighlighting(), XC_VM.Listings.TimeSelector.updateScrollPosition(), P(!0), Y(s.startDateTime), T(s.startDateTime), n || E()
+            n && (v(), s.listingsData = {}), p(e), XtreamPi.Listings.Nav.highlightDay(s.startDateTime), XtreamPi.Listings.Nav.updateDayNavScrollPosition(), XtreamPi.Listings.Nav.buildTimeBar(), XtreamPi.Listings.TimeSelector.updateHighlighting(), XtreamPi.Listings.TimeSelector.updateScrollPosition(), P(!0), Y(s.startDateTime), T(s.startDateTime), n || E()
         }, t.getStartDateTime = function () {
             return s.startDateTime
         }, t.getViewWidth = function () {
@@ -4448,6 +4448,6 @@ window.XC_VM = window.XC_VM || {}, window.XC_VM.Affixer = function () {
         }, t.getHours = function () {
             return s.hours
         }, t.init = function () {
-            O(), p(f()), h(), m(), v(), j(), I(), g(), L(), T(s.startDateTime), XC_VM.Listings.TimeSelector.init()
+            O(), p(f()), h(), m(), v(), j(), I(), g(), L(), T(s.startDateTime), XtreamPi.Listings.TimeSelector.init()
         }, t
-    }(jQuery, window.XC_VM.EnvConfigHelper), window.XC_VM = window.XC_VM || {}, window.XC_VM.Listings = window.XC_VM.Listings || {}, (jQuery), window.XC_VM = window.XC_VM || {}, window.XC_VM.Listings = window.XC_VM.Listings || {};
+    }(jQuery, window.XtreamPi.EnvConfigHelper), window.XtreamPi = window.XtreamPi || {}, window.XtreamPi.Listings = window.XtreamPi.Listings || {}, (jQuery), window.XtreamPi = window.XtreamPi || {}, window.XtreamPi.Listings = window.XtreamPi.Listings || {};

@@ -1,6 +1,6 @@
-# XC_VM Release Preparation Checklist
+# XtreamPi Release Preparation Checklist
 
-Step-by-step guide for preparing and publishing an XC_VM release.
+Step-by-step guide for preparing and publishing an XtreamPi release.
 
 ---
 
