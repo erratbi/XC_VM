@@ -1002,6 +1002,37 @@ a.sc-stream-name:hover {
 .sc-restriction-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .sc-bouquet-content-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .sc-bouquet-content-grid h3 { margin: 0 0 14px; font-size: 14px; }
+.sc-bouquet-picker { min-width: 0; }
+.sc-selection-summary { flex: 0 0 auto; padding: 7px 10px; border-radius: 999px; background: #f0f2f4; color: #596169; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.sc-picker-tabs { display: flex; overflow-x: auto; margin: 20px -24px 0; padding: 0 24px; border-bottom: 1px solid var(--sc-line); gap: 24px; }
+.sc-picker-tabs button { position: relative; flex: 0 0 auto; padding: 0 0 13px; border: 0; background: transparent; color: var(--sc-muted); font: inherit; font-size: 12px; font-weight: 750; cursor: pointer; }
+.sc-picker-tabs button::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: var(--sc-primary-fallback); background: var(--sc-primary); content: ''; transform: scaleX(0); transition: transform .16s ease; }
+.sc-picker-tabs button[aria-selected="true"] { color: #282d31; }
+.sc-picker-tabs button[aria-selected="true"]::after { transform: scaleX(1); }
+.sc-picker-tabs button span { display: inline-flex; min-width: 19px; height: 19px; align-items: center; justify-content: center; margin-left: 6px; padding: 0 5px; border-radius: 999px; background: #f0f2f4; color: #697178; font-size: 9px; }
+.sc-picker-tabs button[aria-selected="true"] span { background: color-mix(in srgb, var(--sc-primary-fallback) 12%, white); background: color-mix(in srgb, var(--sc-primary) 12%, white); color: var(--sc-primary-fallback); color: var(--sc-primary); }
+.sc-picker-panel { padding-top: 20px; }
+.sc-picker-toolbar { display: grid; grid-template-columns: minmax(210px, 1fr) minmax(160px, 220px) auto auto; align-items: center; gap: 10px; margin-bottom: 14px; }
+.sc-picker-search { position: relative; display: block; }
+.sc-picker-search i { position: absolute; top: 50%; left: 12px; color: var(--sc-muted); transform: translateY(-50%); }
+.sc-picker-search input { width: 100%; padding-left: 34px; }
+.sc-picker-category select { width: 100%; }
+.sc-picker-toolbar .sc-button { min-height: 38px; padding: 0 12px; white-space: nowrap; }
+.sc-picker-table { min-width: 560px; }
+.sc-picker-table th, .sc-picker-table td { vertical-align: middle; }
+.sc-picker-table tbody tr { cursor: pointer; }
+.sc-picker-table tbody tr:focus { outline: 2px solid color-mix(in srgb, var(--sc-primary-fallback) 35%, transparent); outline: 2px solid color-mix(in srgb, var(--sc-primary) 35%, transparent); outline-offset: -2px; }
+.sc-picker-table tbody tr.is-selected td { background: color-mix(in srgb, var(--sc-primary-fallback) 6%, white); background: color-mix(in srgb, var(--sc-primary) 6%, white); }
+.sc-picker-check { width: 44px; text-align: center; }
+.sc-picker-check input { width: 16px; height: 16px; accent-color: var(--sc-primary-fallback); accent-color: var(--sc-primary); cursor: pointer; }
+.sc-picker-name strong, .sc-picker-name small { display: block; }
+.sc-picker-name strong { color: #30353a; font-size: 12px; font-weight: 700; }
+.sc-picker-name small { margin-top: 3px; color: var(--sc-muted); font-size: 10px; }
+.sc-picker-footer { min-height: 48px; }
+.sc-picker-pagination { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.sc-picker-pagination > span { color: var(--sc-muted); font-size: 10px; }
+@media (max-width: 880px) { .sc-picker-toolbar { grid-template-columns: minmax(180px, 1fr) minmax(150px, 220px); } .sc-picker-toolbar .sc-button { justify-content: center; } }
+@media (max-width: 580px) { .sc-section-heading:has(.sc-selection-summary) { align-items: flex-start; flex-direction: column; } .sc-picker-tabs { margin-right: -18px; margin-left: -18px; padding-right: 18px; padding-left: 18px; gap: 18px; } .sc-picker-toolbar { grid-template-columns: 1fr; } .sc-picker-toolbar .sc-button { width: 100%; } }
 .sc-grouped-options section + section { margin-top: 5px; padding-top: 5px; border-top: 1px solid var(--sc-line); }
 .sc-grouped-options .sc-option-group-label { display: block; padding: 6px 9px 4px; color: var(--sc-muted); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
 .sc-grouped-options section > button { display: block; width: 100%; padding: 8px 9px; border: 0; background: transparent; color: var(--sc-ink); text-align: left; cursor: pointer; }
