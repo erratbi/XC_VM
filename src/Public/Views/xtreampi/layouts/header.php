@@ -174,8 +174,9 @@ foreach ($xtreampiCustomTranslations[$xtreampiLanguageCode] ?? [] as $xtreampiEn
 	<meta name="application-name" content="XtreamPi">
 	<meta name="apple-mobile-web-app-title" content="XtreamPi">
 	<title><?php echo htmlspecialchars($xtreampiServerName, ENT_QUOTES, 'UTF-8'); ?><?php echo isset($_TITLE) ? ' | ' . htmlspecialchars((string) $_TITLE, ENT_QUOTES, 'UTF-8') : ''; ?></title>
-	<link rel="icon" href="assets/xtreampi/brand/logo-on-light.svg" type="image/svg+xml" sizes="any">
-	<link rel="icon" href="assets/xtreampi/brand/favicon-32.png" type="image/png" sizes="32x32">
+	<link rel="icon" href="assets/xtreampi/brand/logo-on-light.svg" type="image/svg+xml" sizes="any" media="(prefers-color-scheme: light)">
+	<link rel="icon" href="assets/xtreampi/brand/logo.svg" type="image/svg+xml" sizes="any" media="(prefers-color-scheme: dark)">
+	<link rel="icon" href="assets/xtreampi/brand/favicon-32.png" type="image/png" sizes="32x32" media="(prefers-color-scheme: light)">
 	<link rel="apple-touch-icon" href="assets/xtreampi/brand/apple-touch-icon.png" sizes="180x180">
 	<link rel="manifest" href="assets/xtreampi/manifest.json">
 	<link rel="stylesheet" href="assets/css/icons.css">
