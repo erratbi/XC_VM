@@ -46,7 +46,7 @@ done
 echo "==> [XtreamPi Dev] Redis is reachable!"
 
 # 4. Create required runtime directories and set permissions
-mkdir -p /home/xc_vm/content/streams /home/xc_vm/tmp /home/xc_vm/storage /home/xc_vm/config /home/xc_vm/bin/nginx/sbin /home/xc_vm/bin/nginx/conf/codes /home/xc_vm/bin/nginx/logs /home/xc_vm/bin/php/sockets /home/xc_vm/bin/php/sessions /var/lib/nginx/body /var/lib/nginx/fastcgi /var/lib/nginx/proxy /var/lib/nginx/uwsgi /var/lib/nginx/scgi
+mkdir -p /home/xc_vm/content/streams /home/xc_vm/tmp /home/xc_vm/storage /home/xc_vm/config /home/xc_vm/backups /home/xc_vm/bin/nginx/sbin /home/xc_vm/bin/nginx/conf/codes /home/xc_vm/bin/nginx/logs /home/xc_vm/bin/php/sockets /home/xc_vm/bin/php/sessions /var/lib/nginx/body /var/lib/nginx/fastcgi /var/lib/nginx/proxy /var/lib/nginx/uwsgi /var/lib/nginx/scgi
 chmod 1777 /tmp /home/xc_vm/tmp /home/xc_vm/content/streams 2>/dev/null || true
 chown -R xc_vm:xc_vm /home/xc_vm/content/streams /home/xc_vm/tmp /home/xc_vm/storage /home/xc_vm/config /home/xc_vm/bin/nginx/logs /home/xc_vm/bin/php /var/lib/nginx 2>/dev/null || true
 chmod 777 /home/xc_vm/config 2>/dev/null || true
@@ -231,6 +231,11 @@ sudo -u xc_vm /home/xc_vm/bin/php/bin/php /home/xc_vm/console.php cache_handler 
 # 15. Launch Nginx Web Server
 echo "==> [XtreamPi Dev] Launching Nginx Web Server..."
 sudo -u xc_vm /home/xc_vm/bin/nginx/sbin/nginx 2>/dev/null || true
+
+# 15.1. Database access codes are the source of truth for admin routes. This
+# replaces the development bootstrap route above after services are online, so
+# a container recreate cannot leave Nginx serving a code absent from the DB.
+sudo /home/xc_vm/bin/php/bin/php /home/xc_vm/console.php tools access >/dev/null 2>&1 || true
 
 echo "==> [XtreamPi Dev] Everything is ready! Panel: http://localhost:8880/${ADMIN_CODE}"
 

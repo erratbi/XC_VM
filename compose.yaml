@@ -92,6 +92,7 @@ services:
       - ./src/migrations:/home/xc_vm/migrations
       - ./src/vendor:/home/xc_vm/vendor
       - ./src/signals:/home/xc_vm/signals
+      - ./src/backups:/home/xc_vm/backups
       - ./src/bootstrap.php:/home/xc_vm/bootstrap.php
       - ./src/console.php:/home/xc_vm/console.php
       - ./src/api_reseller.php:/home/xc_vm/api_reseller.php

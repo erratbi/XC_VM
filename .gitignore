@@ -15,6 +15,12 @@ src/tmp/**
 !src/tmp/**/
 !src/tmp/**/.gitkeep
 
+# Runtime database snapshots belong to the local backup store. Keep only its
+# directory marker in Git so an operator's SQL dump cannot be committed.
+src/backups/**
+!src/backups/**/
+!src/backups/**/.gitkeep
+
 # Installed modules & runtime asset symlinks
 src/Modules/**
 !src/Modules/**/
