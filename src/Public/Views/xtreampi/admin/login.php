@@ -57,7 +57,7 @@ $recaptchaEnabled = (bool) ($rSettings['recaptcha_enable'] ?? false);
 
 	<main class="sc-auth-stage">
 		<section class="sc-auth-intro" aria-labelledby="sc-auth-heading">
-			<p class="sc-auth-kicker"><?= $copy('broadcast_operations') ?></p>
+			<p class="sc-auth-kicker">XTREAM PI</p>
 			<h1 id="sc-auth-heading"><?= $copy('hero_lead') ?><br><em><?= $copy('hero_emphasis') ?></em></h1>
 			<p class="sc-auth-summary"><?= $copy('hero_summary') ?></p>
 

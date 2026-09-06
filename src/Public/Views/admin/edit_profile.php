@@ -1,8 +1,11 @@
 <div class="wrapper boxed-layout" <?php 
 use XcVm\Core\Auth\AuthRepository;
 use XcVm\Core\Config\SettingsManager;
+use XcVm\Core\Ui\AdminUiTheme;
 use XcVm\Core\Util\AdminHelpers;
 use XcVm\Domain\Server\ServerRepository;
+
+$adminUi = AdminUiTheme::resolve($_GET, $_COOKIE);
 
 if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
                                         echo ' style="display: none;"';
@@ -66,6 +69,16 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
                                                                         } ?>value="<?php echo $rValue['zone']; ?>"><?php echo $rValue['zone'] . " " . $rValue['diff_from_GMT']; ?></option>
                                                             <?php } ?>
                                                         </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row mb-4">
+                                                    <label class="col-md-4 col-form-label" for="admin_ui">Admin Interface</label>
+                                                    <div class="col-md-8">
+                                                        <select name="admin_ui" id="admin_ui" class="form-control" data-toggle="select2">
+                                                            <option value="<?= AdminUiTheme::XTREAMPI ?>"<?= $adminUi === AdminUiTheme::XTREAMPI ? ' selected' : '' ?>>XtreamPi</option>
+                                                            <option value="<?= AdminUiTheme::LEGACY ?>"<?= $adminUi === AdminUiTheme::LEGACY ? ' selected' : '' ?>>Legacy</option>
+                                                        </select>
+                                                        <small class="form-text text-muted">Choose the interface used for future admin pages.</small>
                                                     </div>
                                                 </div>
                                                 <div class="form-group row mb-4">
@@ -284,6 +297,17 @@ renderUnifiedLayoutFooter('admin');
         $('select').select2({
             width: '100%'
         });
+        var adminUi = $('#admin_ui');
+        var defaultProfileCallback = window.callbackForm;
+        window.callbackForm = function(data) {
+            if (data && data.location) {
+                var destination = new URL(data.location, window.location.href);
+                destination.searchParams.set('admin_ui', adminUi.val());
+                window.location.href = destination.toString();
+                return;
+            }
+            defaultProfileCallback(data);
+        };
         $("form").submit(function(e) {
             e.preventDefault();
             $(':input[type="submit"]').prop('disabled', true);

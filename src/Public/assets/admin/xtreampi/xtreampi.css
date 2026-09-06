@@ -868,6 +868,8 @@ a.sc-stream-name:hover {
 .sc-mass-form .sc-filter-field select { height: 46px; min-height: 46px; }
 .sc-page-heading h1 small { color: var(--sc-muted); font-size: 12px; font-weight: 600; }
 .sc-section-copy { margin: -12px 0 20px; color: var(--sc-muted); font-size: 12px; }
+.sc-form-section.is-disabled { opacity: .58; }
+.sc-form-section.is-disabled .sc-legacy-appearance-note { color: #6f4a50; }
 .sc-section-heading .sc-section-copy { margin: 5px 0 0; }
 .sc-mass-change-grid, .sc-override-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .sc-selection-summary { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin: 0 0 14px; padding: 10px 13px; border: 1px solid color-mix(in oklch, var(--sc-primary) 25%, var(--sc-line)); background: color-mix(in oklch, var(--sc-primary) 5%, white); color: #555b60; font-size: 12px; }
